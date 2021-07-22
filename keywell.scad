@@ -8,6 +8,9 @@ tilt=-10;
 spacer = 1.4;
 mxstem = 6.1;
 
+highest_high=40;
+lowest_low=30;
+
 // use to cut a keywell into something
 module keywell_cavity() {
   union() {
@@ -110,7 +113,7 @@ module trimmer() {
  }
 }
 
-// hand positioned column for cherry keycaps, cuprved so the tops of the keycaps are nearly touching
+// hand positioned column for cherry keycaps, curved so the tops of the keycaps are nearly touching
 module position_row(row) {
   assert(row > 0 && row < 6 );
 
@@ -128,7 +131,7 @@ module position_row(row) {
 }
 
 
-// hand positioned column for cherry keycaps, cuprved so the tops of the keycaps are nearly touching
+// hand positioned column for cherry keycaps, curved so the tops of the keycaps are nearly touching
 module key_column_tightest(rows=4,keys=false,well=true, sides=true,tilt=[-10,0,0]) {
   rotate(tilt) union() {
     if (rows == 5) {
@@ -144,6 +147,71 @@ module key_column_tightest(rows=4,keys=false,well=true, sides=true,tilt=[-10,0,0
   }
 }
 
+// a less ad hoc key column where all the joining material and sides are computed rather than predefined
+module key_column_hulled(rows=4,keys=false,well=true, sides=true,footer=false,tilt=[-10,0,0]) {
+  /* clones the child object and, if sides are enabled, projects its intersection with a large plane
+   *  the width of the side and uses a hull between that projection and a duplicate intersection to
+   *  produce a side. we have to use the helper on each peice of the column, rather than the final
+   *  product, because the column is concave and the hull operaation will will fill in the side above
+   *  the column. for side it be properly oriented child must have already had any x rotation (tilt)
+   *  applied, so we take it as a parameter to ensure consistency. the side itself should not be
+   *  tilted. side height is excessive because we will use a difference on the final model to remove
+   *  extraneous material below the desired height.
+   */
+  module side_helper(tilt, sides) {
+    union() {
+      // pass through the child object, even is no side is added
+      rotate(tilt) children();
+
+      if (sides) {
+	// this makes the side exactly as wide as the keywell itself
+	width = (outerdia-innerdia)/2;
+	// globals that must be hand set to estimate the largest values we might encounter.
+	height = highest_high+lowest_low;
+
+	// the computed side
+	hull() {
+	  // just the edge of the child
+	  intersection() {
+	    rotate(tilt) children();
+	    translate([outerdia/2-width/2,0,0]) cube([width,200,height], true);
+	  }
+
+	  // this computes the projection of edge of child in the xy plane (i.e. your desk)
+	  translate([0,0,-lowest_low]) linear_extrude(height=1) projection() intersection() {
+	    rotate(tilt) children();
+	    translate([outerdia/2-width/2,0,0]) cube([width,200,height], true);
+	  }
+	}
+      }
+    }
+  }
+
+  union() {
+    for(i=[((rows>3)?1:2):(rows==5?5:4)]) {
+      side_helper(tilt,sides) position_row(i) {
+	// no header needed because in practice join always decends above the keywell
+	//translate([0,(outerdia/2)+(length/2),(thickness/2)]) cube([outerdia,length,thickness],true);
+
+	key_assembly(i,keys,well,sides=false, header=false,footer=false);
+
+	// footer can be use to prevent keycap from colliding with the the joining material
+	if (i < rows && footer) {
+	  length=spacer/2;
+	  translate([0,-(outerdia/2)-(length/2),(thickness/2)-mxstem]) cube([outerdia,length,thickness],true);
+	}
+      }
+
+      // joins the keywell of this row to the next
+      if (i < rows) {
+	side_helper(tilt,sides) hull() {
+	  position_row(i) translate([-outerdia/2,-(outerdia+(footer?spacer:0))/2,-mxstem]) cube([outerdia,.01,thickness]);
+	  position_row(i+1) translate([-(outerdia)/2,outerdia/2-.01,-mxstem]) cube([outerdia,.01,thickness]);
+	}
+      }
+    }
+  }
+}
 
 module column_pair(rows=4,keys=false,sides=false, spacer=1.4, pos=[0,0,0], rotation=[0,0,0], center="auto", leftside=false, rightside=false) {
   assert(center == "right" || center == "left" || center == "auto");
@@ -152,11 +220,59 @@ module column_pair(rows=4,keys=false,sides=false, spacer=1.4, pos=[0,0,0], rotat
 
   tilt=[rotation.x, 0,0];
   translate([pos.x,pos.y, 0]) rotate([0,0,rotation.z]) trimmer() translate([0,0,pos.z]) rotate([0,rotation.y,0]) translate(right_align ? [0,0,0] : [(outerdia+spacer),0,0]) union() {
-    translate([-(outerdia+spacer),0,0]) mirror([1,0,0]) key_column_tightest(rows=rows,keys=keys,sides=sides||leftside,tilt=tilt);
-    key_column_tightest(rows=rows,keys=keys,sides=sides||rightside,tilt=tilt);
+    translate([-(outerdia+spacer),0,0]) mirror([1,0,0]) key_column_hulled(rows=rows,keys=keys,sides=sides||leftside,tilt=tilt);
+    key_column_hulled(rows=rows,keys=keys,sides=sides||rightside,tilt=tilt);
 
     // spacer to fill the gap between the two columns
-    translate([-(outerdia/2) + overlap,0,0]) rotate([0,-90,0]) linear_extrude(spacer+2*overlap) projection() rotate([0,90,0]) key_column_tightest(rows=rows, sides=false,tilt=tilt);
+    translate([-(outerdia/2) + overlap,0,0]) rotate([0,-90,0]) linear_extrude(spacer+2*overlap) projection() rotate([0,90,0]) key_column_hulled(rows=rows, sides=false,tilt=tilt);
+  }
+}
+
+module noncolliding_offset_column_pair(rows=4,keys=false,sides=false, spacer=1.4, offset=[0,0,0], pos=[0,0,0], rotation=[-10,0,0], center="left") {
+  assert(center == "right" || center == "left" || center == "auto");
+  right_align = center == "right" || (center == "auto" && rotation.z >= 0);
+  overlap=0.1;
+
+  tilt=[rotation.x, 0,0];
+  // middle+ring
+  translate([pos.x,pos.y, 0]) rotate([0,0,rotation.z]) union() {
+    //middle
+    translate([0,offset.y,0]) trimmer() rotate([0,rotation.y,0]) {
+      mirror([1,0,0]) translate([0,0,offset.z]) key_column_hulled(rows=rows,keys=keys,sides=sides,tilt=tilt);
+
+      // side wall to connect vertically to spacer
+      difference() {
+	translate([0,0,offset.z]) key_column_hulled(rows=rows,keys=keys, sides=true,tilt=tilt);
+	translate([outerdia/2+.1,-offset.y,0]) difference() {
+	  rotate([0,-90,0]) linear_extrude(outerdia-innerdia+.2) projection() rotate([0,90,0]) key_column_hulled(rows=rows, sides=true,tilt=tilt);
+	  rotate([0,-90,0]) linear_extrude(outerdia-innerdia+.2) projection() rotate([0,90,0]) key_column_hulled(rows=rows, sides=false,tilt=tilt);
+	}
+	translate([outerdia/2+.1,-offset.y,0]) rotate([0,-90,0]) linear_extrude(outerdia-innerdia+.2) projection() rotate([0,90,0]) difference() {
+	  key_column_hulled(rows=rows, sides=true,tilt=tilt);
+	  key_column_hulled(rows=rows, sides=false,tilt=tilt);
+        }
+      }
+    }
+    // ring
+    trimmer() translate([outerdia+spacer,0,0]) {
+      key_column_hulled(rows=rows,keys=keys,sides=sides,tilt=tilt);
+    }
+
+    // spacer
+    difference () {
+      // spacer should be the intersection of ring and middle on top (low as the lowest of either)
+      // but as long as ring on bottom. so we intersect with sides walls to get the top
+      trimmer() translate([outerdia/2+1.5,0,0]) intersection() {
+        rotate([0,-90,0]) linear_extrude(1.6) projection() rotate([0,90,0]) key_column_hulled(rows=rows, sides=true,tilt=tilt);
+        translate([0,offset.y, offset.z]) rotate([0,-90,0]) linear_extrude(1.6) projection() rotate([0,90,0]) key_column_hulled(rows=rows, sides=true,tilt=tilt);
+      }
+
+      // then remove the part of the wall below ring from the bottom
+      translate([outerdia/2+1.6,0,0]) difference() {
+        rotate([0,-90,0]) linear_extrude(1.8) projection() rotate([0,90,0]) key_column_hulled(rows=rows, sides=true,tilt=tilt);
+        rotate([0,-90,0]) linear_extrude(1.8) projection() rotate([0,90,0]) key_column_hulled(rows=rows, sides=false,tilt=tilt);
+      }
+    }
   }
 }
 
@@ -170,41 +286,14 @@ module offset_column_pair(rows=4,keys=false,sides=false, spacer=1.4, offset=[0,0
   translate([pos.x,pos.y, 0]) rotate([0,0,rotation.z]) union() {
     //middle
     translate([0,offset.y,0]) trimmer() rotate([0,rotation.y,0]) {
-      mirror([1,0,0]) translate([0,0,offset.z]) key_column_tightest(rows=rows,keys=keys,sides=sides,tilt=tilt);
-
-      // side wall to connect vertically to spacer
-      difference() {
-	translate([0,0,offset.z]) key_column_tightest(rows=rows,keys=keys, sides=true,tilt=tilt);
-	translate([outerdia/2+.1,-offset.y,0]) difference() {
-	  rotate([0,-90,0]) linear_extrude(outerdia-innerdia+.2) projection() rotate([0,90,0]) key_column_tightest(rows=rows, sides=true,tilt=tilt);
-	  rotate([0,-90,0]) linear_extrude(outerdia-innerdia+.2) projection() rotate([0,90,0]) key_column_tightest(rows=rows, sides=false,tilt=tilt);
-	}
-	translate([outerdia/2+.1,-offset.y,0]) rotate([0,-90,0]) linear_extrude(outerdia-innerdia+.2) projection() rotate([0,90,0]) difference() {
-	  key_column_tightest(rows=rows, sides=true,tilt=tilt);
-	  key_column_tightest(rows=rows, sides=false,tilt=tilt);
-        }
-      }
+      mirror([1,0,0]) translate([0,0,offset.z]) key_column_hulled(rows=rows,keys=keys,sides=sides,tilt=tilt);
     }
     // ring
     trimmer() translate([outerdia+spacer,0,0]) {
-      key_column_tightest(rows=rows,keys=keys,sides=sides,tilt=tilt);
+      key_column_hulled(rows=rows,keys=keys,sides=sides,tilt=tilt);
     }
 
-    // spacer
-    difference () {
-      // spacer should be the intersection of ring and middle on top (low as the lowest of either)
-      // but as long as ring on bottom. so we intersect with sides walls to get the top
-      trimmer() translate([outerdia/2+1.5,0,0]) intersection() {
-        rotate([0,-90,0]) linear_extrude(1.6) projection() rotate([0,90,0]) key_column_tightest(rows=rows, sides=true,tilt=tilt);
-        translate([0,offset.y, offset.z]) rotate([0,-90,0]) linear_extrude(1.6) projection() rotate([0,90,0]) key_column_tightest(rows=rows, sides=true,tilt=tilt);
-      }
-
-      // then remove the part of the wall below ring from the bottom
-      translate([outerdia/2+1.6,0,0]) difference() {
-        rotate([0,-90,0]) linear_extrude(1.8) projection() rotate([0,90,0]) key_column_tightest(rows=rows, sides=true,tilt=tilt);
-        rotate([0,-90,0]) linear_extrude(1.8) projection() rotate([0,90,0]) key_column_tightest(rows=rows, sides=false,tilt=tilt);
-      }
-    }
+    connect_columns(pos+offset,rotation,pos+[outerdia+spacer,0,0],rotation);
   }
 }
 
@@ -212,15 +301,33 @@ module key_adjacent_bounding_box(row, pos, rotation, left=false) {
   // place bounding box on left or right side of keywell
   x_offset = (outerdia/2) * (left ? -1 : 1) + (left ? 0 : -.01);
   // for all but the last row add the footer length
-  y_offset = (row < 4) ? 6.8: 0;
+  y_offset = 0;//(row < 4) ? 6.8: 0;
 
   translate([pos.x,pos.y,0])  rotate([0,0,rotation.z]) translate([0,0,pos.z]) rotate([rotation.x,rotation.y,0]) position_row(row)
     translate([x_offset,-outerdia/2-y_offset,-mxstem]) cube([.01,outerdia+y_offset,thickness]);
 }
 
-module connect_column_pairs(pos1,rotation1,pos2,rotation2,rows=[1:4]) {
-  if (is_list(rows[0])) {
-        for (i=rows) {
+module column_hull_bounding_box(row, pos, rotation, left=false, footer=false) {
+  translate([pos.x,pos.y,0])  rotate([0,0,rotation.z]) translate([0,0,pos.z]) rotate([rotation.x,rotation.y,0])
+    translate([(outerdia/2) * (left ? -1 : 1) + (left ? 0 : -.01),0,0])
+    rotate([0,90,0]) linear_extrude(.01) projection() rotate([0,-90,0]) hull() {
+    position_row(row) translate([-outerdia/2,-(outerdia+(footer?spacer:0))/2,-mxstem]) cube([outerdia,.01,thickness]);
+    position_row(row+1) translate([-(outerdia)/2,outerdia/2,-mxstem]) cube([outerdia,.01,thickness]);
+  }
+}
+
+*union() {
+  #key_adjacent_bounding_box(1,[0,0,0],[-10,0,0]);
+  #column_hull_bounding_box(1,[0,0,0],[-10,0,0]);
+  #column_hull_bounding_box(1,[0,0,0],[-10,0,0], left=true);
+  key_column_hulled(sides=false);
+}
+
+// bridges rows specified in an array, or as a sub-array pair allowing different rows to be connected
+// negative values refer to the connecting hull between the given row and the next one, rather than a row itself
+module connect_columns(pos1,rotation1,pos2,rotation2,rows=[1,-1,2,-2,3,-3,4]) {
+  if ((len(rows) > 0) && is_list(rows[0])) {
+    for (i=rows) {
       hull(){
 	key_adjacent_bounding_box(i[0], pos1,rotation1);
 	key_adjacent_bounding_box(i[1], pos2,rotation2,left=true);
@@ -228,13 +335,21 @@ module connect_column_pairs(pos1,rotation1,pos2,rotation2,rows=[1:4]) {
     }
   } else {
     for (i=rows) {
-      hull(){
-	key_adjacent_bounding_box(i, pos1,rotation1);
-	key_adjacent_bounding_box(i, pos2,rotation2,left=true);
+      if (i > 0) {
+	hull(){
+	  key_adjacent_bounding_box(i, pos1,rotation1);
+	  key_adjacent_bounding_box(i, pos2,rotation2,left=true);
+	}
+      } else {
+	hull(){
+	  column_hull_bounding_box(-1*i, pos1,rotation1);
+	  column_hull_bounding_box(-1*i, pos2,rotation2,left=true);
+	}
       }
     }
   }
 }
+
 
 index_pos = [-(outerdia+4),-4,6];
 index_rotation = [-10,5,3];
@@ -251,10 +366,11 @@ module finger_plates(rows=4,keys=false,sides=false,spacer=1.4,shell=false) {
     column_pair(rows=rows,keys=keys,sides=sides,spacer=spacer,pos=index_pos, rotation=index_rotation,leftside=shell);
 
     if (shell) {
-      rows=[1,4];
-      connect_column_pairs(index_pos,index_rotation, middle_offset,middle_rotation,rows=rows);
-      connect_column_pairs([outerdia+spacer,0,0],middle_rotation,pinkie_pos,pinkie_rotation,rows=rows);
-      //*translate(middle_offset+[-(outerdia/2),0,0]) rotate([0,-90,0]) linear_extrude(0.1) projection() rotate([0,90,0]) key_column_tightest(rows=rows, sides=false);
+      rows=[-1,4];
+      echo(rows);
+      connect_columns(index_pos,index_rotation, middle_offset,middle_rotation,rows=rows);
+      connect_columns([outerdia+spacer,0,0],middle_rotation,pinkie_pos,pinkie_rotation,rows=rows);
+      //*translate(middle_offset+[-(outerdia/2),0,0]) rotate([0,-90,0]) linear_extrude(0.1) projection() rotate([0,90,0]) key_column_hulled(rows=rows, sides=false);
 
     }
 
@@ -263,7 +379,7 @@ module finger_plates(rows=4,keys=false,sides=false,spacer=1.4,shell=false) {
       offset_column_pair(rows=rows,keys=keys,sides=sides,spacer=spacer,offset=middle_offset,rotation=middle_rotation);
 
       // shave off the bottom so we can be closer to the plate
-      translate([-20,-10,-12.5]) cube([50,70,3]);
+      //translate([-20,-10,-12.5]) cube([50,70,3]);
     }
     // pinky
     column_pair(rows=rows,keys=keys,sides=sides,spacer=spacer,pos=pinkie_pos, rotation=pinkie_rotation, rightside=shell);
