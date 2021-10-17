@@ -167,7 +167,7 @@ module magnetize_screwed(position=[0,0,0], cut_height=9) {
 *magnetize_screwed() translate([0,0,2])  cube([75,75,4], true);
 
 module bar_magnetize_below(position=[0,0,0], rotation=[0,0,0], spacer=0, walls=2, ceiling=2) {
-  bar = [14, 60.5, 5.5];
+  bar = [14, 60.5, 5.5+1];
   epsilon=.1;
 
   outer = bar+[2*walls,2*walls,ceiling+spacer];
@@ -205,7 +205,8 @@ module bar_magnetize(position=[0,0,0], spacer=2) {
 *bar_magnetize() translate([0,0,2])  cube([50,75,4], true);
 
 module mount_teensy20pp(position=[0,0,0], rotation=[0,0,0], spacer=2, walls=2) {
-  bar = [18.2, 51.2, 8+spacer];
+  slop =.2;
+  bar = [18.2+slop, 51.2+slop, 8+spacer];
   epsilon=.1;
 
   outer = bar+[2*walls,2*walls,0];
@@ -241,7 +242,8 @@ module mount_teensy20pp(position=[0,0,0], rotation=[0,0,0], spacer=2, walls=2) {
 *mount_teensy20pp() translate([0,0,2])  cube([50,75,4], true);
 
 module mount_trrs(position=[0,0,0], rotation=[0,0,0], spacer=2, walls=2) {
-  bar = [6.5, 12.5, 8 + spacer];
+  slop = .2;
+  bar = [6.5+slop, 12.5+slop, 8 + spacer];
   epsilon=.1;
 
   outer = bar + [2*walls,2*walls,0];

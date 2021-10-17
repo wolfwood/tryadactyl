@@ -38,7 +38,7 @@ module install_trackpoint(row,col, row_spacing, col_spacing, profile_rows, homer
     helper(row,col,corners=true) translate([0,0,-stem_h]) if (square_hole) {
       cube([7,7,stem_h*2],true);
     } else {
-      cylinder($fn=60,d=5,h=stem_h);
+      cylinder($fn=60,d=13,h=stem_h*2,center=true);
     }
 
     if (access) {
@@ -71,7 +71,7 @@ module trackpoint_mount(h1,h2,stem=0,up=0,tilt=[-5,0,0], bottom=false, stemonly=
 
       color("red",.2) if ($preview) {
 	union(){
-	  cylinder(d=6,h=3);
+	  cylinder(d=11,h=4.5);
 	  translate([0,0,stem_depth]) cylinder(d=4,h=stem_len);
 	  translate([0,0,stem_depth+stem_len]) cylinder(d=6.4,h=cap_len-1);
 	  translate([0,0,stem_depth+(cap_len-1)+stem_len]) cylinder(d=8,h=1);

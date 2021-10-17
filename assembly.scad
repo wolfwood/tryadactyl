@@ -11,9 +11,15 @@ cols=2;
 
 homerow=2;
 profile_rows=effective_rows(rows,homerow);
-tilt=[-5,0,0];
-tent=[0,15,0];
+tilt=[-3,0,0];
+tent=[0,30,0];
 row_chord = [14.5,25,0];
+
+tight_cylindrical_row = [row_chord,
+			 row_chord+[.5,0,0],
+			 0,
+			 row_chord+[.5,0,0]];
+
 
 tight_spherical_row = [row_chord+[4.1,0,0],
 		       row_chord+[3.25,0,0],
@@ -25,14 +31,15 @@ tight_spherical_col = [[row_chord+[-2,0,0]],
 		       [row_chord+[-.5,0,0]]];
 spherical_z = [3,25,0,0];
 index_pos = [-(outerdia+4),-4,6];
-index_rotation = [0,10+1,/*3*/0];
+index_rotation = [0,10,3];
 index_rows= [rows, rows-1, 1];
 index_cols=cols;
 index_placement_params =
   layout_placement_params(homerow=[homerow,homerow,0], homecol=0,
 			  row_spacing=create_circular_placement([[row_chord], tight_spherical_row, tight_spherical_row]),
 			  col_spacing=create_circular_placement(tight_spherical_col, z_correct=spherical_z),
-			  profile_rows=profile_rows, tent=tent, tilt=index_rotation+tilt, position=index_pos);
+			  profile_rows=[profile_rows,profile_rows,[4]],
+			  tent=tent, tilt=index_rotation+tilt, position=index_pos);
 
 index_mountings = [screw_mounting_params(row=0, col=0, height=35, layout_params=index_placement_params,
 					 displacement=[1,1,-15], offsets=[0,0,-1]),
@@ -45,14 +52,15 @@ index_mountings = [screw_mounting_params(row=0, col=0, height=35, layout_params=
 
 middle_keys = true;
 //middle_offset = [[0,0,0], [0,4,1]];
-middle_offset = [0,4+1,1];
+middle_offset = [0,4,1];
+ring_offset=[0,-3,0];
 middle_rotation = [0,0,0];
 middle_placement_params =
   layout_placement_params(homerow=homerow, homecol=1,
 			  row_spacing=create_circular_placement(row_chord),
 			  col_spacing=create_flat_placement(outerdia+spacer()),
 			  profile_rows=profile_rows,
-			  offsets=[[0,0,0], middle_offset], tent=tent, tilt=middle_rotation+tilt);
+			  offsets=[ring_offset, middle_offset], tent=tent, tilt=middle_rotation+tilt);
 middle_mountings = [screw_mounting_params(row=0, col=0, height=12, headroom=[[1,4],[2,7]], footroom=[[2,0],[2,2]],
 					  layout_params=middle_placement_params,
 					  /*displacement=[1.3,.4,-15],*/displacement=[-.9,1.6,-15-3], offsets=[0,0, -3.7]),
@@ -66,14 +74,15 @@ middle_mountings = [screw_mounting_params(row=0, col=0, height=12, headroom=[[1,
 
 
 pinkie_keys = true;//[[false],[true],[false],[false]];
-pinkie_pos = [outerdia+spacer()+20,-13+1,6];
-pinkie_rotation = [0,0,/*-5*/-2];
+pinkie_pos = [outerdia+spacer()+20,-15,6];
+pinkie_rotation = [2,0,/*-5*/-2];
 pinkie_placement_params =
   layout_placement_params(homerow=homerow, homecol=1,
 			  row_spacing=create_circular_placement([tight_spherical_row,
  								 [row_chord]]),
 			  col_spacing=create_circular_placement(tight_spherical_col, z_correct=spherical_z),
-			  profile_rows=profile_rows, offsets=[0,0,0], tent=tent, tilt=pinkie_rotation+tilt,
+			  profile_rows=[[4],profile_rows,profile_rows],
+			  offsets=[0,0,0], tent=tent, tilt=pinkie_rotation+tilt,
 			  position=pinkie_pos);
 
 pinkie_mountings = [screw_mounting_params(row=0, col=0, height=6,
@@ -97,7 +106,7 @@ thumb_placement_params =
 			  row_spacing = create_flat_placement(19.1),
 			  col_spacing = create_circular_placement([[[14,16,0]],[[18,32,0]]],z_correct=0),
 			  profile_rows=[[3,2],[3,"SKRH"],[1,2]],
-			  tent=tent+[-10,0,0], tilt=[20,-60,0],
+			  tent=tent+[-10,0,0], tilt=[20,-80,0],
 			  position=thumb_pos);
 
 thumb_mountings = [screw_mounting_params(row=0, col=1, height=10, displacement=[-0.5,-13,-15],
@@ -154,10 +163,10 @@ module mounted_thumb(keys=true) {
 }
 
 module mounted_index(keys=true) {
-  tp_disp = [5.6,9,0];
+  tp_disp = [5.6,10,0];
   tp_corner_disp = [11,2.8,0];
   apply_screw_mountings(params=index_mountings)
-    install_trackpoint(2, 0, h1=10.9, h2=6, stem=0, up=-0, square_hole=true,
+    install_trackpoint(2, 0, h1=10.9, h2=6, stem=2, up=-0, square_hole=false, access=false,
 		       displacement=tp_disp, w1=12.8, params=index_placement_params)
     union() {
     layout_columns(rows=index_rows, cols=index_cols, params=index_placement_params,
