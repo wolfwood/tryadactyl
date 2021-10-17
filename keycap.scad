@@ -101,7 +101,7 @@ module position_flat(row, override_profile=false) {
   // strings override global profile row numbers
   if (is_string(row) && row == "SKRH") {
     // XXX should navcaps have custom *_position_flat() modules?
-    translate ([0,0,-5]) children();
+    translate ([0,0,-5+1]) children();
   } else if (use_profile == "cherry") {
     cherry_position_flat(row) children();
   } else if (use_profile == "sa") {

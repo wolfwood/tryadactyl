@@ -7,9 +7,9 @@ use <keycap.scad>;
 
 
 module install_trackpoint(row,col, row_spacing, col_spacing, profile_rows, homerow,
-			  h1=4,h2=4, stem=0,up=0,tilt=[0,0,0], displacement=[0,0,0], square_hole=false, access=true,w1=0,w2=0) {
+			  h1=4,h2=4, stem=0,up=0,tilt, displacement=[0,0,0], params=default_layout_placement_params(), square_hole=false, access=true,w1=0,w2=0) {
   module helper(row, col, corners=false, d=displacement) {
-    layout_placement(row,col, row_spacing, col_spacing, profile_rows=profile_rows, homerow=homerow, tilt=tilt,displacement=d,corners=corners, flatten=!corners) children();
+    layout_placement(row,col, row_spacing, col_spacing, profile_rows=profile_rows, homerow=homerow, tilt=tilt,displacement=d,params=params, corners=corners, flatten=!corners) children();
   }
 
   // visualize trackpoint

@@ -28,13 +28,13 @@ module thumbbowl_tester(rows=2, cols=3, keys=false) {
   tilt=[row_chord_center[2],-45,0];
   offsets=[0,0,0];
 
+  placement_params = layout_placement_params(row_spacing=row_spacing, col_spacing=col_spacing, homerow=homerow, homecol=homecol, profile_rows=profile_rows, offsets=offsets, tilt=tilt);
+
   if ($preview) {
     *#rotate(tilt) translate([0,0,optional_vector_index(row_spacing[2],homerow,homecol)[1]])
     scale([cc[1]/row_chord_sides[1],1,1])
     sphere($fn=120,r=optional_vector_index(row_spacing[2],homerow,homecol)[1]);
-    layout_columns(rows=rows, cols=cols, homerow=homerow, homecol=homecol, keys=keys, wells=false,
-		   leftwall=true, rightwall=true, topwall=true, bottomwall=true, narrowsides=false, perimeter=true,
-		   row_spacing=row_spacing, col_spacing=col_spacing, profile_rows=profile_rows, offsets=offsets, tilt=tilt);
+    layout_columns(rows=rows, cols=cols, keys=true, wells=false, params=placement_params);
     rotate([0,tilt.y,0]) color("darksalmon", .2) translate([0,-2,3.7]) scale([1,1,15/21]) rotate([90,0,0]) cylinder(d=21,h=30);
   }
 
@@ -43,13 +43,16 @@ module thumbbowl_tester(rows=2, cols=3, keys=false) {
     union() {
       layout_columns(rows=rows, cols=cols, keys=false,
 		     leftwall=true, rightwall=false, topwall=false, bottomwall=true, narrowsides=false, perimeter=true,
-		     row_spacing=row_spacing, col_spacing=col_spacing, homerow=homerow, homecol=homecol, profile_rows=profile_rows, offsets=offsets, tilt=tilt);
+		     params=placement_params);
+
       layout_walls_only(rows=rows, cols=1, keys=false,
-		     leftwall=true, rightwall=false, topwall=false, bottomwall=false, narrowsides=false, perimeter=true,
-			row_spacing=create_circular_placement(row_chord_center), col_spacing=col_spacing, homerow=homerow, homecol=0, profile_rows=profile_rows[homecol], offsets=offsets, tilt=tilt);
+			leftwall=true, rightwall=false, topwall=false, bottomwall=false, narrowsides=false, perimeter=true,
+			row_spacing=create_circular_placement(row_chord_center), homecol=0, profile_rows=profile_rows[homecol],
+			params=placement_params);
       layout_walls_only(rows=1, cols=1, keys=false,
-		     leftwall=true, rightwall=false, topwall=false, bottomwall=false, narrowsides=false, perimeter=true,
-			row_spacing=row_spacing, col_spacing=col_spacing, homerow=homerow, homecol=1, profile_rows=profile_rows[0], offsets=offsets, tilt=tilt);
+			leftwall=true, rightwall=false, topwall=false, bottomwall=false, narrowsides=false, perimeter=true,
+			homecol=1, profile_rows=profile_rows[0],
+			params=placement_params);
     }
     translate([0,0,-28-40]) cube([500,500,80],true);
 
@@ -59,7 +62,7 @@ module thumbbowl_tester(rows=2, cols=3, keys=false) {
   }
 }
 
-thumbbowl_tester(keys=true);
+*thumbbowl_tester(keys=true);
 
 
 
@@ -73,32 +76,33 @@ module offset_tester(rows=4, cols=2, keys=false) {
   tilt=[-5,0,0];
   offsets=[[0,0,0],[0,4,1]];
 
+  placement_params = layout_placement_params(row_spacing=row_spacing, col_spacing=col_spacing, homerow=homerow, homecol=homecol, profile_rows=profile_rows, offsets=offsets, tilt=tilt);
+
   if ($preview) {
     *#rotate(tilt) translate([0,0,optional_vector_index(row_spacing[2],0,0)[1]])
     scale([col_spacing[2][1]/row_spacing[2][1],1,1])
     sphere($fn=120,r=optional_vector_index(row_spacing[2],0,0)[1]);
     layout_columns(rows=rows, cols=cols, homerow=homerow, homecol=homecol, keys=keys, wells=false,
-		     leftwall=true, rightwall=true, topwall=true, bottomwall=true, narrowsides=false, perimeter=true,
-		   row_spacing=row_spacing, col_spacing=col_spacing, profile_rows=profile_rows, offsets=offsets, tilt=tilt);
+		   params=placement_params);
   }
 
   difference(){
     //install_trackpoint(1, 0, row_spacing, col_spacing, profile_rows, homerow, h1=6, h2=6, stem=-.5, up=.5, tilt=[-7,0,0], square_hole=false)
       layout_columns(rows=rows, cols=cols, keys=false,
 		     leftwall=true, rightwall=true, topwall=false, bottomwall=false, narrowsides=false, perimeter=true,
-		     row_spacing=row_spacing, col_spacing=col_spacing, homerow=homerow, homecol=homecol, profile_rows=profile_rows, offsets=offsets, tilt=tilt);
+		     params=placement_params);
 
     translate([0,0,-24-40]) cube([500,500,80],true);
 
     version=2;
-    translate([outerdia/2 + spacer()/2 + directional_decoder(wall_extra_room,0,1) + optional_vector_index(wall_width,0,0) -.4, -30, -21])
+    translate([3*outerdia/2 + 3*spacer()/2 + directional_decoder(wall_extra_room,0,1) + optional_vector_index(wall_width,0,0) -.4, -30, -21])
       rotate([90,0,90]) linear_extrude(.5) text(str(profile, " Offset v",version), size=6);
   }
 }
 
 *offset_tester(keys=true);
 
-module spherical_tester(rows=4, cols=3, keys=false) {
+module spherical_tester(rows=4, cols=2, keys=false) {
   row_spacing = create_circular_placement([19,35,0]);
   col_spacing = create_circular_placement([15.5,35,0]);
   homerow=2;
@@ -106,20 +110,20 @@ module spherical_tester(rows=4, cols=3, keys=false) {
 
   tilt=[0,0,0];
 
+  placement_params = layout_placement_params(row_spacing=row_spacing, col_spacing=col_spacing, homerow=homerow, profile_rows=profile_rows, tilt=tilt);
+
   if ($preview) {
     *#rotate(tilt) translate([0,0,optional_vector_index(row_spacing[2],0,0)[1]])
     scale([col_spacing[2][1]/row_spacing[2][1],1,1])
     sphere($fn=120,r=optional_vector_index(row_spacing[2],0,0)[1]);
-    layout_columns(rows=rows, cols=cols, keys=keys, wells=false,
-		     leftwall=true, rightwall=true, topwall=true, bottomwall=true, narrowsides=false, perimeter=true,
-		     row_spacing=row_spacing, col_spacing=col_spacing, homerow=homerow, profile_rows=profile_rows, tilt=tilt);
+    layout_columns(rows=rows, cols=cols, keys=keys, wells=false, params=placement_params);
   }
 
   difference(){
-    install_trackpoint(1, 0, row_spacing, col_spacing, profile_rows, homerow, h1=6, h2=6, stem=1, up=-1, tilt=tilt, square_hole=true)
+    install_trackpoint(1, 0, params=placement_params, h1=6, h2=6, stem=1, up=-1, square_hole=true)
       layout_columns(rows=rows, cols=cols, keys=false,
 		     leftwall=true, rightwall=true, topwall=true, bottomwall=true, narrowsides=false, perimeter=true,
-		     row_spacing=row_spacing, col_spacing=col_spacing, homerow=homerow, profile_rows=profile_rows, tilt=tilt);
+		     params=placement_params);
 
     translate([0,0,-24-40]) cube([500,500,80],true);
 
@@ -131,7 +135,7 @@ module spherical_tester(rows=4, cols=3, keys=false) {
 
 *spherical_tester(keys=true);
 
-module cylindrical_tester(rows=4, reys=false) {
+module cylindrical_tester(rows=4, keys=false) {
   row_spacing = create_circular_placement([15,25,0]);
   col_spacing=create_flat_placement(outerdia+spacer());
   homerow=2;
@@ -139,16 +143,19 @@ module cylindrical_tester(rows=4, reys=false) {
 
   tilt=[0,0,0];
 
+  placement_params = layout_placement_params(row_spacing=row_spacing, col_spacing=col_spacing, homerow=homerow, profile_rows=profile_rows, tilt=tilt);
+
   if ($preview) {
     #rotate(tilt) translate([0,0,optional_vector_index(row_spacing[2],0,0)[1]]) rotate([0,90,0])
     cylinder($fn=120,r=optional_vector_index(row_spacing[2],0,0)[1],h=15,center=true);
+    layout_columns(rows=rows, cols=2, keys=keys, wells=false, params=placement_params);
   }
 
   difference(){
-    install_trackpoint(1,0, row_spacing, col_spacing, profile_rows, homerow, h1=4, h2=3.5, stem=.5, up=-.5, tilt=tilt)
-    layout_columns(rows, cols=2, keys=keys,
+    install_trackpoint(1,0, params=placement_params, h1=4, h2=3.5, stem=.5, up=-.5)
+    layout_columns(rows, cols=2, keys=false,
 		   leftwall=true, rightwall=true, /*topwall=true, bottomwall=true,*/ narrowsides=false, perimeter=true,
-		   row_spacing=row_spacing, col_spacing=col_spacing, homerow=homerow, profile_rows=profile_rows, tilt=tilt);
+		   params=placement_params);
 
     translate([0,0,-24-40]) cube([500,500,80],true);
 
@@ -161,24 +168,26 @@ module cylindrical_tester(rows=4, reys=false) {
 *cylindrical_tester(keys=true);
 
 module flat_tester(rows=4, cols=6,keys=false) {
-  row_spacing = create_flat_placement([outerdia+spacer()+.6, outerdia+spacer()+.6, 0, outerdia+spacer()+1.2, outerdia+spacer()+1.2]);
+  row_spacing = create_flat_placement([outerdia+spacer()+.6, outerdia+spacer()+.6, outerdia+spacer()+1.2, outerdia+spacer()+1.2]);
   col_spacing=create_flat_placement(outerdia+spacer());
-  homerow=2;
+  homerow=1;
+  homecol=cols-2;
   profile_rows=effective_rows(rows,homerow);
+
   tilt=[5,5,0];
 
-  layout_columns(rows, cols=cols, keys=keys, wells=false,
-		   leftwall=true, rightwall=true, topwall=true, bottomwall=true, narrowsides=false, perimeter=true,
-		   row_spacing=row_spacing, col_spacing=col_spacing, homerow=homerow, profile_rows=profile_rows, tilt=tilt);
+  placement_params = layout_placement_params(row_spacing=row_spacing, col_spacing=col_spacing, homerow=homerow, homecol=homecol, profile_rows=profile_rows, tilt=tilt);
 
+  layout_columns(rows, cols=cols, keys=keys, wells=false,
+		 params=placement_params);
 
   difference(){
-    install_trackpoint(homerow-1,cols-2, row_spacing, col_spacing, profile_rows, homerow, h1=8, h2=8, stem=4, tilt=tilt)
+    install_trackpoint(homerow-1,homecol, params=placement_params, h1=8, h2=8, stem=4)
       layout_columns(rows, cols=cols, keys=false, wells=true,
-		   leftwall=true, rightwall=true, topwall=true, bottomwall=true, narrowsides=false, perimeter=true,
-		   row_spacing=row_spacing, col_spacing=col_spacing, homerow=homerow, profile_rows=profile_rows, tilt=tilt);
+		     leftwall=true, rightwall=true, topwall=true, bottomwall=true, narrowsides=false, perimeter=true,
+		     params=placement_params);
 
-    translate([0,0,-24-40]) cube([500,500,80],true);
+    translate([0,0,-34-40]) cube([500,500,80],true);
 
     version=2;
     translate([outerdia/2 + spacer()/2 + directional_decoder(wall_extra_room,0,1) + optional_vector_index(wall_width,0,0) -.4, -25, -22])
@@ -186,11 +195,10 @@ module flat_tester(rows=4, cols=6,keys=false) {
   }
 }
 
-*flat_tester(keys=true);
+flat_tester(keys=true);
 
 
-module tubular_tester(rows=4, keys=false) {
-
+module tubular_tester(rows=4, cols=2, keys=false) {
   row_spacing=create_flat_placement(outerdia+spacer()+1.2);
   col_spacing = create_circular_placement([14.5,25,0]);
   homerow=2;
@@ -198,16 +206,21 @@ module tubular_tester(rows=4, keys=false) {
 
   tilt=[0,0,0];
 
+  placement_params = layout_placement_params(row_spacing=row_spacing, col_spacing=col_spacing, homerow=homerow, profile_rows=profile_rows, tilt=tilt);
+
   if ($preview) {
     #rotate(tilt) translate([0,0,optional_vector_index(col_spacing[2],0,0)[1]]) rotate([90,0,0])
     cylinder($fn=120,r=optional_vector_index(col_spacing[2],0,0)[1],h=15,center=true);
+
+    layout_columns(rows, cols=cols, keys=keys, wells=false,
+		   params=placement_params);
   }
 
   difference(){
-    install_trackpoint(1,0, row_spacing, col_spacing, profile_rows, homerow, h1=8, h2=8, stem=2, tilt=tilt)
-    layout_columns(rows, cols=2, keys=keys,
+    install_trackpoint(1,0, params=placement_params, h1=8, h2=8, stem=2)
+    layout_columns(rows, cols=cols, keys=keys,
 		   leftwall=true, rightwall=true, /*topwall=true, bottomwall=true,*/ narrowsides=false, perimeter=true,
-		   row_spacing=row_spacing, col_spacing=col_spacing, homerow=homerow, profile_rows=profile_rows, tilt=tilt);
+		   params=placement_params);
 
     translate([0,0,-26-40]) cube([500,500,80],true);
 

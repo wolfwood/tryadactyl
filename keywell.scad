@@ -137,6 +137,17 @@ module position_keywell_corner(x,y,header=false,footer=false,leftside=false,righ
     children();
 }
 
+// wraps the next two functions for convenience
+module keywell_bounding_box(x,y,header=false,footer=false,leftside=false,rightside=false) {
+  assert(!is_undef(x) || !is_undef(y));
+
+  if (is_undef(x) || is_undef(y)) {
+    keywell_side_bounding_box(x=is_undef(x)?0:x,y=is_undef(y)?0:y,header=header,footer=footer,leftside=leftside,rightside=rightside);
+  } else {
+    keywell_corner_bounding_box(x=x,y=y,header=header,footer=footer,leftside=leftside,rightside=rightside);
+  }
+}
+
 /* places a small bounding box overlapping the indicated corner of a keywell.
  *  used to define the 4 corners at the intersection of 4 switches, so we can hull them together.
  */
@@ -157,7 +168,7 @@ module keywell_side_bounding_box(x=0,y=0,header=false,footer=false,leftside=fals
 
   overlap = epsilon;
 
-  if (x != 0) {
+  if (!is_undef(x) && x != 0) {
     position_keywell_corner(x=x,y=-1,header=header,footer=footer,leftside=leftside,rightside=rightside)
       cube([overlap, outerdia + optional_sum(header,footer), thickness]);
   } else {

@@ -11,23 +11,105 @@ module drop(){
  }
 }
 
-module layout_placement(row,col, row_spacing, col_spacing, profile_rows, homerow, homecol=0, tilt=[0,0,0], offsets=[0,0,0], displacement=[0,0,0], corners=false, flatten=true) {
-  rotate([0,0,optional_vector_index(tilt, col, row).z]) rotate([0,optional_vector_index(tilt, col, row).y,0])
-    translate(optional_vector_index(offsets, col, row)) rotate([optional_vector_index(tilt, col, row).x,0,0])
-    place_row(row, col, row_spacing, homerow, corners=corners, displacement=displacement)
-    place_col(row, col, col_spacing, homecol, homerow, corners=corners, displacement=displacement)
-    translate([0,0,displacement.z])
-    //place_z_correct(row, col, row_spacing, col_spacing, homerow, homecol, corners=corners)
-  if(flatten) {
-    effective_row = optional_index(profile_rows, row, col);
-    position_flat(effective_row) children();
-  } else {
-    children();
+
+/* rotations:
+ *  - tilt is for rotation of the each finger's columns relative to each other and is compensated for by walls
+ *  - tent is applied after final positioning to the keyboard as a whole
+ * positions:
+ *  - displacement is used to refine row and column placement of keys, trackpoints and mountings.
+ *     e.g. for a circulare placement an x or y displacement follows the curvature rather than
+ *     happening before placement
+ * - offsets are used after placement to adjust relative position of columns, but happens before x and y tilt
+ * - position is used to do final positioning of groups of columns
+ */
+
+function layout_placement_params(row_spacing, col_spacing, profile_rows, homerow=2, homecol=0, tent=[0,0,0], tilt=[0,0,0], position=[0,0,0], offsets=[0,0,0], displacement=[0,0,0]) =
+  [[row_spacing_enum, row_spacing],
+   [col_spacing_enum, col_spacing],
+   [profile_rows_enum, profile_rows],
+   [homerow_enum, homerow],
+   [homecol_enum, homecol],
+   [tilt_enum, tilt],
+   [offsets_enum, offsets],
+   [displacement_enum, displacement],
+   [position_enum, position],
+   [tent_enum, tent]
+   ];
+
+/* :/ these variables aren't exported with `use` so params is effectively opaque in intervening functions
+ *    if callers seem to need access it probably means layout_placement needs to be enhanced instead
+ */
+row_spacing_enum = "a";
+col_spacing_enum = "b";
+profile_rows_enum = "c";
+homerow_enum = "d";
+homecol_enum = "e";
+tilt_enum = "f";
+offsets_enum = "g";
+displacement_enum = "h";
+position_enum = "i";
+tent_enum = "j";
+
+/* variables are not exported when we `use` this file, so we make a this a function */
+function default_layout_placement_params() =
+  layout_placement_params(row_spacing=create_flat_placement(outerdia+2*spacer()),
+			  col_spacing=create_flat_placement(outerdia+spacer()),
+			  profile_rows=effective_rows());
+
+/* it would be possible to treat enums as integers and use them as array indexes, but then there is the risk of
+ *  off-by-one errors as keys are added and removed which might not be immediately obvious. I think a hashtable
+ *  will more robust as code evolves, and the performance cost are negligable in the face of render overheads */
+function match(key, params) = params[search(key,params)[0]][1];
+function match_override(key, params, override) = !is_undef(override) ? override : match(key,params);
+
+module layout_placement(row, col,
+			row_spacing, col_spacing, profile_rows, homerow, homecol, tilt, offsets,
+			displacement=[0,0,0],
+			params=default_layout_placement_params(),
+		        corners=false, flatten=true, stay_upright=false) {
+
+  let(row_spacing = match_override(row_spacing_enum, params, row_spacing),
+      col_spacing = match_override(col_spacing_enum, params, col_spacing),
+      profile_rows = match_override(profile_rows_enum, params, profile_rows),
+      homerow = optional_index(match_override(homerow_enum, params, homerow), col),
+      homecol = match_override(homecol_enum, params, homecol),
+      tent = match(tent_enum, params),
+      tilt = optional_vector_index(match_override(tilt_enum, params, tilt), col, row),
+      position = match(position_enum, params),
+      offsets = optional_vector_index(match_override(offsets_enum, params, offsets), col, row),
+      displacement = match(displacement_enum, params) + displacement) {
+
+    rotate([0,tent.y,0])
+    rotate([tent.x,0,0])
+    translate(position)
+      rotate([0,0,tilt.z]) rotate([0,tilt.y,0])
+      translate(offsets) rotate([tilt.x,0,0])
+      place_row(row, col, row_spacing, homerow, corners=corners, displacement=displacement)
+      place_col(row, col, col_spacing, homecol, homerow, corners=corners, displacement=displacement)
+      translate([0,0,displacement.z])
+      //place_z_correct(row, col, row_spacing, col_spacing, homerow, homecol, corners=corners)
+      if(stay_upright) {
+	place_col(row, col, col_spacing, homecol, homerow, corners=corners, displacement=displacement,reverse=true)
+	  place_row(row, col, row_spacing, homerow, corners=corners, displacement=displacement,reverse=true)
+	  rotate([-tilt.x,0,0])
+	  rotate([0,-tilt.y,0])
+	  rotate([0,0,-tilt.z])
+	  rotate([-tent.x,0,0])
+	  rotate([0,-tent.y,0])
+	  children();
+      } else if(flatten) {
+	/* using params bundle makes profile rows opaque to callers. so we use a special var to pass through
+	 *  $effective_row so we can use it to get the right keycap */
+	$effective_row = optional_index(profile_rows, row, col);
+	position_flat($effective_row) children();
+      } else {
+	children();
+      }
   }
 }
 
 /* dispatch for placement styles, so we don't have to re-write layout_columns for each style combo */
-module place_row(row,col,row_spacing,homerow=2, corners=false, reverse=false, displacement=[0,0,0]) {
+module place_row(row,col,row_spacing,homerow, corners=false, reverse=false, displacement=[0,0,0]) {
   assert(len(row_spacing) == 3, "not a properly formatted col_spacing, use a create_*_placement() function");
   style = row_spacing[0];
   args = row_spacing[1];
@@ -42,7 +124,7 @@ module place_row(row,col,row_spacing,homerow=2, corners=false, reverse=false, di
   }
 }
 
-module place_col(row,col,col_spacing,homecol=0, homerow=2, corners=false, reverse=false, displacement=[0,0,0]) {
+module place_col(row,col,col_spacing,homecol, homerow, corners=false, reverse=false, displacement=[0,0,0]) {
   assert(len(col_spacing) == 3, "not a properly formatted col_spacing, use a create_*_placement() function");
   style = col_spacing[0];
   args = col_spacing[1];
@@ -76,20 +158,20 @@ module place_z_correct(row, col, row_spacing, col_spacing, homerow, homecol, cor
 }
 
 /* flat style */
-module place_flat_row(row, col, row_spacing, homerow=2, corners=false, reverse=false, args=[], displacement=[0,0,0]){
+module place_flat_row(row, col, row_spacing, homerow, corners=false, reverse=false, args=[], displacement=[0,0,0]){
   /*if (row == homerow && !corners) {
     children();
     } else {*/
-    translate([0, (reverse?-1:1) *
+    translate([0, (reverse?0:1) *
 	       (calculate_displacement(row_spacing, row, col, homerow, corners=corners) + displacement.y), 0]) children();
     //}
 }
 
-module place_flat_col(row, col, col_spacing, homecol=0, homerow=2, corners=false, reverse=false, args=[], displacement=[0,0,0]){
+module place_flat_col(row, col, col_spacing, homecol, homerow, corners=false, reverse=false, args=[], displacement=[0,0,0]){
   /*if (col == homecol && !corners) {
     children();
     } else {*/
-    translate([(reverse?-1:1) *
+    translate([(reverse?0:1) *
 	       (calculate_displacement(col_spacing, col, row, homecol, corners=corners) + displacement.x), 0, 0]) children();
     //}
 }
@@ -98,7 +180,7 @@ function create_flat_placement(v) = ["flat", [], v];
 
 /* circular style */
 // XXX doesn't use ranged_sum(), so individually tuned key spacing won't properly reflect neighbor's positions
-module place_circular_row(row, col, row_spacing, homerow=2, corners=false, reverse=false, args=[], displacement=[0,0,0]){
+module place_circular_row(row, col, row_spacing, homerow, corners=false, reverse=false, args=[], displacement=[0,0,0]){
   temp_chord = optional_vector_index(row_spacing, row, col);
   chord = normalize_chord([temp_chord[0]+displacement.y,temp_chord[1],0]);
 
@@ -107,14 +189,14 @@ module place_circular_row(row, col, row_spacing, homerow=2, corners=false, rever
   count = homerow-row;
 
   if (corners) {
-    translate([0,0,chord[1]]) rotate([(reverse?-1:1)*((2*count-1)*chord[2]/2),0,0]) translate([0,0,-chord[1]])
+    translate([0,0,reverse?0:chord[1]]) rotate([(reverse?-1:1)*((2*count-1)*chord[2]/2),0,0]) translate([0,0,reverse?0:-chord[1]])
       if (z_correct) {
 	rotate([0,0,-col*(count/2-1)*chord[2]/2/2]) children();
       } else {
 	children();
       }
   } else {
-    translate([0,0,chord[1]]) rotate([(reverse?-1:1)*((homerow-row)*chord[2]),0,0]) translate([0,0,-chord[1]])
+    translate([0,0,reverse?0:chord[1]]) rotate([(reverse?-1:1)*((homerow-row)*chord[2]),0,0]) translate([0,0,reverse?0:-chord[1]])
       if (z_correct) {
 	rotate([0,0,-col*(homerow-row)*chord[2]/2]) children();
       } else {
@@ -123,7 +205,7 @@ module place_circular_row(row, col, row_spacing, homerow=2, corners=false, rever
   }
 }
 
-module place_circular_col(row, col, col_spacing, homecol=0, homerow=2, corners=false, reverse=false, args=[], displacement=[0,0,0]){
+module place_circular_col(row, col, col_spacing, homecol, homerow, corners=false, reverse=false, args=[], displacement=[0,0,0]){
   temp_chord = optional_vector_index(col_spacing, col, row);
   chord = normalize_chord([temp_chord[0]+displacement.x,temp_chord[1],0]);
 
@@ -132,14 +214,14 @@ module place_circular_col(row, col, col_spacing, homecol=0, homerow=2, corners=f
   count = homecol-col;
 
   if (corners) {
-    translate([0,0,chord[1]]) rotate([0,(reverse?-1:1)*-((count-1)*chord[2]/2),0]) translate([0,0,-chord[1]])
+    translate([0,0,reverse?0:chord[1]]) rotate([0,(reverse?-1:1)*-((2*count-1)*chord[2]/2),0]) translate([0,0,reverse?0:-chord[1]])
       /*if (z_correct != 0 ) {
 	rotate([0,0,(count/2-1)*(homerow)*z_correct/2]) children();
 	} else {*/
 	children();
     //}
   } else {
-    translate([0,0,chord[1]]) rotate([0,(reverse?-1:1)*-((homecol-col)*chord[2]),0]) translate([0,0,-chord[1]])
+    translate([0,0,reverse?0:chord[1]]) rotate([0,(reverse?-1:1)*-((homecol-col)*chord[2]),0]) translate([0,0,reverse?0:-chord[1]])
       if (is_num(z_correct) && z_correct == 0) {
 	children();
       } else {
@@ -151,7 +233,7 @@ module place_circular_col(row, col, col_spacing, homecol=0, homerow=2, corners=f
 module place_circular_z_correct(row, col, row_spacing, col_spacing, homerow, homecol, row_args, col_args, corners) {
   row_chord = optional_vector_index(row_spacing, row, col);
   col_chord = optional_vector_index(col_spacing, col, row);
-  row_z_correct = true;//row_args[0];
+  row_z_correct = false;//row_args[0];
 
   row_count = homerow-row;
   col_count = homecol-col;
@@ -175,9 +257,17 @@ function optional_normalize(v) = !is_list(v[0]) ? normalize_chord(v) :
  *  - an array (for treating each key in a column (row) differently, but all columns (rows) identically)
  *  - a 2d array (to be able to configure each key individually
  */
-function optional_index(v, row, col) = !is_list(v) ? v : !is_list(v[0]) ? v[row] : v[col][row];
-function optional_vector_index(v, row, col) = !is_list(v[0]) ? v : !is_list(v[0][0]) ? v[row] :
-  len(v[col]) == 1 ? v[col][0] : v[col][row];
+//function optional_index(v, row, col) = !is_list(v) ? v : !is_list(v[0]) ? v[row] :
+  //  len(v[col]) == 1 ? v[col][0] : v[col][row];
+//function optional_vector_index(v, row, col) = !is_list(v[0]) ? v : !is_list(v[0][0]) ? v[row] :
+//  len(v[col]) == 1 ? v[col][0] : v[col][row];
+function optional_index(v, row, col, leaf = function (l) l) =
+  !is_list(leaf(v))    ? v :
+  !is_list(leaf(v[0])) ? v[row] :
+  len(v[col]) == 1     ? v[col][0] :
+  //len(v[col]) <= row     ? v[col][len(v[col])-1] :
+                         v[col][row];
+function optional_vector_index(v, row, col) = optional_index(v, row, col, leaf = function(l) l[0]);
 
 // column major vs row major data
 // (eg, if expanding values from a scalar, which dimension are we most likely to customize)
