@@ -1,5 +1,7 @@
 // utility functions
 
+function xor(a,b) = (a && !b) || (!a && b);
+
 // makes a number of clones of a supbtreem/ rotated and spaced evenly around the origin
 module rotational_clone(clones=2) {
   for(i=[0:clones-1] ) {

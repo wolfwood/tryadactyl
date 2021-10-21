@@ -62,6 +62,13 @@ function default_layout_placement_params() =
 function match(key, params) = params[search(key,params)[0]][1];
 function match_override(key, params, override) = !is_undef(override) ? override : match(key,params);
 
+module get_homes(params, homecol,homerow, col) {
+  $homerow = optional_index(match_override(homerow_enum, params, homerow), col);
+  $homecol = match_override(homecol_enum, params, homecol);
+
+  children();
+}
+
 module layout_placement(row, col,
 			row_spacing, col_spacing, profile_rows, homerow, homecol, tilt, offsets,
 			displacement=[0,0,0],
