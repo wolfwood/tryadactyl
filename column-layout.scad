@@ -45,13 +45,58 @@ module layout_plate_only(rows=4, cols=1, homerow, homecol, row_spacing,
 			 leftwall=false, rightwall=false, topwall=false, bottomwall=false,
 			 perimeter=true, narrowsides=false, flatten=true, params=default_layout_placement_params()) {
   module placement_helper(row,col) {
-    $h = side_gets_spacer(headers, row != 0, perimeter, narrowsides);
-    $f = side_gets_spacer(footers, row != optional_index(rows, col)-1, perimeter, narrowsides);
-    $r = side_gets_spacer(rightsides, col != 0, perimeter, narrowsides);
-    $l = side_gets_spacer(leftsides, col != cols-1, perimeter, narrowsides);
+    let(col = is_undef(col) ? row.y : col, row = is_list(row) ? row.x : row) {
+      $h = side_gets_spacer(headers, row != 0, perimeter, narrowsides);
+      $f = side_gets_spacer(footers, row != optional_index(rows, col)-1, perimeter, narrowsides);
+      $r = side_gets_spacer(rightsides, col != 0, perimeter, narrowsides);
+      $l = side_gets_spacer(leftsides, col != cols-1, perimeter, narrowsides);
 
-    layout_placement(row=row, col=col, row_spacing=row_spacing, col_spacing=col_spacing, profile_rows=profile_rows,
-		     homerow=homerow, homecol=homecol, tilt=tilt, offsets=offsets, displacement=displacement, flatten=flatten, params=params) children();
+      layout_placement(row=row, col=col, row_spacing=row_spacing, col_spacing=col_spacing, profile_rows=profile_rows,
+		       homerow=homerow, homecol=homecol, tilt=tilt, offsets=offsets, displacement=displacement, flatten=flatten, params=params) children();
+    }
+  }
+
+  module connect(this, left, down, corner) {
+    assert( ( is_undef(this) || is_list(this) ) &&
+	    ( is_undef(left) || is_list(left) ) &&
+	    ( is_undef(down) || is_list(down) ) &&
+	    ( is_undef(corner) || is_list(corner) )
+	    );
+
+    function count_undef(test) = is_undef(test) ? 1 : 0;
+
+    module hull_corners(this, left, down, corner) {
+      hull() {
+	if (!is_undef(this))
+	  placement_helper(this) keywell_bounding_box(y=-1, x=-1, header=$h, footer=$f, leftside=$l, rightside=$r);
+	if (!is_undef(left))
+	  placement_helper(left) keywell_bounding_box(y=-1, x=1, header=$h, footer=$f, leftside=$l, rightside=$r);
+	if (!is_undef(down))
+	  placement_helper(down) keywell_bounding_box(y=1, x=-1, header=$h, footer=$f, leftside=$l, rightside=$r);
+	if (!is_undef(corner))
+	  placement_helper(corner) keywell_bounding_box(y=1, x=1, header=$h, footer=$f, leftside=$l, rightside=$r);
+      }
+    }
+
+    num_wells = count_undef(this) + count_undef(left) + count_undef(down) + count_undef(corner);
+
+    assert(num_wells > 1);
+
+    if (num_wells == 3) {
+      hull_corners(this, left, down, corner);
+    } else {
+      let (corner = is_undef(corner) ? (is_undef(left) ? down : left) : corner,
+	   left = is_undef(left) ? this : left,
+	   down = is_undef(down) ? this : down) {
+	if (this.y < $homecol && this.x <= $homerow) {
+	  hull_corners(this=this,left=left,corner=corner);
+	  hull_corners(this=this,down=down,corner=corner);
+	} else {
+	  hull_corners(this=this,left=left,down=down);
+	  hull_corners(left=left,down=down,corner=corner);
+	}
+      }
+    }
   }
 
   for (j=[0:cols-1]) {
@@ -61,15 +106,15 @@ module layout_plate_only(rows=4, cols=1, homerow, homecol, row_spacing,
 	placement_helper(i,j) keycap($effective_row);
       }
 
-      if (wells) {
+      if (wells) get_homes(params, homerow, homecol, j) let(homerow=$homerow, homecol=$homecol){
 	// well
 	placement_helper(i,j) keywell(header=$h, footer=$f, leftside=$l, rightside=$r);
 
 	//connect rows
 	if (i < row_count-1) {
 	  hull() {
-	    placement_helper(i,j) keywell_side_bounding_box(y=-1, header=$h, footer=$f, leftside=$l, rightside=$r);
-	    placement_helper(i+1,j) keywell_side_bounding_box(y=1, header=$h, footer=$f, leftside=$l, rightside=$r);
+	    placement_helper(i,j) keywell_bounding_box(y=-1, header=$h, footer=$f, leftside=$l, rightside=$r);
+	    placement_helper(i+1,j) keywell_bounding_box(y=1, header=$h, footer=$f, leftside=$l, rightside=$r);
 	  }
 	}
 
@@ -78,9 +123,26 @@ module layout_plate_only(rows=4, cols=1, homerow, homecol, row_spacing,
 	    i < optional_index(rows, j+1)) { // next row is as long as this one
 	  row_offset = 0;//optional_index(homerow, j+1) - optional_index(homerow, j);
 	  if ((i + row_offset) >= 0) {
-	    hull() {
-	      placement_helper(i,j) keywell_side_bounding_box(x=-1, header=$h, footer=$f, leftside=$l, rightside=$r);
-	      placement_helper(i+row_offset, j+1) keywell_side_bounding_box(x=1, header=$h, footer=$f, leftside=$l, rightside=$r);
+	    connect([i,j], left=[i+row_offset, j+1]);
+	    *if (j < homecol && i <= homerow) {
+	      hull() {
+		placement_helper(i,j) keywell_bounding_box(x=-1, header=$h, footer=$f, leftside=$l, rightside=$r);
+		placement_helper(i+row_offset, j+1) keywell_bounding_box(x=1,y=1, header=$h, footer=$f, leftside=$l, rightside=$r);
+	      }
+	      hull() {
+		placement_helper(i,j) keywell_bounding_box(x=-1, y=-1, header=$h, footer=$f, leftside=$l, rightside=$r);
+		placement_helper(i+row_offset, j+1) keywell_bounding_box(x=1,header=$h, footer=$f, leftside=$l, rightside=$r);
+	      }
+	    } else {
+	      hull() {
+		placement_helper(i,j) keywell_bounding_box(x=-1, y=1,header=$h, footer=$f, leftside=$l, rightside=$r);
+		placement_helper(i+row_offset, j+1) keywell_bounding_box(x=1, header=$h, footer=$f, leftside=$l, rightside=$r);
+	      }
+
+	      hull() {
+		placement_helper(i,j) keywell_bounding_box(x=-1, header=$h, footer=$f, leftside=$l, rightside=$r);
+		placement_helper(i+row_offset, j+1) keywell_bounding_box(x=1,y=-1,header=$h, footer=$f, leftside=$l, rightside=$r);
+	      }
 	    }
 
 	    //connect connectors
