@@ -138,6 +138,7 @@ module layout_plate_only(rows=4, cols=1, homerow, homecol, row_spacing,
       if (wells) get_homes(params, homerow, homecol, j) let(homerow=$homerow, homecol=$homecol){
 	// well
 	placement_helper(i,j) keywell(header=$h, footer=$f, leftside=$l, rightside=$r);
+	if ($preview) placement_helper(i,j) hotswap();
 
 	//connect rows
 	if (i < row_count-1) {

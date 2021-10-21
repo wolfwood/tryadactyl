@@ -73,6 +73,23 @@ module keywell(header=false,footer=false,leftside=false,rightside=false) {
   }
 }
 
+module hotswap() {
+  translate([0, 0, -mxstem()]) {
+    let(x=10.9, y=4, x2=5.3, y2=6, z=3.1)
+      translate([0, innerdia/2 - 2 - 1, -thickness -3.1/2]) {
+      color("orange",.2) {
+	cube([10.9,4,3.1], true);
+	translate([-(x/2-x2/2), y/2 - y2/2,0]) cube([x2,y2,z],true);
+      }
+      let(x3=(14.5-x)/2, y3=1.8, z3 = 1.95) translate([0, 0, z3/2])
+	color("silver", .2) {
+	translate([-(x/2 + x3/2), -.5  - 2.55, 0]) cube([x3, y3, z3],true);
+	translate([(x/2 + x3/2), -.5, 0]) cube([x3, y3, z3],true);
+      }
+    }
+  }
+}
+
 /* use to cut a keywell into something. 0.1 mm margins so previews show a proper cavity
  * optionally clears space above and below the well also.
  */
