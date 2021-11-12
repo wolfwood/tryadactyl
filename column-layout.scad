@@ -17,13 +17,17 @@ module layout_columns(rows=4, cols=1, homerow, homecol, row_spacing,
 		      profile_rows, offsets, tilt, displacement=[0,0,0], keys=false, wells=true,
 		      headers=false, footers=false, leftsides=false, rightsides=false,
 		      leftwall=false, rightwall=false, topwall=false, bottomwall=false,
-		      perimeter=true, narrowsides=false, flatten=true, params=default_layout_placement_params()) {
+		      perimeter=true, narrowsides=false, flatten=true,
+		      reverse_triangles=false,
+		      params=default_layout_placement_params()) {
   layout_plate_only(rows=rows, cols=cols, homerow=homerow, homecol=homecol,row_spacing=row_spacing,
 		    col_spacing=col_spacing,
 		    profile_rows=profile_rows, offsets=offsets, tilt=tilt, displacement=displacement, keys=keys, wells=wells,
 		    headers=headers, footers=footers, leftsides=leftsides, rightsides=rightsides,
 		    leftwall=leftwall, rightwall=rightwall, topwall=topwall, bottomwall=bottomwall,
-		    perimeter=perimeter, narrowsides=narrowsides, flatten=flatten, params=params);
+		    perimeter=perimeter, narrowsides=narrowsides, flatten=flatten,
+		    reverse_triangles=reverse_triangles,
+		    params=params);
 
   if (wells) {
     layout_walls_only(rows=rows, cols=cols, homerow=homerow, homecol=homecol, row_spacing=row_spacing,
@@ -43,7 +47,9 @@ module layout_plate_only(rows=4, cols=1, homerow, homecol, row_spacing,
 			 profile_rows, offsets, tilt, displacement=[0,0,0], keys=false, wells=true,
 			 headers=false, footers=false, leftsides=false, rightsides=false,
 			 leftwall=false, rightwall=false, topwall=false, bottomwall=false,
-			 perimeter=true, narrowsides=false, flatten=true, params=default_layout_placement_params()) {
+			 perimeter=true, narrowsides=false, flatten=true,
+			 reverse_triangles=false,
+			 params=default_layout_placement_params()) {
 
   module placement_helper(row,col) {
     // lets us pass row, column as 2 scalar parameters, or as a single 2d vector
@@ -117,7 +123,8 @@ module layout_plate_only(rows=4, cols=1, homerow, homecol, row_spacing,
 	 */
 	reverse = num_wells != 4;
 
-	if (xor(quadrant, reverse)) {
+	// we can override the heuristic with reverse_triangles if needed
+	if (xor(quadrant, xor(reverse, reverse_triangles))) {
 	  hull_corners(this=this,left=left,down=down);
 	  hull_corners(left=left,down=down,corner=corner);
 	} else {
