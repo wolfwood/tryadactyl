@@ -207,11 +207,19 @@ module bar_magnetize(position=[0,0,0], spacer=2) {
 *bar_magnetize() translate([0,0,2])  cube([50,75,4], true);
 
 module mount_teensy20pp(position=[0,0,0], rotation=[0,0,0], spacer=2, walls=2) {
-  slop =.2;
+  slop =.1;
   bar = [18.2+slop, 51.2+slop, 8+spacer];
   epsilon=.1;
 
   outer = bar+[2*walls,2*walls,0];
+
+  if ($preview) {
+
+    translate(position) rotate(rotation) let(z1=18.5,z2=23-18.5) translate([0,0,spacer]) {
+      color("black", .2) translate([0,0,z1/2]) cube(bar + [0,0,z1 - bar.z], true);
+      color("blue", .2) translate([0,0,z1+z2/2]) cube(bar + [0,0,z2 - bar.z], true);
+    }
+  }
 
   pitch=2.54;
   difference() {
@@ -244,7 +252,7 @@ module mount_teensy20pp(position=[0,0,0], rotation=[0,0,0], spacer=2, walls=2) {
 *mount_teensy20pp() translate([0,0,2])  cube([50,75,4], true);
 
 module mount_trrs(position=[0,0,0], rotation=[0,0,0], spacer=2, walls=2) {
-  slop = .2;
+  slop = .1;
   bar = [6.5+slop, 12.5+slop, 8 + spacer];
   epsilon=.1;
 
@@ -275,40 +283,57 @@ module mount_trrs(position=[0,0,0], rotation=[0,0,0], spacer=2, walls=2) {
 
 *mount_trrs() translate([0,0,2])  cube([30,30,4], true);
 
-module mount_permaproto(position=[0,0,0], rotation=[0,0,0], spacer=4.2, walls=2,rail1=15.5, rail2=20) {
+module mount_permaproto(position=[0,0,0], rotation=[0,0,0], spacer=4.5, walls=2,rail1=15.5, rail2=20) {
+  bar = [2,53,33];
+
   if ($preview) {
     translate(position+[0,0,spacer]) {
-      color("white", .4) cube([2,53,33]);
+      color("white", .4) cube(bar);
       pitch=2.54;
       translate([2,53/2,33/2]) rotate([0,90,0]) translate([0,0,17.5/2]) color("black", .2) cube([12*pitch,15*pitch,17.5], true);
     }
   }
 
   children();
-  let(w=6) {
+  let(w=6,l=53-2*4,h=4) {
     translate(position+[2,4,0]){
+      // fill in between rails to help prevent peeling
+      cube([min(rail1,rail2), l, h]);
+      //support the ends of the rails
+      //cube([w,l,h]);
+
       difference() {
 	union () {
 	  translate([0,-w/2,0]) {
-	    cube([4,w,spacer+4+w/2]);
-	    cube([rail2,w,4]);
+	    cube([w, w, spacer + bar.z]);
+	    cube([rail2, w, h]);
 	  }
 	}
 	translate([0,0,spacer+4]) rotate([0,90,0]) cylinder(d=3.4,h=20,center=true,$fn=60);
+	translate([0,0,spacer+33-4]) rotate([0,90,0]) cylinder(d=3.4,h=20,center=true,$fn=60);
       }
-      translate([0,53-2*4,0]){
+      translate([0,l,0]){
 	difference() {
 	  union () {
 	    translate([0,-w/2,0]) {
-	      cube([4,w,spacer+4+w/2]);
-	      cube([rail1,w,4]);
+	      cube([w, w, spacer + bar.z]);
+	      cube([rail1, w, h]);
 	    }
 	  }
 	  translate([0,0,spacer+4]) rotate([0,90,0]) cylinder(d=3.4,h=20,center=true,$fn=60);
+	  translate([0,0,spacer+33-4]) rotate([0,90,0]) cylinder(d=3.4,h=20,center=true,$fn=60);
 	}
       }
     }
   }
 }
 
-mount_permaproto();
+*mount_permaproto();
+
+module mount_foot(position=[0,0,0], rotation=[0,0,0], protrusion=.8) {
+  epsilon = .1;
+  difference() {
+    children();
+    translate(position-[0,0,protrusion+epsilon]) rotate(rotation) cylinder(d=8.3, h=2+epsilon);
+  }
+}
