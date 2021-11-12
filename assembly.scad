@@ -15,35 +15,42 @@ tilt=[-3,0,0];
 tent=[0,30,0];
 row_chord = [14.5,25,0];
 
-tight_cylindrical_row = [row_chord,
+// Akko cherry PBT neesds a bit more space
+tight_cylindrical_row =[row_chord+[.5/2,0,0],
 			 row_chord+[.5,0,0],
-			 0,
+			 row_chord,
 			 row_chord+[.5,0,0]];
 
 
-tight_spherical_row = [row_chord+[4.1,0,0],
-		       row_chord+[3.25,0,0],
+tight_spherical_row = [row_chord+[5.2,0,0],
+		       row_chord+[4.75,0,0],
 		       row_chord+[4.5,0,0],
 		       row_chord+[8.6,0,0]];
-tight_spherical_col = [[row_chord+[-2,0,0]],
-		       [row_chord+[.6,0,0]],
+tight_spherical_col = [[row_chord+[-1.8,0,0]],
+		       [row_chord+[.9,0,0]],
 		       [row_chord+[0,0,0]],
 		       [row_chord+[-.5,0,0]]];
-spherical_z = [3,25,0,0];
+spherical_z = [4,30,0,0];
+
+index_keys= true;
 index_pos = [-(outerdia+4),-4,6];
-index_rotation = [0,10,3];
+index_tent = [0,0,3];
+index_tilt = [0,10,0];
 index_rows= [rows, rows-1, 1];
 index_cols=cols;
 index_placement_params =
   layout_placement_params(homerow=[homerow,homerow,0], homecol=0,
-			  row_spacing=create_circular_placement([[row_chord], tight_spherical_row, tight_spherical_row]),
+			  row_spacing=create_circular_placement([tight_cylindrical_row, tight_spherical_row, [row_chord]]),
 			  col_spacing=create_circular_placement(tight_spherical_col, z_correct=spherical_z),
 			  profile_rows=[profile_rows,profile_rows,[4]],
-			  tent=tent, tilt=index_rotation+tilt, position=index_pos);
+			  tent=index_tent+tent, tilt=index_tilt+tilt, position=index_pos);
 
-index_mountings = [screw_mounting_params(row=0, col=0, height=35, layout_params=index_placement_params,
-					 displacement=[1,1,-15], offsets=[0,0,-1]),
-		   screw_mounting_params(row=1, col=0, height=25, layout_params=index_placement_params)
+index_mountings = [screw_mounting_params(row=0, col=0, height=60, layout_params=index_placement_params,
+					 displacement=[5,1,-22], offsets=[0,0,-1],
+					 headroom=[[4,2], [2,7]], footroom=[[6, 2], [2, 2]]),
+		   //screw_mounting_params(row=1, col=0, height=50, layout_params=index_placement_params)
+		   screw_mounting_params(row=1, col=0, height=40, displacement=[-11, -1.6, -17],
+					 headroom=[[1,2.6], [2,7]], layout_params=index_placement_params)
 		   /*screw_mounting_params(row=3, col=0, height=50, layout_params=index_placement_params,
 					 headroom=[[1,0],[2,7]],
 					 displacement=[2,5,-20])*/
@@ -57,52 +64,75 @@ ring_offset=[0,-3,0];
 middle_rotation = [0,0,0];
 middle_placement_params =
   layout_placement_params(homerow=homerow, homecol=1,
-			  row_spacing=create_circular_placement(row_chord),
+			  row_spacing=create_circular_placement(tight_cylindrical_row),
 			  col_spacing=create_flat_placement(outerdia+spacer()),
 			  profile_rows=profile_rows,
 			  offsets=[ring_offset, middle_offset], tent=tent, tilt=middle_rotation+tilt);
-middle_mountings = [screw_mounting_params(row=0, col=0, height=12, headroom=[[1,4],[2,7]], footroom=[[2,0],[2,2]],
+middle_mountings = [screw_mounting_params(row=0, col=0, height=25, headroom=[[1,6],[2,7]], footroom=[[2,0],[2,2]],
 					  layout_params=middle_placement_params,
-					  /*displacement=[1.3,.4,-15],*/displacement=[-.9,1.6,-15-3], offsets=[0,0, -3.7]),
-		    screw_mounting_params(row=1, col=0, height=6, layout_params=middle_placement_params,
-					  displacement=[-2.6,-1,-15],
-					  offsets=middle_offset+[0,0,-1]),
-		    screw_mounting_params(row=3, col=0, height=20, headroom=[[2,0],[2,7]],
+					  /*displacement=[1.3,.4,-15],*/displacement=[.7,.6,-15-3], offsets=[0,0, -3.7]),
+		    /*screw_mounting_params(row=1, col=0, height=20, layout_params=middle_placement_params,
+					  displacement=[-4.6,-1,-14],spacer=[4,3],
+					  offsets=middle_offset+[0,0,-1]),*/
+		    screw_mounting_params(row=3, col=0, height=30, headroom=[[2,2],[2,7]],
 					  layout_params=middle_placement_params,
-					  displacement=[-4.5,-1.5,-15], offsets=[0,0,0])
+					  displacement=[-7.5,-1.5,-17], offsets=[0,0,0])
 		    ];
 
 
 pinkie_keys = true;//[[false],[true],[false],[false]];
 pinkie_pos = [outerdia+spacer()+20,-15,6];
-pinkie_rotation = [2,0,/*-5*/-2];
+pinkie_tent = [0,0,-2];
+pinkie_tilt = [2,0,/*-5*/0];
 pinkie_placement_params =
   layout_placement_params(homerow=homerow, homecol=1,
 			  row_spacing=create_circular_placement([tight_spherical_row,
  								 [row_chord]]),
 			  col_spacing=create_circular_placement(tight_spherical_col, z_correct=spherical_z),
-			  profile_rows=[[4],profile_rows,profile_rows],
-			  offsets=[0,0,0], tent=tent, tilt=pinkie_rotation+tilt,
+			  profile_rows=[/*[4],*/profile_rows,profile_rows],
+			  offsets=[0,0,0], tent=tent+pinkie_tent, tilt=pinkie_tilt+tilt,
 			  position=pinkie_pos);
 
-pinkie_mountings = [screw_mounting_params(row=0, col=0, height=6,
-					  displacement=[2,-5,-15],
+pinkie_mountings = [screw_mounting_params(row=0, col=0, height=15,
+					  displacement=[1,-5,-14],
 					  offsets=[0,0,-2],
 					  layout_params=pinkie_placement_params),
-		    /*screw_mounting_params(row=1, col=0, height=6, layout_params=pinkie_placement_params,
-		      displacement=[1,0,-15]),*/
-					  screw_mounting_params(row=2, col=0, height=6, layout_params=pinkie_placement_params)
+		    screw_mounting_params(row=1, col=0, height=10, layout_params=pinkie_placement_params,
+					  displacement=[28,10,-15]),
+		    screw_mounting_params(row=2, col=0, height=6, layout_params=pinkie_placement_params)
 		    ];
 
-thumb_keys= [false,true,false];
+thumb_keys= true;
+thumb_pos = index_pos + [-1.5*(outerdia+spacer()),-3.5*(outerdia+spacer())+7,-35];
+thumb_row_chord_sides = [30, 25, 0];
+thumb_row_chord_center = [14.5, 0, 60];
+thumb_placement_params =
+  layout_placement_params(homerow=1//[0,1,0]
+			  , homecol=1,
+			  row_spacing=create_circular_placement([[thumb_row_chord_sides],
+								 [thumb_row_chord_center],
+								 [thumb_row_chord_sides]]),
+			  col_spacing = create_circular_placement([[[17,16,0]],[[20,20,0]]],z_correct=60),
+			  profile_rows=[[2,3],["SKRH",3],[2,1]],
+			  tent=tent+[0,0,0], tilt=[10,-80,20],
+			  position=thumb_pos);
+
+thumb_mountings = [screw_mounting_params(row=0, col=1, height=15, displacement=[2,-13,-14],
+					 headroom= [[1,0],[2,7]], layout_params=thumb_placement_params),
+		   screw_mounting_params(row=0, col=1, height=15, displacement=[4,6,-13],
+					 layout_params=thumb_placement_params),
+		   screw_mounting_params(row=0, col=0, height=40, offsets=[0,0,0], displacement=[0,-15,-18.0],
+					 headroom=[[2,3],[2,7]], footroom=[[6,2],[2,2]],
+					 layout_params=thumb_placement_params)
+		];
+
+/*
+  thumb_keys= [false,true,false];
 thumb_pos = index_pos + [-1.75*(outerdia+spacer()),-2.5*(outerdia+spacer())+7,-15 -5];
 thumb_row_chord_sides = [20.5,500,0];
-thumb_row_chord_center = [14.5,/*28*/ 50,0];
+thumb_row_chord_center = [14.5, 50,0];
 thumb_placement_params =
   layout_placement_params(homerow=0, homecol=1,
-			  /*row_spacing=create_circular_placement([[thumb_row_chord_sides],
-								 [thumb_row_chord_center],
-								 [thumb_row_c1hord_sides]]),*/
 			  row_spacing = create_flat_placement(19.1),
 			  col_spacing = create_circular_placement([[[14,16,0]],[[18,32,0]]],z_correct=0),
 			  profile_rows=[[3,2],[3,"SKRH"],[1,2]],
@@ -117,6 +147,7 @@ thumb_mountings = [screw_mounting_params(row=0, col=1, height=10, displacement=[
 					 headroom=[[2,3],[2,7]], footroom=[[7,2],[2,2]],
 					 layout_params=thumb_placement_params)
 		];
+*/
 
 /*thumb_pos = index_pos + [-2*(outerdia+spacer()),-2.5*(outerdia+spacer())+7+1,-15 -5];
 thumb_row_chord_sides = [20.5,40,0];
@@ -153,20 +184,35 @@ module apply_screw_mountings(params, idx=0) {
     }
 }
 module mounted_thumb(keys=true) {
-  let(rows=2,cols=3) {
-    apply_screw_mountings(params=thumb_mountings)
+  let(rows=2//[1,2,1]
+      ,cols=3) {
+    apply_screw_mountings(params=thumb_mountings) {
       layout_columns(rows=rows, cols=cols, params=thumb_placement_params,
-		     keys=false, perimeter=true);
+		     keys=false, perimeter=true, reverse_triangles=true);
+      *hull() {
+	layout_placement(0,2, params=thumb_placement_params) keywell_bounding_box(y=1, header=true, leftside=true);
+     	layout_placement(0,0, params=thumb_placement_params) keywell_bounding_box(y=1, header=true, rightside=true);
+      }
+      hull() {
+	layout_placement(0,1, params=thumb_placement_params) keywell_bounding_box(y=1, header=true);
+	layout_placement(0,2, params=thumb_placement_params) keywell_bounding_box(y=1,x=1, header=true, leftside=true);
+      }
+      hull() {
+	layout_placement(0,1, params=thumb_placement_params) keywell_bounding_box(y=1,x=1, header=true);
+	layout_placement(0,2, params=thumb_placement_params) keywell_bounding_box(y=1,x=1, header=true, leftside=true);
+     	layout_placement(0,0, params=thumb_placement_params) keywell_bounding_box(y=1,x=-1, header=true, rightside=true);
+      }
+    }
     layout_columns(rows=rows, cols=cols, params=thumb_placement_params,
 		   keys=keys?thumb_keys:false, wells=false);
   }
 }
 
 module mounted_index(keys=true) {
-  tp_disp = [5.6,10,0];
+  tp_disp = [5.6,11,0];
   tp_corner_disp = [11,2.8,0];
   apply_screw_mountings(params=index_mountings)
-    install_trackpoint(2, 0, h1=10.9, h2=6, stem=2, up=-0, square_hole=false, access=false,
+    install_trackpoint(2, 0, h1=14, h2=6, stem=0, up=-0, square_hole=false, access=true,
 		       displacement=tp_disp, w1=12.8, params=index_placement_params)
     union() {
     layout_columns(rows=index_rows, cols=index_cols, params=index_placement_params,
@@ -269,11 +315,14 @@ module mounted_index(keys=true) {
 
   }
 
-  layout_placement(row=2, col=2, homerow=2, homecol=0, offsets=[0,-.1,0], params=index_placement_params) keycap($effective_row);
-  layout_columns(rows=index_rows, cols=cols, params=index_placement_params,
-		 keys=keys, wells=false);
-
+  if (keys) {
+    layout_placement(row=2, col=2, homerow=2, homecol=0, offsets=[0,-.1,0], params=index_placement_params) keycap($effective_row);
+    layout_columns(rows=index_rows, cols=cols, params=index_placement_params,
+		   keys=index_keys, wells=false);
+  }
 }
+
+//!mounted_index();
 
 module mounted_middle(keys=true) {
   apply_screw_mountings(params=middle_mountings) {
@@ -321,68 +370,70 @@ module mounted_pinkie(keys=true) {
       layout_placement(3, 1, params=pinkie_placement_params) keywell_corner_bounding_box(x=1, y=1, leftside=true,
 											 footer=true);
     }
+
+    layout_placement(row=2, col=0, homerow=2, homecol=2, profile_rows=4, offsets=[0,-.1,0],params=pinkie_placement_params) keywell(header=true, footer=true, rightside=true);
+
+    hull() {
+      layout_placement(3, 1, params=pinkie_placement_params) keywell_corner_bounding_box(x=1, y=-1, leftside=true,
+											 footer=true);
+      layout_placement(2, 0, params=pinkie_placement_params) keywell_corner_bounding_box(x=1,y=-1, rightside=true,
+											 footer=true);
+      layout_placement(row=2, col=0, homerow=2, homecol=2, profile_rows=4, offsets=[0,-.1,0], params=pinkie_placement_params)
+	keywell_corner_bounding_box(x=-1,y=-1, rightside=true, header=true, footer=true);
+    }
+    hull() {
+      layout_placement(3, 1, params=pinkie_placement_params) keywell_corner_bounding_box(x=1, y=-1, leftside=true,
+											 footer=true);
+      layout_placement(row=2, col=0, homerow=2, homecol=2, profile_rows=4, offsets=[0,-.1,0], params=pinkie_placement_params)
+	keywell_side_bounding_box(y=-1, rightside=true, header=true, footer=true);
+    }
+    hull() {
+      layout_placement(row=2, col=0, homerow=2, homecol=2, profile_rows=4, offsets=[0,-.1,0], params=pinkie_placement_params)
+	keywell_side_bounding_box(x=-1, rightside=true, header=true, footer=true);
+      layout_placement(2, 0, params=pinkie_placement_params) keywell_side_bounding_box(x=1, rightside=true,
+										       footer=true);
+    }
+
+    hull() {
+      layout_placement(row=2, col=0, homerow=2, homecol=2, profile_rows=4, offsets=[0,-.1,0], params=pinkie_placement_params)
+	keywell_corner_bounding_box(x=-1, y=1, header=true);
+      layout_placement(2, 0, params=pinkie_placement_params) keywell_corner_bounding_box(x=1, y=1, rightside=true);
+      layout_placement(1, 0, params=pinkie_placement_params) keywell_corner_bounding_box(x=1, y=-1, rightside=true);
+    }
+    hull() {
+      layout_placement(row=2, col=0, homerow=2, homecol=2, profile_rows=4, offsets=[0,-.1,0], params=pinkie_placement_params)
+	keywell_corner_bounding_box(x=1,y=1, rightside=true, header=true, footer=true);
+      layout_placement(0, 0, params=pinkie_placement_params) keywell_corner_bounding_box(x=1, y=-1,rightside=true,
+											 header=true);
+      layout_placement(1, 0, params=pinkie_placement_params) keywell_corner_bounding_box(x=1, y=-1, rightside=true);
+    }
+    hull() {
+      layout_placement(row=2, col=0, homerow=2, homecol=2, profile_rows=4, offsets=[0,-.1,0], params=pinkie_placement_params)
+	keywell_side_bounding_box(y=1, rightside=true, header=true, footer=true);
+      layout_placement(1, 0, params=pinkie_placement_params) keywell_corner_bounding_box(x=1, y=-1, rightside=true);
+    }
+    hull() {
+      layout_placement(1, 0, params=pinkie_placement_params) keywell_corner_bounding_box(x=1, y=-1, rightside=true);
+      layout_placement(1, 0, params=pinkie_placement_params) keywell_corner_bounding_box(x=1, y=1, rightside=true);
+      layout_placement(0, 0, params=pinkie_placement_params) keywell_corner_bounding_box(x=1, y=-1, rightside=true,header=true);
+    }
+    hull() {
+      *layout_placement(1, 0, params=pinkie_placement_params) keywell_corner_bounding_box(x=1, y=-1, rightside=true);
+      *layout_placement(0, 0, params=pinkie_placement_params) keywell_corner_bounding_box(x=1, y=1, rightside=true,header=true);
+      layout_placement(0, 0, params=pinkie_placement_params) keywell_side_bounding_box(x=1, rightside=true,header=true);
+      layout_placement(row=2, col=0, homerow=2, homecol=2, profile_rows=4, offsets=[0,-.1,0], params=pinkie_placement_params)
+	keywell_corner_bounding_box(x=1,y=1, rightside=true, header=true, footer=true);
+    }
+    hull() {
+      layout_placement(0, 0, params=pinkie_placement_params) keywell_corner_bounding_box(x=-1, y=1, rightside=true,header=true);
+      layout_placement(0, 1, params=pinkie_placement_params) keywell_side_bounding_box(y=1, leftside=true,header=true);
+    }
+
   }
-  layout_placement(row=2, col=0, homerow=2, homecol=2, offsets=[0,-.1,0],params=pinkie_placement_params) keywell(header=true, footer=true, rightside=true);
-  layout_placement(row=2, col=0, homerow=2, homecol=2, offsets=[0,-.1,0], params=pinkie_placement_params) keycap($effective_row);
+  if (keys) layout_placement(row=2, col=0, homerow=2, homecol=2, profile_rows=4, offsets=[0,-.1,0], params=pinkie_placement_params) keycap($effective_row);
   layout_columns(rows=[rows-1,rows], cols=cols, params=pinkie_placement_params,
 		 keys=keys?pinkie_keys:false, wells=false);
 
-
-  hull() {
-    layout_placement(3, 1, params=pinkie_placement_params) keywell_corner_bounding_box(x=1, y=-1, leftside=true,
-										       footer=true);
-    layout_placement(2, 0, params=pinkie_placement_params) keywell_corner_bounding_box(x=1,y=-1, rightside=true,
-										       footer=true);
-    layout_placement(row=2, col=0, homerow=2, homecol=2, offsets=[0,-.1,0], params=pinkie_placement_params)
-      keywell_corner_bounding_box(x=-1,y=-1, rightside=true, header=true, footer=true);
-  }
-    hull() {
-    layout_placement(3, 1, params=pinkie_placement_params) keywell_corner_bounding_box(x=1, y=-1, leftside=true,
-										       footer=true);
-    layout_placement(row=2, col=0, homerow=2, homecol=2, offsets=[0,-.1,0], params=pinkie_placement_params)
-      keywell_side_bounding_box(y=-1, rightside=true, header=true, footer=true);
-  }
-  hull() {
-    layout_placement(row=2, col=0, homerow=2, homecol=2, offsets=[0,-.1,0], params=pinkie_placement_params)
-      keywell_side_bounding_box(x=-1, rightside=true, header=true, footer=true);
-    layout_placement(2, 0, params=pinkie_placement_params) keywell_side_bounding_box(x=1, rightside=true,
-										     footer=true);
-  }
-
-  hull() {
-    layout_placement(row=2, col=0, homerow=2, homecol=2, offsets=[0,-.1,0], params=pinkie_placement_params)
-      keywell_corner_bounding_box(x=-1, y=1, header=true);
-    layout_placement(2, 0, params=pinkie_placement_params) keywell_corner_bounding_box(x=1, y=1, rightside=true);
-    layout_placement(1, 0, params=pinkie_placement_params) keywell_corner_bounding_box(x=1, y=-1, rightside=true);
-  }
-  hull() {
-    layout_placement(row=2, col=0, homerow=2, homecol=2, offsets=[0,-.1,0], params=pinkie_placement_params)
-      keywell_corner_bounding_box(x=1,y=1, rightside=true, header=true, footer=true);
-    layout_placement(0, 0, params=pinkie_placement_params) keywell_corner_bounding_box(x=1, y=-1,rightside=true,
-										     header=true);
-    layout_placement(1, 0, params=pinkie_placement_params) keywell_corner_bounding_box(x=1, y=-1, rightside=true);
-  }
-  hull() {
-    layout_placement(row=2, col=0, homerow=2, homecol=2, offsets=[0,-.1,0], params=pinkie_placement_params)
-      keywell_side_bounding_box(y=1, rightside=true, header=true, footer=true);
-    layout_placement(1, 0, params=pinkie_placement_params) keywell_corner_bounding_box(x=1, y=-1, rightside=true);
-  }
-  hull() {
-    layout_placement(1, 0, params=pinkie_placement_params) keywell_corner_bounding_box(x=1, y=-1, rightside=true);
-    layout_placement(1, 0, params=pinkie_placement_params) keywell_corner_bounding_box(x=1, y=1, rightside=true);
-    layout_placement(0, 0, params=pinkie_placement_params) keywell_corner_bounding_box(x=1, y=-1, rightside=true,header=true);
-  }
-  hull() {
-    *layout_placement(1, 0, params=pinkie_placement_params) keywell_corner_bounding_box(x=1, y=-1, rightside=true);
-    *layout_placement(0, 0, params=pinkie_placement_params) keywell_corner_bounding_box(x=1, y=1, rightside=true,header=true);
-    layout_placement(0, 0, params=pinkie_placement_params) keywell_side_bounding_box(x=1, rightside=true,header=true);
-    layout_placement(row=2, col=0, homerow=2, homecol=2, offsets=[0,-.1,0], params=pinkie_placement_params)
-      keywell_corner_bounding_box(x=1,y=1, rightside=true, header=true, footer=true);
-  }
-  hull() {
-    layout_placement(0, 0, params=pinkie_placement_params) keywell_corner_bounding_box(x=-1, y=1, rightside=true,header=true);
-    layout_placement(0, 1, params=pinkie_placement_params) keywell_side_bounding_box(y=1, leftside=true,header=true);
-  }
 }
 
 module strut_mounted_finger_plates(keys=true, thumb=true) {
@@ -496,18 +547,39 @@ module base_plate(z=-31,debug=true) {
   //plate(mountings, z=z, debug=debug);
   //} else {
 
-  mount_trrs([15,25,z],[0,0,0])
-    mount_teensy20pp([-14, 5, z])
-    //mount_teensy20pp([23, 5, z],[0,0,-20])
-    bar_magnetize_below([-31.5,-33.5, z], [0,0,90])
-    bar_magnetize_below([34,-5, z], [0,0,0])
-    mount_permaproto([-60,-24, z], rail1=25.5, rail2=30)
-    plate(mountings, z=z, debug=debug);
+  difference() {
+    mount_foot([0,-20,z])
+      mount_foot([37,12,z])
+      mount_foot([60,-5,z])
+      mount_foot([30,-30,z])
+      mount_foot([-32,-43,z])
+      mount_foot([-60,-55,z])
+      mount_foot([-45,-15,z])
+      mount_foot([-30,20,z])
+      mount_foot([0,25,z])
+      mount_trrs([37,12,z],[0,0,0])
+      mount_teensy20pp([-14, 10, z])
+      //mount_teensy20pp([23, 5, z],[0,0,-20])
+      bar_magnetize_below([-35,-30.4, z], [0,0,90])
+      //bar_magnetize_below([34,-5, z], [0,0,0])
+      bar_magnetize_below([12.7,-1, z], [0,0,0])
+      mount_permaproto([-62.5,-18, z], rail1=25.5, rail2=30)
+      plate(mountings, z=z, debug=debug);
     //}
 
+    // cutout to acommodate floating palm rest
+    translate([outerdia,-85,z-.1]) scale([1.33,1,1]) wrist_rest_base($fn=120,angle=[0,0,0], back_height=10);
+  }
 }
 
-base_plate(debug=true);
+use <rest.scad>;
+
+let(z=-45) {
+
+  base_plate(z=z,debug=true);
+
+
+}
 
 module plate(mountings, z=-31, thickness=4, debug=true) {
   if (debug) {
