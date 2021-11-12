@@ -89,8 +89,9 @@ module layout_placement(row, col,
     rotate([0,tent.y,0])
     rotate([tent.x,0,0])
     translate(position)
-      rotate([0,0,tilt.z]) rotate([0,tilt.y,0])
+      rotate([0,0,tent.z]) rotate([0,tilt.y,0])
       translate(offsets) rotate([tilt.x,0,0])
+      rotate([0,0,tilt.z])
       place_row(row, col, row_spacing, homerow, corners=corners, displacement=displacement)
       place_col(row, col, col_spacing, homecol, homerow, corners=corners, displacement=displacement)
       translate([0,0,displacement.z])
@@ -98,9 +99,10 @@ module layout_placement(row, col,
       if(stay_upright) {
 	place_col(row, col, col_spacing, homecol, homerow, corners=corners, displacement=displacement,reverse=true)
 	  place_row(row, col, row_spacing, homerow, corners=corners, displacement=displacement,reverse=true)
+	  rotate([0,0,-tilt.z])
 	  rotate([-tilt.x,0,0])
 	  rotate([0,-tilt.y,0])
-	  rotate([0,0,-tilt.z])
+	  rotate([0,0,-tent.z])
 	  rotate([-tent.x,0,0])
 	  rotate([0,-tent.y,0])
 	  children();
