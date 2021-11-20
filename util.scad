@@ -211,7 +211,7 @@ module bar_magnetize(position=[0,0,0], spacer=2) {
 
 *bar_magnetize() translate([0,0,2])  cube([50,75,4], true);
 
-module mount_teensy20pp(position=[0,0,0], rotation=[0,0,0], spacer=2, walls=2) {
+module mount_teensy20pp(position=[0,0,0], rotation=[0,0,0], spacer=2, walls=2, diode=false) {
   slop =.1;
   bar = [18.2+slop, 51.2+slop, 8+spacer];
   epsilon=.1;
@@ -249,7 +249,7 @@ module mount_teensy20pp(position=[0,0,0], rotation=[0,0,0], spacer=2, walls=2) {
       translate([0, bar.y/2, bar.z/2+spacer+7/2]) cube([11, 40, bar.z+7],true);
 
       // for VBUS detect shottky
-      translate([0,(pitch/2)+(4*pitch)+(pitch*3/2),spacer]) cube([8,pitch*3,4],true);
+      if (diode) translate([0,(pitch/2)+(4*pitch)+(pitch*3/2),spacer]) cube([8,pitch*3,4],true);
     }
   }
 }
@@ -287,6 +287,53 @@ module mount_trrs(position=[0,0,0], rotation=[0,0,0], spacer=2, walls=2) {
 }
 
 *mount_trrs() translate([0,0,2])  cube([30,30,4], true);
+
+module mount_permaproto_flat(position=[0,0,0], rotation=[0,0,0], spacer=4+2.5, margin=2,washer_dia=6.4, screw_h=2.7) {
+  bar = [2,53,33];
+
+  if ($preview) {
+    translate(position+[bar.z,0,spacer]+[margin,margin,0]) rotate([0,-90,0]){
+      color("white", .4) cube(bar);
+      pitch=2.54;
+      translate([2,53/2,33/2]) rotate([0,90,0]) translate([0,0,17.5/2]) color("black", .2) cube([12*pitch,15*pitch,17.5], true);
+    }
+  }
+
+  children();
+
+  translate(position+[margin,margin,0]) let(w=bar.z,l=bar.y) {
+    difference() {
+      union() {
+	translate([-margin,-margin,0]) cube([w+margin*2, l+margin*2, 4]);
+	translate([0,l-8,0]) cube([8,8,spacer]);
+	translate([w-8,l-8,0]) cube([8,8,spacer]);
+
+	translate([0,0,0]) cube([8,8,spacer]);
+	translate([w-8,0,0]) cube([8,8,spacer]);
+
+      }
+      translate([4,l-4,0]) {
+	cylinder(d=3.4,h=30,center=true,$fn=60);
+	cylinder(d=washer_dia,h=screw_h*2,center=true,$fn=60);
+      }
+      translate([w-4,l-4,0]){
+	cylinder(d=3.4,h=30,center=true,$fn=60);
+	cylinder(d=washer_dia,h=screw_h*2,center=true,$fn=60);
+      }
+      translate([4,4,0]){
+	cylinder(d=3.4,h=30,center=true,$fn=60);
+	cylinder(d=washer_dia,h=screw_h*2,center=true,$fn=60);
+      }
+      translate([w-4,4,0]){
+	cylinder(d=3.4,h=30,center=true,$fn=60);
+	cylinder(d=washer_dia,h=screw_h*2,center=true,$fn=60);
+      }
+    }
+  }
+}
+
+mount_permaproto_flat();
+
 
 module mount_permaproto(position=[0,0,0], rotation=[0,0,0], spacer=4.5, walls=2,rail1=15.5, rail2=20) {
   bar = [2,53,33];
@@ -334,6 +381,7 @@ module mount_permaproto(position=[0,0,0], rotation=[0,0,0], spacer=4.5, walls=2,
 }
 
 *mount_permaproto();
+
 
 module mount_foot(position=[0,0,0], rotation=[0,0,0], protrusion=.8) {
   epsilon = .1;

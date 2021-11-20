@@ -12,7 +12,7 @@ cols=2;
 homerow=2;
 profile_rows=effective_rows(rows,homerow);
 tilt=[-3,0,0];
-tent=[0,30,0];
+tent=[0,35,0];
 row_chord = [14.5,25,0];
 
 // Akko cherry PBT neesds a bit more space
@@ -34,8 +34,11 @@ spherical_z = [4,30,0,0];
 
 index_keys= true;
 index_pos = [-(outerdia+4),-4,6];
-index_tent = [0,0,3];
-index_tilt = [0,10,0];
+index_tent = [0,0,5];
+index_tilt = [[0,10,0]+tilt,
+	      [0,0,0]+tilt,
+	      [0,0,0]+tilt
+	      ];
 index_rows= [rows, rows-1, 1];
 index_cols=cols;
 index_placement_params =
@@ -43,24 +46,24 @@ index_placement_params =
 			  row_spacing=create_circular_placement([tight_cylindrical_row, tight_spherical_row, [row_chord]]),
 			  col_spacing=create_circular_placement(tight_spherical_col, z_correct=spherical_z),
 			  profile_rows=[profile_rows,profile_rows,[4]],
-			  tent=index_tent+tent, tilt=index_tilt+tilt, position=index_pos);
+			  tent=index_tent+tent, tilt=index_tilt, position=index_pos);
 
 index_mountings = [screw_mounting_params(row=0, col=0, height=60, layout_params=index_placement_params,
-					 displacement=[5,1,-22], offsets=[0,0,-1],
-					 headroom=[[4,2], [2,7]], footroom=[[6, 2], [2, 2]]),
+					 displacement=[4,-1,-23], offsets=[0,0,-1],
+					 headroom=[[3,1], [2,7]], footroom=[[8, 2], [2, 2]]),
 		   //screw_mounting_params(row=1, col=0, height=50, layout_params=index_placement_params)
-		   screw_mounting_params(row=1, col=0, height=40, displacement=[-11, -1.6, -17],
+		   screw_mounting_params(row=1, col=0, height=45, displacement=[-11, -1.8, -17],
 					 headroom=[[1,2.6], [2,7]], layout_params=index_placement_params)
 		   /*screw_mounting_params(row=3, col=0, height=50, layout_params=index_placement_params,
 					 headroom=[[1,0],[2,7]],
 					 displacement=[2,5,-20])*/
-		];
+		   ];
 
 
-middle_keys = true;
+middle_keys = [false,true];
 //middle_offset = [[0,0,0], [0,4,1]];
-middle_offset = [0,4,1];
-ring_offset=[0,-3,0];
+middle_offset = [0,6,1];
+ring_offset=[0,-4,0];
 middle_rotation = [0,0,0];
 middle_placement_params =
   layout_placement_params(homerow=homerow, homecol=1,
@@ -68,22 +71,22 @@ middle_placement_params =
 			  col_spacing=create_flat_placement(outerdia+spacer()),
 			  profile_rows=profile_rows,
 			  offsets=[ring_offset, middle_offset], tent=tent, tilt=middle_rotation+tilt);
-middle_mountings = [screw_mounting_params(row=0, col=0, height=25, headroom=[[1,6],[2,7]], footroom=[[2,0],[2,2]],
+middle_mountings = [screw_mounting_params(row=0, col=0, height=30, headroom=[[1,3],[2,7]], footroom=[[2,0],[2,2]],
 					  layout_params=middle_placement_params,
-					  /*displacement=[1.3,.4,-15],*/displacement=[.7,.6,-15-3], offsets=[0,0, -3.7]),
-		    /*screw_mounting_params(row=1, col=0, height=20, layout_params=middle_placement_params,
-					  displacement=[-4.6,-1,-14],spacer=[4,3],
-					  offsets=middle_offset+[0,0,-1]),*/
-		    screw_mounting_params(row=3, col=0, height=30, headroom=[[2,2],[2,7]],
+					  /*displacement=[1.3,.4,-15],*/displacement=[0,1.6,-15-3], offsets=[0,0, -3.7]),
+		    screw_mounting_params(row=1, col=1, height=20, layout_params=middle_placement_params,
+					  displacement=[15.5,-2,-15.5], headroom=[[2,2],[2,7]],
+					  offsets=middle_offset+[0,0,-1]),
+		    screw_mounting_params(row=3, col=0, height=35, headroom=[[2,2],[2,7]],
 					  layout_params=middle_placement_params,
 					  displacement=[-7.5,-1.5,-17], offsets=[0,0,0])
 		    ];
 
 
 pinkie_keys = true;//[[false],[true],[false],[false]];
-pinkie_pos = [outerdia+spacer()+20,-15,6];
+pinkie_pos = [outerdia+spacer()+20,-20,6];
 pinkie_tent = [0,0,-2];
-pinkie_tilt = [2,0,/*-5*/0];
+pinkie_tilt = [5,0,/*-5*/0];
 pinkie_placement_params =
   layout_placement_params(homerow=homerow, homecol=1,
 			  row_spacing=create_circular_placement([tight_spherical_row,
@@ -98,12 +101,14 @@ pinkie_mountings = [screw_mounting_params(row=0, col=0, height=15,
 					  offsets=[0,0,-2],
 					  layout_params=pinkie_placement_params),
 		    screw_mounting_params(row=1, col=0, height=10, layout_params=pinkie_placement_params,
-					  displacement=[28,10,-15]),
-		    screw_mounting_params(row=2, col=0, height=6, layout_params=pinkie_placement_params)
+					  displacement=[28,14,-15]),
+		    screw_mounting_params(row=2, col=0, height=6,
+					  displacement=[2,0,-15],
+					  layout_params=pinkie_placement_params)
 		    ];
 
 thumb_keys= true;
-thumb_pos = index_pos + [-1.5*(outerdia+spacer()),-3.5*(outerdia+spacer())+7,-35];
+thumb_pos = index_pos + [-1.5*(outerdia+spacer())+20,-3.5*(outerdia+spacer())+1,-35-5];
 thumb_row_chord_sides = [30, 25, 0];
 thumb_row_chord_center = [14.5, 0, 60];
 thumb_placement_params =
@@ -114,14 +119,14 @@ thumb_placement_params =
 								 [thumb_row_chord_sides]]),
 			  col_spacing = create_circular_placement([[[17,16,0]],[[20,20,0]]],z_correct=60),
 			  profile_rows=[[2,3],["SKRH",3],[2,1]],
-			  tent=tent+[0,0,0], tilt=[10,-80,20],
+			  tent=tent+[0,0,-5], tilt=[10,-100,30],
 			  position=thumb_pos);
 
-thumb_mountings = [screw_mounting_params(row=0, col=1, height=15, displacement=[2,-13,-14],
-					 headroom= [[1,0],[2,7]], layout_params=thumb_placement_params),
-		   screw_mounting_params(row=0, col=1, height=15, displacement=[4,6,-13],
+thumb_mountings = [screw_mounting_params(row=0, col=1, height=6, displacement=[4,6,-13],
 					 layout_params=thumb_placement_params),
-		   screw_mounting_params(row=0, col=0, height=40, offsets=[0,0,0], displacement=[0,-15,-18.0],
+		   screw_mounting_params(row=0, col=1, height=6, displacement=[2,-13,-14],
+					 headroom= [[1,0],[2,7]], layout_params=thumb_placement_params),
+		   screw_mounting_params(row=0, col=0, height=30, offsets=[0,0,0], displacement=[0,-4.8,-16.0],
 					 headroom=[[2,3],[2,7]], footroom=[[6,2],[2,2]],
 					 layout_params=thumb_placement_params)
 		];
@@ -188,7 +193,7 @@ module mounted_thumb(keys=true) {
       ,cols=3) {
     apply_screw_mountings(params=thumb_mountings) {
       layout_columns(rows=rows, cols=cols, params=thumb_placement_params,
-		     keys=false, perimeter=true, reverse_triangles=true);
+		     keys=false, perimeter=true, reverse_triangles=false);
       *hull() {
 	layout_placement(0,2, params=thumb_placement_params) keywell_bounding_box(y=1, header=true, leftside=true);
      	layout_placement(0,0, params=thumb_placement_params) keywell_bounding_box(y=1, header=true, rightside=true);
@@ -209,11 +214,12 @@ module mounted_thumb(keys=true) {
 }
 
 module mounted_index(keys=true) {
-  tp_disp = [5.6,11,0];
+  tp_disp = [6.5,11,0];
   tp_corner_disp = [11,2.8,0];
   apply_screw_mountings(params=index_mountings)
-    install_trackpoint(2, 0, h1=14, h2=6, stem=0, up=-0, square_hole=false, access=true,
-		       displacement=tp_disp, w1=12.8, params=index_placement_params)
+    install_trackpoint(2, 0, h1=13, h2=7, stem=0, up=-0, square_hole=false, access=true,
+		       tilt=tilt, use_shield=true,  shield=[4,11,12.3], shield_angle=[-65,-5],
+		       displacement=tp_disp, w1=13.6, params=index_placement_params)
     union() {
     layout_columns(rows=index_rows, cols=index_cols, params=index_placement_params,
 		   keys=false);
@@ -327,13 +333,22 @@ module mounted_index(keys=true) {
 module mounted_middle(keys=true) {
   apply_screw_mountings(params=middle_mountings) {
     layout_columns(rows=rows, cols=cols, params=middle_placement_params,
-		   //leftwall=false, rightwall=true, topwall=false, bottomwall=false, narrowsides=false, perimeter=true,
+		   rightsides=true, //rightwall=true, topwall=false, bottomwall=false, narrowsides=false, perimeter=true,
 		   keys=false);
     hull() {
       layout_placement(3, 0, params=middle_placement_params) keywell_corner_bounding_box(x=-1, y=-1,
 											 footer=true);
       layout_placement(3, 1, params=middle_placement_params) keywell_side_bounding_box(y=-1, leftside=true,
 										       footer=true);
+    }
+    hull() {
+      layout_placement(3, 0, params=middle_placement_params) keywell_bounding_box(x=-1, y=-1,
+											 footer=true);
+      layout_placement(3, 1, params=middle_placement_params) keywell_bounding_box(x=-1, y=-1, leftside=true,
+										       footer=true);
+            layout_placement(3, 0, params=index_placement_params) keywell_bounding_box(x=1, y=-1,
+											footer=true
+										       /*rightside=true*/);
     }
   }
   layout_columns(rows=rows, cols=cols, params=middle_placement_params,
@@ -536,8 +551,11 @@ strut_mounted_finger_plates(keys=true);
 }
 
 use <util.scad>;
+use <rest.scad>;
 
-module base_plate(z=-31,debug=true) {
+base_plate(debug=false);
+
+module base_plate(z=-48,debug=true) {
   //*magnetize(position=[-16,-25,-29])
   //magnetize(position=[28,-15,-29], post_height=8)
 
@@ -552,33 +570,28 @@ module base_plate(z=-31,debug=true) {
       mount_foot([37,12,z])
       mount_foot([60,-5,z])
       mount_foot([30,-30,z])
-      mount_foot([-32,-43,z])
-      mount_foot([-60,-55,z])
-      mount_foot([-45,-15,z])
+      mount_foot([-46,-43,z])
+      mount_foot([-5,-43,z])
+      mount_foot([-44,-66,z])
+      mount_foot([-65,-8,z])
+      mount_foot([-90,-8,z])
+      mount_foot([-90,21,z])
+      mount_foot([-65,21,z])
       mount_foot([-30,20,z])
       mount_foot([0,25,z])
-      mount_trrs([37,12,z],[0,0,0])
-      mount_teensy20pp([-14, 10, z])
+      mount_trrs([27,18,z],[0,0,0])
+      mount_teensy20pp([-48, 6, z])
       //mount_teensy20pp([23, 5, z],[0,0,-20])
       bar_magnetize_below([-35,-30.4, z], [0,0,90])
       //bar_magnetize_below([34,-5, z], [0,0,0])
       bar_magnetize_below([12.7,-1, z], [0,0,0])
-      mount_permaproto([-62.5,-18, z], rail1=25.5, rail2=30)
+      mount_permaproto_flat([-96,-22, z])
       plate(mountings, z=z, debug=debug);
     //}
 
     // cutout to acommodate floating palm rest
-    translate([outerdia,-85,z-.1]) scale([1.33,1,1]) wrist_rest_base($fn=120,angle=[0,0,0], back_height=10);
+    if(!debug) translate([outerdia*1.5,-95,z-.1]) scale([1.,1,1]) wrist_rest_base($fn=120,angle=[0,0,0], back_height=10);
   }
-}
-
-use <rest.scad>;
-
-let(z=-45) {
-
-  base_plate(z=z,debug=true);
-
-
 }
 
 module plate(mountings, z=-31, thickness=4, debug=true) {
