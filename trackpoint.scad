@@ -7,7 +7,7 @@ use <keycap.scad>;
 
 
 module install_trackpoint(row,col, row_spacing, col_spacing, profile_rows, homerow,
-			  h1=4,h2=4, stem=0,up=0,tilt, displacement=[0,0,0], params=default_layout_placement_params(), square_hole=false, access=true,w1=0,w2=0) {
+			  h1=4,h2=4, stem=0,up=0,tilt, displacement=[0,0,0], params=default_layout_placement_params(), square_hole=false, access=true,w1=0,w2=0, use_shield=false, shield=[4,11,12.3], shield_angle=[-65,-5]) {
   module helper(row, col, corners=false, d=displacement) {
     layout_placement(row,col, row_spacing, col_spacing, profile_rows=profile_rows, homerow=homerow, tilt=tilt,displacement=d,params=params, corners=corners, flatten=!corners) children();
   }
@@ -28,6 +28,18 @@ module install_trackpoint(row,col, row_spacing, col_spacing, profile_rows, homer
 	for (i=[0,1]) {
 	  for (j=[0,1]) {
 	    helper(row+i,col+j,d=[0,0,0]) keywell_cavity(above=above,below=true);
+	  }
+	}
+      }
+
+      if (use_shield) {
+	helper(row,col,corners=true) translate([0,0,-shield.z]) if (square_hole) {
+	  //cube([7,7,stem_h*2],true);
+	} else {
+	  difference() {
+	    cylinder($fn=120,d=13+shield.x*2,h=shield.y);
+	    rotate([0,0,shield_angle[0]]) translate([-50,0,0]) cube([100,100,shield.y*2]);
+	    rotate([0,0,shield_angle[1]]) translate([-50,0,0]) cube([100,100,shield.y*2]);
 	  }
 	}
       }
