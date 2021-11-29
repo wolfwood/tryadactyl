@@ -38,8 +38,8 @@ module install_trackpoint(row,col, row_spacing, col_spacing, profile_rows, homer
 	} else {
 	  difference() {
 	    cylinder($fn=120,d=13+shield.x*2,h=shield.y);
-	    rotate([0,0,shield_angle[0]]) translate([-50,0,0]) cube([100,100,shield.y*2]);
-	    rotate([0,0,shield_angle[1]]) translate([-50,0,0]) cube([100,100,shield.y*2]);
+	    rotate([0,0,shield_angle[0]]) translate([-50,0,-0.1]) cube([100,100,shield.y*2]);
+	    rotate([0,0,shield_angle[1]]) translate([-50,0,-0.1]) cube([100,100,shield.y*2]);
 	  }
 	}
       }
@@ -50,7 +50,7 @@ module install_trackpoint(row,col, row_spacing, col_spacing, profile_rows, homer
     helper(row,col,corners=true) translate([0,0,-stem_h]) if (square_hole) {
       cube([7,7,stem_h*2],true);
     } else {
-      cylinder($fn=60,d=13,h=stem_h*2,center=true);
+      cylinder($fn=60,d=15,h=stem_h*2,center=true);
     }
 
     if (access) {
@@ -68,7 +68,7 @@ module trackpoint_cap() {
 module trackpoint_mount(h1,h2,stem=0,up=0,tilt=[-5,0,0], bottom=false, stemonly=false, w1=0,w2=0){
   width=23+.4;
   depth=9.5;
-  flange_z=2;
+  flange_z=3;
 
 
   cap_len = 5;
@@ -102,9 +102,9 @@ module trackpoint_mount(h1,h2,stem=0,up=0,tilt=[-5,0,0], bottom=false, stemonly=
 	  }
 
 	  // verticals
-	  let(x=2,y=depth,z=thickness) {
-	    translate([width/2+w1,-y/2,-flange_z]) cube([x,y,h1+z]);
-	    mirror([1,0,0]) translate([width/2+w2,-y/2,-flange_z]) cube([x,y,h2+z]);
+	  let(x=flange_z,y=depth,z=flange_z) {
+	    translate([width/2+w1,-y/2,-z]) cube([x,y,h1+z]);
+	    mirror([1,0,0]) translate([width/2+w2,-y/2,-z]) cube([x,y,h2+z]);
 	  }
 	}
 
