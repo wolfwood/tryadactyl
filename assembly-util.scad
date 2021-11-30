@@ -95,7 +95,7 @@ module screw_mounting(row,col,height, displacement,
 		      mounting_params=default_screw_mounting_params,
 		      layout_params, idx=-1, clearance=true, blank=false) {
 
-  module clearance(washer=[6, .55], screwhead=[5.55, 2.02], indicator=0) {
+  module clearance(washer=[6, 1.05], screwhead=[5.55, 2.55], indicator=0) {
     color("silver", .3) {
       cylinder(d=washer.x, h=washer.y);
       translate([0,0,washer.y]) cylinder(d=screwhead.x, h=screwhead.y);
