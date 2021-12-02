@@ -117,6 +117,4 @@ module trackpoint_mount(h1,h2,stem=0,up=0,tilt=[-5,0,0], bottom=false, stemonly=
   }
 }
 
-place_col(2,1,col_spacing,corners=true) place_row(1,1,row_spacing) trackpoint_mount($fn=60,3,3,bottom=true);
-col_spacing=create_flat_placement(outerdia+spacer());
-row_spacing=create_flat_placement(outerdia+spacer());
+trackpoint_mount($fn=60,5,5,bottom=true);
