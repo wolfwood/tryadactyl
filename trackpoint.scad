@@ -55,7 +55,7 @@ module install_trackpoint(row,col, row_spacing, col_spacing, profile_rows, homer
 
     if (access) {
       // screw holes for attaching stem extension
-      access_dia=4;
+      access_dia=5;
       helper(row,col,corners=true) translate([0,0,-(21+stem-access_dia/2)]) rotate([0,90,0]) cylinder($fn=60,d=access_dia,h=100,center=true);
     }
   }
