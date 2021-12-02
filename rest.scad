@@ -8,7 +8,7 @@ mount_foot(position=[-30,28,0])
 mount_foot(position=[40,-20,0])
 mount_foot(position=[30,28,0])
 bar_magnetize_below(rotation=[0,0,90], washer=9)
-wrist_rest_base($fn=120,angle=[15,0,0], back_height=40);
+wrist_rest_base($fn=120,angle=[10,0,0], back_height=30);
 
 module wrist_rest_base(angle=[20,-5,9], back_height = 43, ledge = 3.5){
   h_offset = tan(angle.x)*88;

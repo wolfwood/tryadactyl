@@ -67,7 +67,7 @@ module trackpoint_cap() {
 
 module trackpoint_mount(h1,h2,stem=0,up=0,tilt=[-5,0,0], bottom=false, stemonly=false, w1=0,w2=0){
   width=23+.4;
-  depth=9.5;
+  depth=9.8;
   flange_z=3;
 
 
