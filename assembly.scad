@@ -553,7 +553,7 @@ strut_mounted_finger_plates(keys=true);
 use <util.scad>;
 use <rest.scad>;
 
-base_plate(debug=true);
+base_plate(debug=false);
 
 module base_plate(z=-48,debug=true) {
   //*magnetize(position=[-16,-25,-29])
