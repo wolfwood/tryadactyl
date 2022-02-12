@@ -5,28 +5,13 @@
 
 include <settings.scad>;
 
-
-// XXX: these settings break if moved to settings.scad :( I don't fully get special vars
-
-/* Pre-rendered keycaps are recommended as they should be much faster, and remove the dependency on KeyV2.
- * However they lose the distinctive coloring. Also, pre-renders may be missing. Used in both previews and renders
- */
-$prerendered_keycaps=true;
-include <../KeyV2/includes.scad> // warning can be ignored if above is true
-
-// if not pre-rendering, these options turn down the fidelity so that previews/renders don't take so long
-$fast_keycap_preview=true;
-$fast_keycap_render=false;
-
-// don't show keycaps in renders. we don't want keys when 3D printing, also they block the view and can be slow
-$disable_keycap_render=true;
-
+include <../KeyV2/includes.scad> // you can ignore this warning if prerendered_keycaps is true
 
 module keycap(row=3, travel_advisory=true, override_profile=false) {
   // KeyV2 will warn for an unsupported profile. good enough?
   //assert(profile=="cherry"||profile="sa", "unrecognized keycap profile");
 
-  if ($preview || ! $disable_keycap_render) {
+  if ($preview || ! disable_keycap_render()) {
     if (is_string(row)) {
       // XXX separate modules for nav caps (and encoders)?
       if (row == "SKRH") {
@@ -44,13 +29,13 @@ module keycap(row=3, travel_advisory=true, override_profile=false) {
 
 
       show_travel()
-	if ($prerendered_keycaps) {
+	if (prerendered_keycaps()) {
 	  import(str("key-cache","/",use_profile,"/",row,".stl"));
 	} else {
 	  blank() key_profile(use_profile, effective_row)
-	    if ($preview && $fast_keycap_preview) {
+	    if ($preview && fast_keycap_preview()) {
 	      key($fn=6);
-	    } else if (! $preview&& $fast_keycap_render) {
+	    } else if (! $preview&& fast_keycap_render()) {
 	      key($fn=60);
 	    } else {
 	      key();
