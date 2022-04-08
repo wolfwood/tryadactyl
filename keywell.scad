@@ -7,7 +7,7 @@
 include <settings.scad>;
 
 // demo of the coordination of well shapes and bounding boxes
-let(header=false,footer=true,rightside=true,leftside=false) {
+let(header=false,footer=true,rightside=true,leftside=false, $fn=60) {
   keywell(header=header,footer=footer,leftside=leftside,rightside=rightside);
 
 
@@ -59,6 +59,36 @@ let(header=false,footer=true,rightside=true,leftside=false) {
       }
       sidewall_topper(x=i,header=header,footer=footer,leftside=leftside,rightside=rightside);
       sidewall_topper(y=i,header=header,footer=footer,leftside=leftside,rightside=rightside);
+    }
+  }
+
+  translate ([(gap+(outerdia+spacer())),-(gap+(outerdia+spacer())),0]) {
+    keywell(header=header,footer=footer,leftside=leftside,rightside=rightside);
+    for (i=[-1,1]) {
+      for (j=[-1,1]) {
+	#keywell_corner_spheres(x=i, y=j, header=header,footer=footer,leftside=leftside,rightside=rightside);
+      }
+    }
+   for (i=[-1,1]) {
+      #keywell_corner_spheres(x=i, header=header,footer=footer,leftside=leftside,rightside=rightside);
+      #keywell_corner_spheres(y=i, header=header,footer=footer,leftside=leftside,rightside=rightside);
+    }
+
+    for (i=[-1,1]) {
+      #keywell_corner_spheres(x=i, extra_room=[5,0,0], header=header,footer=footer,leftside=leftside,rightside=rightside);
+      #keywell_corner_spheres(y=i, extra_room=[0,5,0], header=header,footer=footer,leftside=leftside,rightside=rightside);
+    }
+  }
+  *translate ([3*(gap+(outerdia+spacer())),-(gap+(outerdia+spacer())),0]) {
+    keywell(header=header,footer=footer,leftside=leftside,rightside=rightside);
+    for (i=[-1,1]) {
+      #keywell_corner_spheres(x=i, header=header,footer=footer,leftside=leftside,rightside=rightside);
+      #keywell_corner_spheres(y=i, header=header,footer=footer,leftside=leftside,rightside=rightside);
+    }
+
+    for (i=[-1,1]) {
+      #keywell_corner_spheres(x=i, extra_room=[5,0,0], header=header,footer=footer,leftside=leftside,rightside=rightside);
+      #keywell_corner_spheres(y=i, extra_room=[0,5,0], header=header,footer=footer,leftside=leftside,rightside=rightside);
     }
   }
 }
@@ -141,7 +171,7 @@ module keywell_slug(header=false,footer=false,leftside=false,rightside=false) {
  * (x=-1,y=-1)=======(x= 1,y=-1)
  *               |
  */
-module position_keywell_corner(x,y,header=false,footer=false,leftside=false,rightside=false) {
+module position_keywell_corner(x,y,header=false,footer=false,leftside=false,rightside=false, extra_room=[0,0,0]) {
   assert(x != 0 && y != 0);
 
   /* "default" position is -X,-Y corner, where no rotation is required, just translation.
@@ -150,7 +180,7 @@ module position_keywell_corner(x,y,header=false,footer=false,leftside=false,righ
   mirror([x > 0 ? 1 : 0, 0, 0]) mirror([0, y > 0 ? 1 : 0, 0])
     translate([-outerdia/2 - ((x > 0 && rightside) || (x < 0 && leftside) ? spacer()/2 : 0),
 	       -outerdia/2 - ((y > 0 && header)    || (y < 0 && footer)   ? spacer()/2 : 0),
-	       -mxstem()-thickness])
+	       -mxstem()-thickness] - (is_undef(extra_room) ? [0,0,0] : extra_room))
     children();
 }
 
@@ -194,6 +224,43 @@ module keywell_side_bounding_box(x=0,y=0,header=false,footer=false,leftside=fals
   }
 }
 
+module keywell_corner_spheres(x,y,width=thickness, header=false,footer=false,leftside=false,rightside=false, extra_room=[0,0,0]) {
+  position_keywell_corner(x=is_undef(x)?-1:x,y=is_undef(y)?-1:y,header=header,footer=footer,leftside=leftside,rightside=rightside,extra_room=extra_room) translate([0,0,width/2]){
+    if (is_undef(x) || x == 0){
+      h = outerdia + optional_sum(rightside,leftside);
+      if (extra_room == [0,0,0]) {
+	rotate([0,90,0]) difference() {
+	  cylinder(d=width, h=h);
+	  if (extra_room == [0,0,0]) translate([-width/2,0,0]) cube([width, width,h]);
+	}
+      } else {
+	sphere(d=width);
+	translate([outerdia + optional_sum(rightside,leftside), 0 , 0]) sphere(d=width);
+      }
+    } else if (is_undef(y) || y == 0) {
+      h=outerdia + optional_sum(header,footer);
+      if (extra_room == [0,0,0]) {
+	rotate([-90,0,0]) difference() {
+	  cylinder(d=width, h=h);
+	  if (extra_room == [0,0,0]) translate([0,-width/2,0]) cube([width, width,h]);
+	}
+      } else {
+	sphere(d=width);
+	translate([0, outerdia + optional_sum(header,footer), 0]) sphere(d=width);
+      }
+    } else {
+      difference() {
+	sphere(d=width);
+	if (extra_room == [0,0,0]) {
+	  //translate([0,0,-width/2]) cube([width,width,width]);
+	 translate([0,-width/2,-width/2]) cube([width,width,width]);
+	 translate([-width/2,0,-width/2]) cube([width,width,width]);
+	}
+      }
+    }
+  }
+}
+
 function directional_decoder(v,x,y) = !is_list(v) ? v :
   x != 0 ? is_list(v.x) ? v.x[(x+1)/2] : v.x :
   is_list(v.y) ? v.y[(y+1)/2] : v.y;
@@ -230,33 +297,33 @@ module wall_bbox(length=epsilon,underhang,x_aligned=false) {
   }
 }
 
-module sidewall_bounding_box(leftwall=false,rightwall=false,topwall=false,bottomwall=false,header=false,footer=false,leftside=false,rightside=false){
+module sidewall_bounding_box(leftwall=false,rightwall=false,topwall=false,bottomwall=false,header=false,footer=false,leftside=false,rightside=false, extra_room=[0,0,0]){
 
   if (leftwall) {
-    position_keywell_corner(x=-1,y=-1,header=header,footer=footer,leftside=leftside,rightside=rightside)
+    position_keywell_corner(x=-1,y=-1,header=header,footer=footer,leftside=leftside,rightside=rightside,extra_room=extra_room)
       wall_bbox(outerdia + optional_sum(header,footer), !leftside);
   }
 
   if (rightwall) {
-    position_keywell_corner(x=1,y=-1,header=header,footer=footer,leftside=leftside,rightside=rightside)
+    position_keywell_corner(x=1,y=-1,header=header,footer=footer,leftside=leftside,rightside=rightside,extra_room=extra_room)
       wall_bbox(outerdia + optional_sum(header,footer), !rightside);
   }
 
   if (topwall) {
-    position_keywell_corner(x=-1,y=1,header=header,footer=footer,leftside=leftside,rightside=rightside)
+    position_keywell_corner(x=-1,y=1,header=header,footer=footer,leftside=leftside,rightside=rightside,extra_room=extra_room)
       wall_bbox(outerdia + optional_sum(rightside,leftside), !header, x_aligned=true);
   }
 
   if (bottomwall) {
-    position_keywell_corner(x=-1,y=-1,header=header,footer=footer,leftside=leftside,rightside=rightside)
+    position_keywell_corner(x=-1,y=-1,header=header,footer=footer,leftside=leftside,rightside=rightside,extra_room=extra_room)
       wall_bbox(outerdia + optional_sum(rightside,leftside), !footer, x_aligned=true);
   }
 }
 
-module sidewall_edge_bounding_box(x=0,y=0,x_aligned=true, header=false,footer=false,leftside=false,rightside=false) {
+module sidewall_edge_bounding_box(x=0,y=0,x_aligned=true, header=false,footer=false,leftside=false,rightside=false, extra_room=[0,0,0]) {
   assert((x==1 || x==-1) && (y==1 || y==-1));
 
-  position_keywell_corner(x=x,y=y,header=header,footer=footer,leftside=leftside,rightside=rightside)
+  position_keywell_corner(x=x,y=y,header=header,footer=footer,leftside=leftside,rightside=rightside,extra_room=extra_room)
     if (x_aligned) {
       wall_bbox(underhang=!((x == -1 && leftside) || (x == 1 && rightside)));
     } else {
@@ -265,37 +332,44 @@ module sidewall_edge_bounding_box(x=0,y=0,x_aligned=true, header=false,footer=fa
 }
 
 // XXX: overhang needs to be narrowsides aware
-module sidewall_topper(x=0,y=0, header=false,footer=false,leftside=false,rightside=false, bounding_box=false) {
+module sidewall_topper(x=0,y=0, header=false,footer=false,leftside=false,rightside=false, bounding_box=false, extra_room=[0,0,0]) {
   module top(overhang, length) {
     mirror(y != 0 ? [1,-1,0] : [0,0,0]) translate([-overhang, 0,0]) {
-      cube([overhang,length,thickness]);
+      difference() {
+	cube([overhang,length,thickness]);
+	translate([overhang,0,0]) rotate([0,-atan(thickness/overhang),0]) translate([0,0,-10]) cube([overhang+10, length,20]);
+      }
       translate([0, 0, -wall_width/2]) cube([wall_width,length,wall_width/2]);
     }
   }
 
   if (x != 0 && y != 0) {
-    position_keywell_corner(x=x,y=y,header=header,footer=footer,leftside=leftside,rightside=rightside)
+    position_keywell_corner(x=x,y=y,header=header,footer=footer,leftside=leftside,rightside=rightside,extra_room=extra_room)
       top(wall_width + directional_decoder(wall_extra_room,x,y), epsilon);
 
   } else if (x != 0) {
-    position_keywell_corner(x=x,y=-1,header=header,footer=footer,leftside=leftside,rightside=rightside)
+    position_keywell_corner(x=x,y=-1,header=header,footer=footer,leftside=leftside,rightside=rightside,extra_room=extra_room)
       top(wall_width + directional_decoder(wall_extra_room,x,y), outerdia + optional_sum(header,footer));
   } else {
-    position_keywell_corner(x=1,y=y,header=header,footer=footer,leftside=leftside,rightside=rightside)
+    position_keywell_corner(x=1,y=y,header=header,footer=footer,leftside=leftside,rightside=rightside,extra_room=extra_room)
       top(wall_width + directional_decoder(wall_extra_room,x,y), outerdia + optional_sum(rightside,leftside));
   }
 }
 
-module sidewall_topper_bounding_box(x=0,y=0, x_aligned=true, header=false,footer=false,leftside=false,rightside=false, bounding_box=false) {
+module sidewall_topper_bounding_box(x=0,y=0, x_aligned=true, header=false,footer=false,leftside=false,rightside=false, bounding_box=false, extra_room=[0,0,0]) {
   module top(overhang, length) {
     mirror(!x_aligned ? [1,-1,0] : [0,0,0])
     translate([-overhang, 0,0]) {
-      cube([overhang,length,thickness]);
+      difference() {
+	cube([overhang,length,thickness]);
+	translate([overhang,0,0]) rotate([0,-atan(thickness/overhang),0]) translate([0,0,-10]) cube([overhang+10, length,20]);
+      }
+
       translate([0, 0, -wall_width/2]) cube([wall_width,length,wall_width/2]);
     }
 
   }
 
-  position_keywell_corner(x=x,y=y,header=header,footer=footer,leftside=leftside,rightside=rightside)
+  position_keywell_corner(x=x,y=y,header=header,footer=footer,leftside=leftside,rightside=rightside,extra_room=extra_room)
     top(wall_width + directional_decoder(wall_extra_room,x_aligned?x:0,y), epsilon);
 }
