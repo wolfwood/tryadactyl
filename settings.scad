@@ -40,7 +40,7 @@ function spacer() = 1.4; // how close keywells can be
 
 
 /* side wall width */
-wall_width=2;
+wall_width=2.5;
 wall_extra_room = [0,0]; //[5,3];
 
 // bounds

@@ -62,12 +62,14 @@ function default_layout_placement_params() =
 function match(key, params) = params[search(key,params)[0]][1];
 function match_override(key, params, override) = !is_undef(override) ? override : match(key,params);
 
-module get_homes(params, homecol,homerow, col) {
+module get_homes(params, homerow,homecol, col) {
   $homerow = optional_index(match_override(homerow_enum, params, homerow), col);
   $homecol = match_override(homecol_enum, params, homecol);
 
   children();
 }
+
+function get_homerow(params, homerow, col) = optional_index(match_override(homerow_enum, params, homerow), col);
 
 module layout_placement(row, col,
 			row_spacing, col_spacing, profile_rows, homerow, homecol, tilt, offsets,
@@ -85,7 +87,7 @@ module layout_placement(row, col,
       position = match(position_enum, params),
       offsets = optional_vector_index(match_override(offsets_enum, params, offsets), col, row),
       displacement = match(displacement_enum, params) + displacement) {
-
+    assert(!is_undef(tilt.x),str(tilt," ",col," ", row," ", match(tilt_enum,params)))
     rotate([0,tent.y,0])
     rotate([tent.x,0,0])
     translate(position)
@@ -270,12 +272,25 @@ function optional_normalize(v) = !is_list(v[0]) ? normalize_chord(v) :
   //  len(v[col]) == 1 ? v[col][0] : v[col][row];
 //function optional_vector_index(v, row, col) = !is_list(v[0]) ? v : !is_list(v[0][0]) ? v[row] :
 //  len(v[col]) == 1 ? v[col][0] : v[col][row];
+
+function _optional_index_or_last(v,idx) =
+  !is_list(v)   ? v :
+  len(v) == 1   ? v[0] :
+  //len(v) <= idx ? v[len(v)-1] :
+                  v[idx];
+
 function optional_index(v, row, col, leaf = function (l) l) =
   !is_list(leaf(v))    ? v :
-  !is_list(leaf(v[0])) ? v[row] :
-  len(v[col]) == 1     ? v[col][0] :
-  //len(v[col]) <= row     ? v[col][len(v[col])-1] :
-                         v[col][row];
+  !is_list(leaf(v[0])) ? _optional_index_or_last(v, row) :
+                         _optional_index_or_last(_optional_index_or_last(v, col), row);
+  //len(v) == 1          ? v[0] :
+  //len(v) <= row        ? v[len(v)-1] :
+  //                       v[row] :
+  //len(v[col]) == 1     ? v[col][0] :
+  //len(v) == 1          ? len(v[0]) == 1 ? v[0][0]  : v[0][row] :
+  //len(v[col]) <= row   ? v[col][len(v[col])-1] :
+  //                       v[col][row];
+
 function optional_vector_index(v, row, col) = optional_index(v, row, col, leaf = function(l) l[0]);
 
 // column major vs row major data
