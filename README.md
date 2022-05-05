@@ -19,7 +19,10 @@ I also aim to document an easy approach to handwiring that both simplifies the i
 ## How Does My Personalized Tryadactyl Stand Out?
   * uses Cherry keycaps as though they are a flat profile
   * concave, spherical thumb cluster, with a 5-way nav switch
-  * trackpoint!
+  * **Trackpoint!**
+  * spherical "pair" of columns under pinkie and index, with lowest key in the outside column moved to the homerow, one column further out
+    * on the index, this makes room for the trackpoint without cutting keycaps
+	* on the pinkie this makes for a more comfortable extension of the finger to the side to press shift, rather than curling up and pressing down and out
 
 ![first full build](images/jank.jpg)
 
