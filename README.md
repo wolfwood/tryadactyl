@@ -1,5 +1,9 @@
+
 # What Is Try-A-Dactyl?
 The goal of this project is to be a flexible API for generating ortholinear-ish (column-staggered) keyboards, and particularly split, concave keyboards often called dactyls. You can start with my preferred keyboard and modify it to your needs, or use the API to build your own 'from scratch' without the pain of re-writing the details you don't care about.
+
+![skeleton-edition style preview](images/skeleton-preview.png)
+![first full build](images/jank.jpg)
 
 ## Why Is TryÅdactyl Different
 This project starts with the assumption that one-size does *not* fit all, and so a keyboard user will want to tune their dactyl to achieve the greatest comfort possible. Given this, it makes sense to optimize the modelling software for faster iteration time at both the design and print level, and to expose both easy configuration for bootstrapping and more fine-grained control for tuning. This way you can Try All Dactyls!
@@ -31,13 +35,6 @@ I also aim to document an easy approach to handwiring that both simplifies the i
   * multiple case styles, automatically generated base plates, and easy manual tuning of strut or wall placement
   * visual indications in preview-mode for identifying keycap collisions (including travel, when pressed) or hotswap socket collisions with the model or each other
 
-
-# Code Concepts
-  * value or vector of values or vector of vector of values
-  * grid key placement, column clusters, irregular row count
-  * homerow and homecol
-  * regular-ish placement, chords for circular and spherical
-  * uniform placement function, corner placement
 
 # Organization of the Code
 These are abbreviated descriptions of what lives where. See the linked files for detailed documentation comments.
