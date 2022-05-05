@@ -32,8 +32,15 @@ I also aim to document an easy approach to handwiring that both simplifies the i
   * visual indications in preview-mode for identifying keycap collisions (including travel, when pressed) or hotswap socket collisions with the model or each other
 
 
+# Code Concepts
+  * value or vector of values or vector of vector of values
+  * grid key placement, column clusters, irregular row count
+  * homerow and homecol
+  * regular-ish placement, chords for circular and spherical
+  * uniform placement function, corner placement
+
 # Organization of the Code
-	These are abbreviated descriptions of what lives where. See the linked files for detailed documentation comments.
+These are abbreviated descriptions of what lives where. See the linked files for detailed documentation comments.
 
   * **Keys** - the most basic building blocks of a keyboard
     * [keywell.scad](keywell.scad) - The `keywell()` is the basic switch holder and there are various bounding boxes around the sides of the keywell used to stitch keywells together into a key plate and to generate sidewalls to a case when desired.
