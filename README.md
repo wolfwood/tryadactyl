@@ -3,7 +3,6 @@
 The goal of this project is to be a flexible API for generating ortholinear-ish (column-staggered) keyboards, and particularly split, concave keyboards often called dactyls. You can start with my preferred keyboard and modify it to your needs, or use the API to build your own 'from scratch' without the pain of re-writing the details you don't care about.
 
 ![skeleton-edition style preview](images/skeleton-preview.png)
-![first full build](images/jank.jpg)
 
 ## Why Is TryÅdactyl Different
 This project starts with the assumption that one-size does *not* fit all, and so a keyboard user will want to tune their dactyl to achieve the greatest comfort possible. Given this, it makes sense to optimize the modelling software for faster iteration time at both the design and print level, and to expose both easy configuration for bootstrapping and more fine-grained control for tuning. This way you can Try All Dactyls!
@@ -22,6 +21,7 @@ I also aim to document an easy approach to handwiring that both simplifies the i
   * concave, spherical thumb cluster, with a 5-way nav switch
   * trackpoint!
 
+![first full build](images/jank.jpg)
 
 ## Cool Software Features
   * orthogonal row/column placement styles including flat and cylindrical (cylindrical row + cylindrical column == spherical placement of thumb keys, for example)
