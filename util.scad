@@ -241,8 +241,12 @@ module mount_teensy20pp(position=[0,0,0], rotation=[0,0,0], spacer=2, walls=2, d
 
       // for pin headers
       rotational_clone() translate([bar.x/2-1, 0, spacer]) cube([2, bar.y, 2],true);
+      // bonus interior pins
       translate([0, -pitch/2-3*pitch, spacer]) cube([2, 4*pitch+2, 2], true);
       translate([pitch, -pitch/2-3*pitch, spacer]) cube([2, 4*pitch+2, 2], true);
+      // reversed for when reflected for opposite hand
+      translate([-pitch, -pitch/2-3*pitch, spacer]) cube([2, 4*pitch+2, 2], true);
+      // reset pins
       translate([0,-pitch/2 - 9*pitch, spacer]) cube([bar.x, 2 , 2], true);
 
       // usb
@@ -279,7 +283,7 @@ module mount_trrs(position=[0,0,0], rotation=[0,0,0], spacer=2, walls=2) {
       translate([0, bar.y/2, bar.z/2+spacer+epsilon/2]) cube([5.5, (epsilon+max(2,walls))*2, bar.z+epsilon],true);
 
       // plug
-      translate([0, bar.y/2+walls, spacer+2.5]) rotate([-90,0,0]) cylinder($fn=60, d=6.25, h=20);
+      translate([0, bar.y/2+walls, spacer+2.5]) rotate([-90,0,0]) cylinder($fn=60, d=6.25, h=50);
     }
   }
   translate(position) rotate(rotation)
