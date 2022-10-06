@@ -12,7 +12,7 @@ cols=2;
 homerow=2;
 profile_rows=effective_rows(rows,homerow);
 tilt=[-3,0,0];
-tent=[0,33,0];
+tent=[0,32,0];
 row_chord = [14.5,25,0];
 
 // Akko cherry PBT neesds a bit more space
@@ -60,7 +60,7 @@ index_mountings = [screw_mounting_params(row=0, col=0, height=60, layout_params=
 middle_keys = true;
 //middle_offset = [[0,0,0], [0,4,1]];
 middle_offset = [0,5,0];
-ring_offset=[0,-5,-1];
+ring_offset=[1,-5,-1];
 middle_rotation = [0,0,0];
 middle_placement_params =
   layout_placement_params(homerow=homerow, homecol=1,
@@ -81,7 +81,7 @@ middle_mountings = [screw_mounting_params(row=0, col=0, height=30, headroom=[[1,
 
 
 pinkie_keys = true;//[[false],[true],[false],[false]];
-pinkie_pos = [outerdia+spacer()+20,-23,4];
+pinkie_pos = [outerdia+spacer()+20+2,-23,4];
 pinkie_tent = [0,0,-2];
 pinkie_tilt = [3,0,0];
 pinkie_placement_params =
@@ -580,12 +580,12 @@ module base_plate(z=-48,debug=true) {
       mount_foot([-30,20,z])
       mount_foot([0,25,z])
       mount_trrs([27,18,z],[0,0,0])
-      mount_teensy20pp([-48.7, 6, z])
+      mount_teensy20pp([-49.6, 6, z])
       //mount_teensy20pp([23, 5, z],[0,0,-20])
       bar_magnetize_below([-35,-30.4, z], [0,0,90])
       //bar_magnetize_below([34,-5, z], [0,0,0])
       bar_magnetize_below([12.7,-1, z], [0,0,0])
-      mount_permaproto_flat([-96.7,-22, z])
+      mount_permaproto_flat([-97.7,-22, z])
       plate(mountings, z=z, debug=debug);
     //}
 
