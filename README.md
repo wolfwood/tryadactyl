@@ -62,6 +62,13 @@ These are abbreviated descriptions of what lives where. See the linked files for
 	* [assembly.scad](assembly.scad) - my personal skeleton-edition style keyboard
 	* [debug.scad](debug.scad) - my closed-case keyboard experimentation
 
+# Usage
+
+To view the keyboard assembled, run `openscad assembly.scad`. Within [assembly.scad](assembly.scad) the base plate is generated in debug mode with just shows the strut mount placement, so the strut heights can be manually adjusted, and so that renders are faster. To see the full keyboard, find the line `base_plate(debug=true);` and change to `false`.
+
+For printing, the `fingers.scad`, `plate.scad` and `thumb.scad` models can be used to obtain separate parts. trying to print the whole assembly as is would be unlikely to succeed. I like to use the commandline to invoke openscad for renders, like the following `openscad -q --hardwarnings --render -o things/plate.stl plate.scad`.
+
+
 # TODO
   * key (profile & switch/well) configuration architecture
     - [ ] add and test SA profile support
@@ -77,7 +84,7 @@ These are abbreviated descriptions of what lives where. See the linked files for
   * columns
     - [ ] document layout_columns arguments
 	- [ ] spiral placement
-	- [ ] figure out how to connect 2 rectangles (faces of a keywell) in 3D space without hull (BOSL2?)
+	- [ ] figure out how to connect 2 rectangles (faces of a keywell) in 3D space without hull ([functional OpenSCAD](https://github.com/thehans/FunctionalOpenSCAD) seems like a good bet, or BOSL2?)
 	  - [ ] alternatively use the corner sphere bounding boxes for _everything_ to guarantee thickness and accept the cost (and figure out how to avoid colliding with keycap)
   * case
     - [ ] finish closed case
