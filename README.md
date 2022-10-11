@@ -70,9 +70,11 @@ For printing, the `fingers.scad`, `plate.scad` and `thumb.scad` models can be us
 
 
 # FAQs
-  - **Q**. Why not just use a flat keycap profile and save yourself a lot of work?
+#### Q
+  Why not just use a flat keycap profile and save yourself a lot of work?
 
-	**A**. 1. I'm not aware of a cylindrical topped (rather than spherical) flat MX profile, which I prefer.
+#### A
+	  1. I'm not aware of a cylindrical topped (rather than spherical) flat MX profile, which I prefer.
 
       2. Sculpted profiles tend to have angled sides, and top surfaces that are noticeably smaller than a full 1u footprint, which lets you pack them a bit more tightly if you aren't looking for a full 19.05 mm spacing between keys. This also seems particularly important for the spherical key placement i use, because its more at risk of keycap collisions than cylindrical. However, I haven't yet investigated the spherical placement with a flat profile, so maybe it's less of a concern than it seems.
 
