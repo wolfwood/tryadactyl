@@ -62,11 +62,25 @@ These are abbreviated descriptions of what lives where. See the linked files for
 	* [assembly.scad](assembly.scad) - my personal skeleton-edition style keyboard
 	* [debug.scad](debug.scad) - my closed-case keyboard experimentation
 
+
 # Usage
+To view the keyboard assembled, run `openscad assembly.scad`. This is how I normally make edits. Within [assembly.scad](assembly.scad) the base plate is generated in debug mode which just shows the strut mount placement, so that strut heights can be manually adjusted, and so that renders are faster. To see the full keyboard, find the line `base_plate(debug=true);` and change to `false`.
 
-To view the keyboard assembled, run `openscad assembly.scad`. Within [assembly.scad](assembly.scad) the base plate is generated in debug mode with just shows the strut mount placement, so the strut heights can be manually adjusted, and so that renders are faster. To see the full keyboard, find the line `base_plate(debug=true);` and change to `false`.
+For printing, the `fingers.scad`, `plate.scad` and `thumb.scad` models can be used to obtain separate parts. trying to print the whole assembly as is would be unlikely to succeed. I like to use the commandline to invoke `openscad` for renders, like the following: `openscad -q --hardwarnings --render -o things/plate.stl plate.scad`.
 
-For printing, the `fingers.scad`, `plate.scad` and `thumb.scad` models can be used to obtain separate parts. trying to print the whole assembly as is would be unlikely to succeed. I like to use the commandline to invoke openscad for renders, like the following `openscad -q --hardwarnings --render -o things/plate.stl plate.scad`.
+
+# FAQs
+  - **Q**. Why not just use a flat keycap profile and save yourself a lot of work?
+
+	**A**. 1. I'm not aware of a cylindrical topped (rather than spherical) flat MX profile, which I prefer.
+
+      2. Sculpted profiles tend to have angled sides, and top surfaces that are noticeably smaller than a full 1u footprint, which lets you pack them a bit more tightly if you aren't looking for a full 19.05 mm spacing between keys. This also seems particularly important for the spherical key placement i use, because its more at risk of keycap collisions than cylindrical. However, I haven't yet investigated the spherical placement with a flat profile, so maybe it's less of a concern than it seems.
+
+      3. Many colorways are limited to specific (sculpted) profiles. I started this project after being completely blown away by the [GMK Copper renders](https://geekhack.org/index.php?PHPSESSID=6mre0fhdltin70p68o5i6feekgqu2082&action=dlattach;topic=102917.0;attach=229851;image), for example.
+
+      4. Flexibility: my design can accommodate flat profiles. It may even give the most pleasing results that way. It can also accommodate sculpted profiles. It could even be used to add a sculpted effect to a flat profile (or change the sculpt of a sculpted profile). To each their own, as they say.
+
+      5. Cherry profile R3 has a lower vertical height that DSA or XDA. Obviously chocs are a superior choice for low profile switches, but don't like linears and I love my Kailh Speed Copper switches, so cherry profile helps me shave off some height.
 
 
 # TODO
@@ -97,4 +111,5 @@ For printing, the `fingers.scad`, `plate.scad` and `thumb.scad` models can be us
 	- [ ] hack up and test a @kennykaye-esque palmrest? use JellyTitan magnetic feet?
   * general
     - [ ] reorganize code into directories? and re-locate util functions
+	- [ ] rename `keywell()` to ???`switch_holder()`??? to reflect that keywell has now come to mean concavity
     - [ ] decide how multiple case style support and rendering of individual parts can be generalized
