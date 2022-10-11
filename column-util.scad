@@ -23,7 +23,7 @@ module drop(){
  * - position is used to do final positioning of groups of columns
  */
 
-function layout_placement_params(row_spacing, col_spacing, profile_rows, homerow=2, homecol=0, tent=[0,0,0], tilt=[0,0,0], position=[0,0,0], offsets=[0,0,0], displacement=[0,0,0]) =
+function layout_placement_params(row_spacing, col_spacing, profile_rows, homerow=2, homecol=0, tent=[0,0,0], tilt=[0,0,0], position=[0,0,0], offsets=[0,0,0], displacement=[0,0,0], row_first=false) =
   [[row_spacing_enum, row_spacing],
    [col_spacing_enum, col_spacing],
    [profile_rows_enum, profile_rows],
@@ -33,7 +33,8 @@ function layout_placement_params(row_spacing, col_spacing, profile_rows, homerow
    [offsets_enum, offsets],
    [displacement_enum, displacement],
    [position_enum, position],
-   [tent_enum, tent]
+   [tent_enum, tent],
+   [row_first_enum,row_first]
    ];
 
 /* :/ these variables aren't exported with `use` so params is effectively opaque in intervening functions
@@ -49,6 +50,7 @@ offsets_enum = "g";
 displacement_enum = "h";
 position_enum = "i";
 tent_enum = "j";
+row_first_enum = "k";
 
 /* variables are not exported when we `use` this file, so we make a this a function */
 function default_layout_placement_params() =
@@ -58,7 +60,7 @@ function default_layout_placement_params() =
 
 /* it would be possible to treat enums as integers and use them as array indexes, but then there is the risk of
  *  off-by-one errors as keys are added and removed which might not be immediately obvious. I think a hashtable
- *  will more robust as code evolves, and the performance cost are negligable in the face of render overheads */
+ *  will more robust as code evolves, and the performance costs are negligable in the face of render overheads */
 function match(key, params) = params[search(key,params)[0]][1];
 function match_override(key, params, override) = !is_undef(override) ? override : match(key,params);
 
@@ -71,49 +73,98 @@ module get_homes(params, homerow,homecol, col) {
 
 function get_homerow(params, homerow, col) = optional_index(match_override(homerow_enum, params, homerow), col);
 
+// for the rare case we don't want any translation, we only want to be oriented at the same angle
+module rotation_only(row, col, tilt, tent, params=default_layout_placement_params()) {
+  let(tent = match_override(tent_enum, params, tent),
+      tilt = optional_vector_index(match_override(tilt_enum, params, tilt), col, row)){
+    rotate([0,tent.y,0])
+      rotate([tent.x,0,0])
+      rotate([0,0,tent.z])
+      rotate([0,tilt.y,0])
+      rotate([tilt.x,0,0])
+      rotate([0,0,tilt.z])
+      children();
+  }
+}
+
+// this cancels out the rotations, giving the effect of translation only
+module reverse_rotation(row, col, tilt, tent, params=default_layout_placement_params()) {
+  let(tent = match_override(tent_enum, params, tent),
+      tilt = optional_vector_index(match_override(tilt_enum, params, tilt), col, row)){
+    rotate([0,0,-tilt.z])
+      rotate([-tilt.x,0,0])
+      rotate([0,-tilt.y,0])
+      rotate([0,0,-tent.z])
+      rotate([-tent.x,0,0])
+      rotate([0,-tent.y,0])
+      children();
+  }
+}
+
+
+// private, but external so we don't accidentally inherit an undeclared parameter from layout_placements()'s scope
+// **plz don't use**, we just need this because of the rare case (thumb clusters) where we might want to place keys
+//  around a sphere on the X-Y plane instead of Y-Z
+module place_row_and_or_col(row, col, row_spacing, col_spacing, homecol, homerow, corners, displacement, row_first=false,reverse=false){
+  if(!row_first){
+      place_row(row, col, row_spacing, homerow, corners=corners, displacement=displacement, reverse=reverse)
+	place_col(row, col, col_spacing, homecol, homerow, corners=corners, displacement=displacement, reverse=reverse)
+	children();
+  } else {
+    place_col(row, col, col_spacing, homecol, homerow, corners=corners, displacement=displacement, reverse=reverse)
+      place_row(row, col, row_spacing, homerow, corners=corners, displacement=displacement, reverse=reverse)
+      children();
+  }
+}
+
 module layout_placement(row, col,
-			row_spacing, col_spacing, profile_rows, homerow, homecol, tilt, offsets,
+			row_spacing, col_spacing, profile_rows, homerow, homecol, tilt, tent, offsets,
 			displacement=[0,0,0],
-			params=default_layout_placement_params(),
-		        corners=false, flatten=true, stay_upright=false) {
+	 		params=default_layout_placement_params(),
+	 	        corners=false, flatten=true, stay_upright=false) {
 
   let(row_spacing = match_override(row_spacing_enum, params, row_spacing),
       col_spacing = match_override(col_spacing_enum, params, col_spacing),
       profile_rows = match_override(profile_rows_enum, params, profile_rows),
       homerow = optional_index(match_override(homerow_enum, params, homerow), col),
       homecol = match_override(homecol_enum, params, homecol),
-      tent = match(tent_enum, params),
+      tent = match_override(tent_enum, params, tent),
       tilt = optional_vector_index(match_override(tilt_enum, params, tilt), col, row),
       position = match(position_enum, params),
       offsets = optional_vector_index(match_override(offsets_enum, params, offsets), col, row),
-      displacement = match(displacement_enum, params) + displacement) {
+      displacement = match(displacement_enum, params) + displacement,
+      row_first = match(row_first_enum,params)) {
     assert(!is_undef(tilt.x),str(tilt," ",col," ", row," ", match(tilt_enum,params)))
+
     rotate([0,tent.y,0])
     rotate([tent.x,0,0])
     translate(position)
       rotate([0,0,tent.z]) rotate([0,tilt.y,0])
       translate(offsets) rotate([tilt.x,0,0])
       rotate([0,0,tilt.z])
-      place_row(row, col, row_spacing, homerow, corners=corners, displacement=displacement)
-      place_col(row, col, col_spacing, homecol, homerow, corners=corners, displacement=displacement)
+      // usually we place col first (i.e. closer to the children(), second in right-to-left, top-to-bottom reading order)
+      //  but this can be overridden
+      place_row_and_or_col(row, col, row_spacing, col_spacing, homecol, homerow, corners=corners,
+			   displacement=displacement, row_first=row_first)
       translate([0,0,displacement.z])
       //place_z_correct(row, col, row_spacing, col_spacing, homerow, homecol, corners=corners)
       if(stay_upright) {
-	place_col(row, col, col_spacing, homecol, homerow, corners=corners, displacement=displacement,reverse=true)
-	  place_row(row, col, row_spacing, homerow, corners=corners, displacement=displacement,reverse=true)
-	  rotate([0,0,-tilt.z])
-	  rotate([-tilt.x,0,0])
-	  rotate([0,-tilt.y,0])
-	  rotate([0,0,-tent.z])
-	  rotate([-tent.x,0,0])
-	  rotate([0,-tent.y,0])
+	// this case is used for things like struts where we want the positioning effects, but want to cancel out
+	//  any rotation in X or Y so the strut stays completely vertical
+	//  we have to do the reversal in the opposite order as above, so we invert whatever row_first is set to
+	place_row_and_or_col(row, col, row_spacing, col_spacing, homecol, homerow, corners=corners,
+			     displacement=displacement, row_first=!row_first,reverse=true)
+	  reverse_rotation(row, col, tilt, tent)
 	  children();
       } else if(flatten) {
+	// this is the 'normal' case for key caps/switches/holders
+
 	/* using params bundle makes profile rows opaque to callers. so we use a special var to pass through
 	 *  $effective_row so we can use it to get the right keycap */
 	$effective_row = optional_index(profile_rows, row, col);
 	position_flat($effective_row) children();
       } else {
+	// this case is for items that opt out of key flattening transformations, e.g. the trackpoint mount
 	children();
       }
   }
@@ -195,7 +246,7 @@ module place_circular_row(row, col, row_spacing, homerow, corners=false, reverse
   temp_chord = optional_vector_index(row_spacing, row, col);
   chord = normalize_chord([temp_chord[0]+displacement.y,temp_chord[1],0]);
 
-  z_correct = false;//args[0];
+  z_correct = args[0];
 
   count = homerow-row;
 
@@ -208,10 +259,10 @@ module place_circular_row(row, col, row_spacing, homerow, corners=false, reverse
       }
   } else {
     translate([0,0,reverse?0:chord[1]]) rotate([(reverse?-1:1)*((homerow-row)*chord[2]),0,0]) translate([0,0,reverse?0:-chord[1]])
-      if (z_correct) {
-	rotate([0,0,-col*(homerow-row)*chord[2]/2]) children();
-      } else {
+       if (is_num(z_correct) && z_correct == 0) {
 	children();
+      } else {
+	rotate([0,0,count*(homerow-row)*optional_index(z_correct,row,col)]) children();
       }
   }
 }
