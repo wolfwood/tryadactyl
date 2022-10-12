@@ -556,14 +556,7 @@ use <rest.scad>;
 base_plate(debug=true);
 
 module base_plate(z=-48,debug=true) {
-  //*magnetize(position=[-16,-25,-29])
-  //magnetize(position=[28,-15,-29], post_height=8)
-
   mountings = [each index_mountings, each thumb_mountings, each middle_mountings, each pinkie_mountings];
-
-  //if (debug) {
-  //plate(mountings, z=z, debug=debug);
-  //} else {
 
   difference() {
     mount_foot([0,-20,z])
@@ -587,7 +580,6 @@ module base_plate(z=-48,debug=true) {
       bar_magnetize_below([12.7,-1, z], [0,0,0])
       mount_permaproto_flat([-97.7,-22, z])
       plate(mountings, z=z, debug=debug);
-    //}
 
     // cutout to acommodate floating palm rest
     if(!debug) translate([outerdia*2.1,-95,z-.1]) scale([1.,1,1]) wrist_rest_base($fn=120,angle=[0,0,0], back_height=10);
