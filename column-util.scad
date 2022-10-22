@@ -60,7 +60,7 @@ function default_layout_placement_params() =
 
 /* it would be possible to treat enums as integers and use them as array indexes, but then there is the risk of
  *  off-by-one errors as keys are added and removed which might not be immediately obvious. I think a hashtable
- *  will more robust as code evolves, and the performance costs are negligable in the face of render overheads */
+ *  will more robust as code evolves, and the performance costs are negligible in the face of render overheads */
 function match(key, params) = params[search(key,params)[0]][1];
 function match_override(key, params, override) = !is_undef(override) ? override : match(key,params);
 
