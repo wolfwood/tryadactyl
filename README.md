@@ -74,6 +74,8 @@ For printing, the `fingers.scad`, `plate.scad` and `thumb.scad` models can be us
   Why not just use a flat keycap profile and save yourself a lot of work?
 
 #### A
+  0. Using a flat profile doesn't actually solve the problem that when you do cylindrical placement of the switch holders, rather than the keycap top surfaces, radius and chord distance do not correspond to measurments of the fingers and their movement. These values are inflated because the height of the switch and keycap can be a sizable percentage of the finger length. While angle is invariant in this case, it is not easy to measure on a curved finger, and it is especially difficult to measure at the desired precision. Using a small protractor with 5 degree increments to measure in cases where fractions of a degree are meaningful is a fool's errand. The chord distance of the circle (distance between the center of one keycap top and the next) is much more straightforward.
+  
   1. I'm not aware of a cylindrical topped (rather than spherical) flat MX profile, which I prefer.
 
   2. Sculpted profiles tend to have angled sides, and top surfaces that are noticeably smaller than a full 1u footprint, which lets you pack them a bit more tightly if you aren't looking for a full 19.05 mm spacing between keys. This also seems particularly important for the spherical key placement i use, because its more at risk of keycap collisions than cylindrical. However, I haven't yet investigated the spherical placement with a flat profile, so maybe it's less of a concern than it seems.
@@ -82,7 +84,7 @@ For printing, the `fingers.scad`, `plate.scad` and `thumb.scad` models can be us
 
   4. Flexibility: my design can accommodate flat profiles. It may even give the most pleasing results that way. It can also accommodate sculpted profiles. It could even be used to add a sculpted effect to a flat profile (or change the sculpt of a sculpted profile). To each their own, as they say.
 
-  5. Cherry profile R3 has a lower vertical height that DSA or XDA. Obviously chocs are a superior choice for low profile switches, but don't like linears and I love my Kailh Speed Copper switches, so cherry profile helps me shave off some height.
+  5. Cherry profile R3 has a lower vertical height that DSA or XDA. Obviously chocs are a superior choice for low profile switches, but I don't like linear switches and I love my Kailh Speed Copper switches, so cherry profile helps me shave off some height.
 
 
 # TODO
