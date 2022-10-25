@@ -556,6 +556,7 @@ use <rest.scad>;
 base_plate(debug=true);
 
 module base_plate(z=-48,debug=true) {
+  // flatten all the mountings into a single array
   mountings = [each index_mountings, each thumb_mountings, each middle_mountings, each pinkie_mountings];
 
   difference() {
@@ -587,33 +588,67 @@ module base_plate(z=-48,debug=true) {
 }
 
 module plate(mountings, z=-31, thickness=4, debug=true) {
+  module vertical_mount(){
+    where=[pinkie_pos.x+12.2+2*(outerdia+spacer()),24.8,10];
+
+    // XXX: it would be far preferable not to rotate the children() but handling tent and tilt in bar_magnetize_below()
+    //       would add a (circular) dependency to util.scad on column-util.scad
+    rotation_only(tilt=tilt, tent=tent)
+      bar_magnetize_below(where, [0,-90,0],grow=[-3,0,0])
+      bar_magnetize_below(where+[0,0,17], [0,-90,0])
+      reverse_rotation(tilt=tilt, tent=tent)
+      children();
+  }
+  module vertical_mount_bounding_box(bonus=0){
+    translate([0,0,z])
+      linear_extrude(thickness+bonus)
+      projection()
+      vertical_mount();
+  }
+
   if (debug) {
     for (mount=mountings) {
       screw_mounting(mounting_params=mount, idx=1, clearance=true);
       #mount_bounding_box(z=z, thickness=thickness, mounting_params=mount);
     }
+    vertical_mount();
+    #vertical_mount_bounding_box();
   } else {
-    for (mount=mountings) {
-      difference(){
-	screw_mounting(mounting_params=mount, idx=1, clearance=debug);
-	translate([0,0,-thickness]) mount_bounding_box(z=z, thickness=thickness, mounting_params=mount);
-	translate([0,0,-2*thickness+.1]) mount_bounding_box(z=z, thickness=thickness, mounting_params=mount);
-      }
-    }
-
     difference() {
-      hull() {
+      // apply the mount to the rest of the plate, so that the mounts' magnet holes get cut from the plate
+      vertical_mount() union() {
 	for (mount=mountings) {
-	  intersection() {
-	    screw_mounting(mounting_params=mount, idx=1, clearance=false);
-	    mount_bounding_box(z=z, thickness=thickness, mounting_params=mount);
+	  difference(){
+	    screw_mounting(mounting_params=mount, idx=1, clearance=debug);
+	    translate([0,0,-thickness]) mount_bounding_box(z=z, thickness=thickness, mounting_params=mount);
+	    translate([0,0,-2*thickness+.1]) mount_bounding_box(z=z, thickness=thickness, mounting_params=mount);
+	  }
+	}
+
+	difference() {
+	  // to keep the plate a fixed thickness, we intersect the constituent parts with their footprints extruded to a fixed height
+	  hull() {
+	    for (mount=mountings) {
+	      intersection() {
+		screw_mounting(mounting_params=mount, idx=1, clearance=false);
+		mount_bounding_box(z=z, thickness=thickness, mounting_params=mount);
+	      }
+	    }
+	    intersection(){
+	      vertical_mount();
+	      vertical_mount_bounding_box();
+	    }
+	  }
+
+	  // diffing out the hull'd mountings keeps the plate hull above from filling in the cavities
+	  for (mount=mountings) {
+	    hull() {screw_mounting(mounting_params=mount, idx=1, clearance=true,blank=true);}
 	  }
 	}
       }
-
-      for (mount=mountings) {
-	hull() {screw_mounting(mounting_params=mount, idx=1, clearance=true,blank=true);}
-      }
+      // remove any part of the mount vertical magnet mount that extends below the plate
+      bonus = 10;
+      translate([0,0,-thickness-bonus]) vertical_mount_bounding_box(bonus=bonus);
     }
   }
 }
