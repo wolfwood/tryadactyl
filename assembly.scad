@@ -587,17 +587,21 @@ module base_plate(z=-48,debug=true) {
   }
 }
 
-module plate(mountings, z=-31, thickness=4, debug=true) {
+module plate(mountings, z=-31, thickness=4, debug=true, vertical=true) {
   module vertical_mount(){
-    where=[pinkie_pos.x+12.2+2*(outerdia+spacer()),24.8,10];
+    if (vertical) {
+      where=[pinkie_pos.x+12.2+2*(outerdia+spacer()),24.8,10];
 
-    // XXX: it would be far preferable not to rotate the children() but handling tent and tilt in bar_magnetize_below()
-    //       would add a (circular) dependency to util.scad on column-util.scad
-    rotation_only(tilt=tilt, tent=tent)
-      bar_magnetize_below(where, [0,-90,0],grow=[-3,0,0])
-      bar_magnetize_below(where+[0,0,17], [0,-90,0])
-      reverse_rotation(tilt=tilt, tent=tent)
+      // XXX: it would be far preferable not to rotate the children() but handling tent and tilt in bar_magnetize_below()
+      //       would add a (circular) dependency to util.scad on column-util.scad
+      rotation_only(tilt=tilt, tent=tent)
+	bar_magnetize_below(where, [0,-90,0],grow=[-3,0,0])
+	bar_magnetize_below(where+[0,0,17], [0,-90,0])
+	reverse_rotation(tilt=tilt, tent=tent)
+	children();
+    } else {
       children();
+    }
   }
   module vertical_mount_bounding_box(bonus=0){
     translate([0,0,z])
@@ -611,8 +615,10 @@ module plate(mountings, z=-31, thickness=4, debug=true) {
       screw_mounting(mounting_params=mount, idx=1, clearance=true);
       #mount_bounding_box(z=z, thickness=thickness, mounting_params=mount);
     }
-    vertical_mount();
-    #vertical_mount_bounding_box();
+    if (vertical) {
+      vertical_mount();
+      #vertical_mount_bounding_box();
+    }
   } else {
     difference() {
       // apply the mount to the rest of the plate, so that the mounts' magnet holes get cut from the plate
@@ -634,7 +640,7 @@ module plate(mountings, z=-31, thickness=4, debug=true) {
 		mount_bounding_box(z=z, thickness=thickness, mounting_params=mount);
 	      }
 	    }
-	    intersection(){
+	    if (vertical) intersection(){
 	      vertical_mount();
 	      vertical_mount_bounding_box();
 	    }
@@ -648,7 +654,7 @@ module plate(mountings, z=-31, thickness=4, debug=true) {
       }
       // remove any part of the mount vertical magnet mount that extends below the plate
       bonus = 10;
-      translate([0,0,-thickness-bonus]) vertical_mount_bounding_box(bonus=bonus);
+      if (vertical) translate([0,0,-thickness-bonus]) vertical_mount_bounding_box(bonus=bonus);
     }
   }
 }
