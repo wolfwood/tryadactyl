@@ -1,6 +1,6 @@
 
 # What Is Try-A-Dactyl?
-The goal of this project is to be a flexible API for generating ortholinear-ish (column-staggered) keyboards, and particularly split, concave keyboards often called dactyls. You can start with my preferred keyboard and modify it to your needs, or use the API to build your own 'from scratch' without the pain of re-writing the details you don't care about.
+The goal of this project is to be a flexible API for generating ortholinear-ish (column-staggered) keyboards, and particularly split, concave keyboards often called [Dactyls](https://github.com/adereth/dactyl-keyboard). You can start with my preferred keyboard and modify it to your needs, or use the API to build your own 'from scratch' without the pain of re-writing the details you don't care about.
 
 ![skeleton-edition style preview](images/skeleton-preview.png)
 
@@ -8,13 +8,13 @@ The goal of this project is to be a flexible API for generating ortholinear-ish 
 This project starts with the assumption that one-size does *not* fit all, and so a keyboard user will want to tune their dactyl to achieve the greatest comfort possible. In this process, a number of design-print-test iterations will be required and while the process of 3D printing can be a significant time delay, beyond a certain point its not possible to spend extra time designing and avoid the need to print and test. Given this, it makes sense to optimize the modeling software for faster iteration time at both the design and print level, and to expose both easy configuration for bootstrapping and more fine-grained control for tuning. This way you can Try All (the) Dactyls!
 
   * faster previews - writing in pure openscad rather than using a generator-style language binding lets us see changes as fast as possible
-  * faster prints - support for multiple case styles allows quicker turn around with more open models like the [skeleton-edition style case](https://github.com/atsuyuki/dactyl-manuform-skeleton-edition-4x5), and then the ability to print the same layout with a more protected case with sidewalls
-  * placement of the keycap tops, not the keywells - control where you want your fingers to be, not where the switches go; this means you can keep the same exact layout and switch from e.g. Cherry profile to DSA (provided the keycaps don't collide)
+  * faster prints - support for multiple case styles allows quicker turn around with more open models like the [skeleton-edition inspired case](https://github.com/atsuyuki/dactyl-manuform-skeleton-edition-4x5), and then the ability to print the same layout with a more protected case with sidewalls
+  * placement of the keycap tops, not the keywells - control where you want your fingers to be, not where the switches go; this means you can keep the same exact layout and change from e.g. Cherry profile to DSA (provided the keycaps don't collide)
   * all parameters correspond to measurable quantities - combined with the above, makes it easier to say things like "I want to move the equals key 2 mm closer to my pinkie" and get the results you want
   * library / API style approach - gives you the tools to build what *you* want, and makes it easy to plug in different keyswitch / keycap styles without having to rewrite half the code
   * no post-processing needed - it should be easier to incorporate unanticipated additions directly in openscad than to take an stl and munge it somewhere else
 
-I also aim to document an easy approach to handwiring that both simplifies the initial process and allows easy reuse of the electronics as you switch from case to case.
+I also aim to document an easy approach to handwiring that both simplifies the initial process and allows easy reuse of the electronics as you switch from case to case. [You can find a brief summary here](docs/wiring.md).
 
 ## How Does My Personalized Tryadactyl Stand Out?
   * uses Cherry keycaps as though they are a flat profile
@@ -23,7 +23,7 @@ I also aim to document an easy approach to handwiring that both simplifies the i
   * spherical "pair" of columns under pinkie and index, with lowest key in the outside column moved to the homerow, one column further out
     * on the index, this makes room for the trackpoint without cutting keycaps
 	* on the pinkie this makes for a more comfortable extension of the finger to the side to press shift, rather than curling up and pressing down and out
-  * recessed magnets in the base plate, to hold the keyboard firmly to an adjustable metal tray
+  * recessed magnets in the base plate, to hold the keyboard firmly to an adjustable metal tray ([I documented my approach for mounting peripherals to my chair arms here](https://wolfwood.github.io/chair-arm-keyboard-mounting/))
 
 ![first full build](images/facing-pair-jank.jpg)
 
