@@ -104,9 +104,9 @@ module layout_plate_only(rows=4, cols=1, homerow, homecol, row_spacing,
     } else {
 
       /* this is a trick to handle joining 2 keywells along a row or column the same as joining the intersection
-       * of 4 keywells. To connect 2 wells in the same column, left is mappe onto 'this' and corner onto down.
+       * of 4 keywells. To connect 2 wells in the same column, left is mapped onto 'this' and corner onto down.
        * To connect 2 wells in the same row, down is mapped onto 'this' and corner onto left.  this reverses the ordering
-       * so the reverse bollean is needed to correct this.
+       * so the reverse boolean is needed to correct this.
        */
       let (corner = is_undef(corner) ? (is_undef(left) ? down : left) : corner,
 	   left = is_undef(left) ? this : left,
