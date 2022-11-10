@@ -37,12 +37,16 @@ index_pos = [-(outerdia+4),-4,6];
 index_tent = [0,0,5];
 index_tilt = [0,0,0];
 index_rows= [rows, rows-1, 1];
-index_cols=cols;
+index_cols=cols+1;
+
+index_col_sp=[[tight_spherical_col[0][0],tight_spherical_col[0][0],tight_spherical_col[2][0]],[tight_spherical_col[1][0]],[tight_spherical_col[2][0]],[tight_spherical_col[3][0]]];
+
 index_placement_params =
   layout_placement_params(homerow=[homerow,homerow,0], homecol=0,
 			  row_spacing=create_circular_placement([tight_cylindrical_row, tight_spherical_row, [row_chord]]),
-			  col_spacing=create_circular_placement(tight_spherical_col, z_correct=spherical_z),
+			  col_spacing=create_circular_placement(index_col_sp, z_correct=spherical_z),
 			  profile_rows=[profile_rows,profile_rows,[4]],
+			  offsets=[[0,0,0],[0,0,0],[0,-.1,0]],
 			  tent=index_tent+tent, tilt=index_tilt, position=index_pos);
 
 index_mountings = [screw_mounting_params(row=0, col=0, height=60, layout_params=index_placement_params,
@@ -105,27 +109,29 @@ pinkie_mountings = [screw_mounting_params(row=0, col=0, height=10,
 		    ];
 
 thumb_keys= true;
-thumb_pos = index_pos + [-1.5*(outerdia+spacer())+30,-3.5*(outerdia+spacer())-1,-30];
-thumb_tilt = [10,-100,25];
-thumb_tent = tent+[0,0,-5];
-thumb_row_chord_sides = [30, 25, 0];
-thumb_row_chord_center = [14.5, 0, 60];
+thumb_pos = index_pos + [-1.5*(outerdia+spacer())+20,-3.5*(outerdia+spacer())-6,-24];
+thumb_tilt = [10,-98,20];
+thumb_tent = tent+[0,0,10];
+thumb_row_chord_sides = [15, 0, 30];
+thumb_row_chord_center = [14.5, 0, 30];
 thumb_placement_params =
   layout_placement_params(homerow=1//[0,1,0]
 			  , homecol=1,
 			  row_spacing=create_circular_placement([[thumb_row_chord_sides],
 								 [thumb_row_chord_center],
-								 [thumb_row_chord_sides]]),
-			  col_spacing = create_circular_placement([[[17,16,0]],[[20,20,0]]],z_correct=60),
+								 [thumb_row_chord_sides]],z_correct=0),
+			  col_spacing = create_circular_placement([[[22,13,0]],[[18,13,0]]]),
 			  profile_rows=[[2,3],["SKRH",3],[2,1]],
 			  tent=thumb_tent, tilt=thumb_tilt,
-			  position=thumb_pos);
+			  position=thumb_pos,
+			  row_first=true
+			  );
 
-thumb_mountings = [screw_mounting_params(row=0, col=1, height=6, displacement=[4,6,-13],
+thumb_mountings = [screw_mounting_params(row=0, col=1, height=20, displacement=[2,14,-11],
 					 layout_params=thumb_placement_params),
-		   screw_mounting_params(row=0, col=1, height=6, displacement=[2,-13,-16],
+		   screw_mounting_params(row=0, col=1, height=15, displacement=[-2,-10,-13],
 					 headroom= [[2,2],[2,10]], footroom=[[2,2],[2,1]],layout_params=thumb_placement_params),
-		   screw_mounting_params(row=0, col=0, height=30, offsets=[0,0,0], displacement=[0,-4.8,-16.0],
+		   screw_mounting_params(row=1, col=0, height=40, offsets=[-7,0,-6], displacement=[0,-25,-19.0],
 					 headroom=[[2,3],[2,10]], footroom=[[6,2],[2,2]],
 					 layout_params=thumb_placement_params)
 		];
@@ -228,10 +234,10 @@ module mounted_index(keys=true) {
       layout_placement(2, 1, params=index_placement_params) keywell_corner_bounding_box(y=-1, x=1, leftside=true,
 											footer=true);
     }
-    hull () {
+  hull () {
       layout_placement(3, 0, params=index_placement_params, displacement=tp_corner_disp, corners=true)
 	keywell_corner_bounding_box(x=-1, y=1,leftside=true, footer=true);
-      layout_placement(2, 1, params=index_placement_params) keywell_side_bounding_box(y=-1, leftside=true,
+      layout_placement(2, 1, params=index_placement_params) keywell_side_bounding_box(y=-1,
 										      footer=true);
     }
     hull () {
@@ -243,30 +249,10 @@ module mounted_index(keys=true) {
 											footer=true);
     }
 
-    *hull() {
-      layout_placement(2, 1, params=index_placement_params) keywell_corner_bounding_box(y=-1, x=1,
-											footer=true);
-      /*layout_placement(3, 0, params=pinkie_placement_params) keywell_corner_bounding_box(y=1, x=-1,
-	rightside=true,
-	footer=true);*/
-      layout_placement(2, 0, params=index_placement_params) keywell_corner_bounding_box(x=-1, y=-1);
-      layout_placement(3, 0, params=index_placement_params) keywell_corner_bounding_box(x=-1, y=1,
-											footer=true);
-    }
-
-    layout_placement(row=2, col=2, homerow=2, homecol=0, offsets=[0,-.1,0], params=index_placement_params) keywell(header=true, footer=true, leftside=true);
-
-    hull() {
-      layout_placement(row=2, col=2, homerow=2, homecol=0, offsets=[0,-.1,0], params=index_placement_params)
-	keywell_bounding_box(x=1,header=true, footer=true, leftside=true);
-      layout_placement(2, 1, params=index_placement_params) keywell_bounding_box(x=-1, leftside=true,
-											footer=true);
-    }
-
     hull() {
       layout_placement(row=2, col=2, homerow=2, homecol=0, offsets=[0,-.1,0], params=index_placement_params)
 	keywell_bounding_box(x=1,y=-1, header=true, footer=true, leftside=true);
-      layout_placement(2, 1, params=index_placement_params) keywell_bounding_box(x=-1,y=-1, leftside=true,
+      layout_placement(2, 1, params=index_placement_params) keywell_bounding_box(x=-1,y=-1,
 										 footer=true);
       layout_placement(3, 0, params=index_placement_params, displacement=tp_corner_disp, corners=true)
 	keywell_corner_bounding_box(x=-1, y=1,leftside=true, footer=true);
@@ -276,15 +262,6 @@ module mounted_index(keys=true) {
 	keywell_bounding_box(y=-1, header=true, footer=true, leftside=true);
            layout_placement(3, 0, params=index_placement_params, displacement=tp_corner_disp, corners=true)
 	keywell_corner_bounding_box(x=-1, y=1,leftside=true, footer=true);
-    }
-
-    hull() {
-      layout_placement(row=2, col=2, homerow=2, homecol=0, offsets=[0,-.1,0], params=index_placement_params)
-	keywell_bounding_box(x=1,y=1, header=true, footer=true, leftside=true);
-      layout_placement(2, 1, params=index_placement_params) keywell_bounding_box(x=-1,y=1, leftside=true,
-										 footer=true);
-      layout_placement(1, 1, params=index_placement_params) keywell_bounding_box(x=-1,y=-1, leftside=true,
-										 footer=false);
     }
 
     hull() {
@@ -314,15 +291,13 @@ module mounted_index(keys=true) {
 
     hull() {
       layout_placement(0, 1, params=index_placement_params) keywell_bounding_box(x=1, y=1, leftside=true,header=true);
-      layout_placement(0, 0, params=index_placement_params) keywell_bounding_box(y=1, header=true);
-
+      layout_placement(0, 0, params=index_placement_params) keywell_bounding_box(y=1, rightside=true, header=true);
     }
 
   }
 
   if (keys) {
-    layout_placement(row=2, col=2, homerow=2, homecol=0, offsets=[0,-.1,0], params=index_placement_params) keycap($effective_row);
-    layout_columns(rows=index_rows, cols=cols, params=index_placement_params,
+    layout_columns(rows=index_rows, cols=index_cols, params=index_placement_params,
 		   keys=index_keys, wells=false);
   }
 }
