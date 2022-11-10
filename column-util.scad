@@ -181,6 +181,8 @@ module place_row(row,col,row_spacing,homerow, corners=false, reverse=false, disp
     place_flat_row(row=row, col=col, row_spacing=spacing, homerow=homerow, corners=corners, reverse=reverse, args=args, displacement=displacement) children();
   } else if (style == "circular") {
     place_circular_row(row=row, col=col, row_spacing=spacing, homerow=homerow, corners=corners, reverse=reverse, args=args, displacement=displacement) children();
+  } else if (style == "arc") {
+    place_arc_row(row=row, col=col, row_spacing=spacing, homerow=homerow, corners=corners, reverse=reverse, args=args, displacement=displacement) children();
   } else {
     assert(false, str("unknown placement style: ", style));
   }
@@ -196,6 +198,8 @@ module place_col(row,col,col_spacing,homecol, homerow, corners=false, reverse=fa
     place_flat_col(row=row, col=col, col_spacing=spacing, homecol=homecol, homerow=homerow, corners=corners, reverse=reverse, args=args, displacement=displacement) children();
   } else if (style == "circular") {
     place_circular_col(row=row, col=col, col_spacing=spacing, homecol=homecol, homerow=homerow, corners=corners, reverse=reverse, args=args, displacement=displacement) children();
+  } else if (style == "arc") {
+    place_arc_col(row=row, col=col, col_spacing=spacing, homecol=homecol, homerow=homerow, corners=corners, reverse=reverse, args=args, displacement=displacement) children();
   } else {
     assert(false, str("unknown placement style: ", style));
   }
@@ -240,7 +244,7 @@ module place_flat_col(row, col, col_spacing, homecol, homerow, corners=false, re
 
 function create_flat_placement(v) = ["flat", [], v];
 
-/* circular style */
+/* circular style - rows in XZ plane, columns in YZ */
 // XXX doesn't use ranged_sum(), so individually tuned key spacing won't properly reflect neighbor's positions
 module place_circular_row(row, col, row_spacing, homerow, corners=false, reverse=false, args=[], displacement=[0,0,0]){
   temp_chord = optional_vector_index(row_spacing, row, col);
@@ -309,6 +313,69 @@ module place_circular_z_correct(row, col, row_spacing, col_spacing, homerow, hom
 }
 
 function create_circular_placement(v, z_correct=0) = ["circular", [z_correct], optional_normalize(v)];
+
+/* arc style - circular in the XY plane */
+// XXX doesn't use ranged_sum(), so individually tuned key spacing won't properly reflect neighbor's positions
+module place_arc_row(row, col, row_spacing, homerow, corners=false, reverse=false, args=[], displacement=[0,0,0]){
+  temp_chord = optional_vector_index(row_spacing, row, col);
+  chord = normalize_chord([temp_chord[0]+displacement.y,temp_chord[1],0]);
+
+  if (chord == [0,0,0]) {
+    children();
+  } else {
+    z_correct = args[0];
+
+    count = homerow-row;
+
+    if (corners) {
+      translate([reverse?0:chord[1],0,0]) rotate([0,0,(reverse?-1:1)*-((2*count-1)*chord[2]/2)]) translate([reverse?0:-chord[1],0,0])
+	if (z_correct) {
+	  rotate([0,0,-col*(count/2-1)*chord[2]/2/2]) children();
+	} else {
+	  children();
+	}
+    } else {
+      translate([reverse?0:chord[1],0,0]) rotate([0,0,(reverse?-1:1)*-(count*chord[2])]) translate([reverse?0:-chord[1],0,0])
+	if (is_num(z_correct) && z_correct == 0) {
+	  children();
+	} else {
+	  rotate([0,0,count*(homerow-row)*optional_index(z_correct,row,col)]) children();
+	}
+    }
+  }
+}
+
+module place_arc_col(row, col, col_spacing, homecol, homerow, corners=false, reverse=false, args=[], displacement=[0,0,0]){
+  temp_chord = optional_vector_index(col_spacing, col, row);
+  chord = normalize_chord([temp_chord[0]+displacement.x,temp_chord[1],0]);
+
+  if (chord == [0,0,0]) {
+    children();
+  } else {
+    z_correct = args[0];
+
+    count = homecol-col;
+
+    if (corners) {
+      translate([0,reverse?0:-chord[1],0]) rotate([0,0,(reverse?-1:1)*-((2*count-1)*chord[2]/2)]) translate([0,reverse?0:chord[1],0])
+	/*if (z_correct != 0 ) {
+	  rotate([0,0,(count/2-1)*(homerow)*z_correct/2]) children();
+	  } else {*/
+	children();
+      //}
+    } else {
+      translate([0,reverse?0:-chord[1],0]) rotate([0,0,(reverse?-1:1)*-(count*chord[2])]) translate([0,reverse?0:chord[1],0])
+	if (is_num(z_correct) && z_correct == 0) {
+	  children();
+	} else {
+	  rotate([0,0,count*(homerow-row)*optional_index(z_correct,row,col)]) children();
+	}
+    }
+  }
+}
+
+function create_arc_placement(v, z_correct=0) = ["arc", [z_correct], optional_normalize(v)];
+
 
 function optional_normalize(v) = !is_list(v[0]) ? normalize_chord(v) :
 				     [ for(e=v) optional_normalize(e) ];
