@@ -53,14 +53,38 @@ module layout_plate_only(rows=4, cols=1, homerow, homecol, row_spacing,
 			 perimeter=true, narrowsides=false, flatten=true,
 			 reverse_triangles=false,
 			 params=default_layout_placement_params()) {
+  module perimeter_helper(row,col) {
+    last_col = col == cols-1;
+    next_homerow = last_col ? undef : get_homerow(params, homerow, col+1);
+    next_row_count = last_col ? undef : optional_index(rows, col+1);
+    row_offset = last_col ? undef : (next_homerow - $homerow);
+
+    next_i = last_col ? undef : row+row_offset;
+
+    $next_i_valid = last_col ? undef :     0 <= next_i   && next_i   < next_row_count;
+    next_corner_valid = last_col ? undef : 0 <= next_i+1 && next_i+1 < next_row_count;
+
+    first_col = col == 0;
+
+    prev_homerow = first_col ? undef : get_homerow(params, homerow, col-1);
+    prev_row_count = first_col ? undef : optional_index(rows, col-1);
+    prev_row_offset = first_col ? undef : (prev_homerow - $homerow);
+
+    prev_i = first_col ? undef : row+prev_row_offset;
+
+    $prev_i_valid = first_col ? undef :      0 <= prev_i   && prev_i   < prev_row_count;
+
+    children();
+  }
 
   module placement_helper(row,col) {
     // lets us pass row, column as 2 scalar parameters, or as a single 2d vector
-    let(col = is_undef(col) ? row.y : col, row = is_list(row) ? row.x : row) {
+    let(col = is_undef(col) ? row.y : col, row = is_list(row) ? row.x : row) get_homes(params, homerow, homecol, col) perimeter_helper(row,col) {
       $h = side_gets_spacer(optional_index(headers,row,col), row != 0, perimeter, narrowsides);
       $f = side_gets_spacer(optional_index(footers,row,col), row != optional_index(rows, col)-1, perimeter, narrowsides);
-      $r = side_gets_spacer(optional_index(rightsides,row,col), col != 0, perimeter, narrowsides);
-      $l = side_gets_spacer(optional_index(leftsides,row,col), col != cols-1, perimeter, narrowsides);
+      $r = side_gets_spacer(optional_index(rightsides,row,col), col != 0 /*&& !$prev_i_valid*/, perimeter, narrowsides);
+      $l = side_gets_spacer(optional_index(leftsides,row,col), col != cols-1 && !$next_i_valid, perimeter, narrowsides);
+      echo(row, col, $l, optional_index(leftsides,row,col), col != cols-1 && !$next_i_valid, perimeter, narrowsides);
 
       layout_placement(row=row, col=col, row_spacing=row_spacing, col_spacing=col_spacing, profile_rows=profile_rows,
 		       homerow=homerow, homecol=homecol, tilt=tilt, offsets=offsets, displacement=displacement, flatten=flatten, params=params) children();
@@ -85,7 +109,7 @@ module layout_plate_only(rows=4, cols=1, homerow, homecol, row_spacing,
 	  placement_helper(left) keywell_bounding_box(y=-1, x=1, header=$h, footer=$f, leftside=$l, rightside=$r);
 	if (!is_undef(down))
 	  placement_helper(down) keywell_bounding_box(y=1, x=-1, header=$h, footer=$f, leftside=$l, rightside=$r);
-	if (!is_undef(corner))
+ 	if (!is_undef(corner))
 	  placement_helper(corner) keywell_bounding_box(y=1, x=1, header=$h, footer=$f, leftside=$l, rightside=$r);
       }
     }
@@ -145,7 +169,7 @@ module layout_plate_only(rows=4, cols=1, homerow, homecol, row_spacing,
 	placement_helper(i,j) keycap($effective_row);
       }
 
-      if (wells) get_homes(params, homerow, homecol, j){// let(homerow=$homerow, homecol=$homecol){
+      if (wells) get_homes(params, homerow, homecol, j) {
 	// well
 	placement_helper(i,j) keywell(header=$h, footer=$f, leftside=$l, rightside=$r);
 	if ($preview) placement_helper(i,j) hotswap();
