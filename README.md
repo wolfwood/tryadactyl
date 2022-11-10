@@ -34,7 +34,7 @@ I also aim to document an easy approach to handwiring that both simplifies the i
   * pluggable keycap support (add a new profile with a single function)
   * pluggable switch support (**TODO**)
   * per-key configuration overrides
-    * stick a Row 1 key next to an Row 4 key seamlessly by changing keycap profile row
+    * stick a Row 1 key next to a Row 4 key seamlessly by changing keycap profile row
     * Favorite keycaps don't come with an ortho/ergo kit? Use 'traditional' wide modifier keys with you non-row staggered design by setting a position offset.
   * multiple case styles, automatically generated base plates, and easy manual tuning of strut or wall placement
   * visual indications in preview-mode for identifying keycap collisions (including key travel, when pressed) or hotswap socket collisions with the model or each other
