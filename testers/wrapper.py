@@ -15,7 +15,7 @@ from pathlib import Path
 test_list_filename = 'tests.txt'
 tests_path = Path(__file__).resolve().parent
 
-def collect_test_names(ignore_list=[]):
+def collect_test_names(ignore_list:list[str]=[]) -> list[str]:
     names = []
 
     files = os.listdir(tests_path)
@@ -33,11 +33,11 @@ def collect_test_names(ignore_list=[]):
 
     return names
 
-def serialize_test_list(tests=[]):
+def serialize_test_list(tests:list[str]=[]) -> None:
     with (tests_path / test_list_filename).open("w") as f:
         f.write(' '.join(tests) + '\n')
 
-def deserialize_test_list(ignore_list=[]):
+def deserialize_test_list(ignore_list:list[str]=[]) -> list[str]:
     with (tests_path / test_list_filename) as l:
         if l.exists():
             with l.open() as f:
