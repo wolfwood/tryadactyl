@@ -4,10 +4,9 @@
 
 # this program is used to accomplish a number of test-related tasks:
 #   x generate list of tests by traversing testers/ directory, with optional ignore list
-#   * update wrapper.scad
 #   x generate test .stls and reference .stls
 #   x interpret execution of wrapper.scad diff render
-#   * run megatest - if it fails run individual tests
+#   x run all tests
 
 # I hope to avoid reimplementing dependency management or job control, which ideally belong to make
 
