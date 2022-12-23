@@ -17,7 +17,7 @@ use <thumbbowl-tester.scad>;
 use <tubular-tester.scad>;
 
 // ADD TEST HERE
-testnamelist=["cylindrical", "flat", "offset", "spherical", "thumbbowl", "tubular"];
+testnamelist=["cylindrical", "offset", "spherical", "thumbbowl", "tubular"];
 
 // ADD TEST HERE
 module invoke_test(name) {
@@ -33,6 +33,8 @@ module invoke_test(name) {
     thumbbowl_tester();
   } else if (name == "tubular"){
     tubular_tester();
+  } else {
+    //assert(false, str("'", name "' is not a valid test name"));
   }
 }
 
@@ -52,7 +54,7 @@ module testwrapper(){
 
 module test(name) {
   intersection() {
-    invoke_test(name);
+    invoke_stl(str("REFERENCE_", name));
     invoke_stl(name);
   }
 }
