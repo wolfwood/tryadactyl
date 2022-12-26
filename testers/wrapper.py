@@ -8,7 +8,35 @@
 #   x interpret execution of wrapper.scad diff render
 #   x run all tests
 
-# I hope to avoid reimplementing dependency management or job control, which ideally belong to make
+#  There is tension in the design because it would be easy to do everything in a single invocation
+#  of this script, or even a single invocation of openscad, however I hope to avoid reimplementing
+#  dependency management or job control, which ideally belong to make. I also wanted to detect new
+#  test models automatically and to provide a way to persistently exclude certain tests. I also
+#  wanted to be able to run a given test explicitly, regardless of prior exclusions.
+#
+#  Right now, this mean that you must re-generate tests.txt for a new test to be recognized.
+#  The main alternative I see to that would be persisting the ignore list separately, and then
+#  reconstructing the tests.txt on every run to see if a file has been added. this would also need
+#  to resolve the priority of ignores on the commandline vs the text file. either additive behavior
+#  or treating the commandline as authoritative could be reasonable choices.
+
+
+# diffing a current model against a reference .stl is challenging for two reasons:
+#  - repeated executions of an openscad render command don't give identical output for complex models
+#      this isn't due to timestamps or other metadata, but may be due to unordered mesh serialization
+#  - empty models give an error, rather than generating an empty stl, and this error is not unique
+#      rendering the current model to an .stl lets us confirm the model is not malformed
+#
+# since diffing .stl files with standard text tools isn't a promising strategy (unless there is some
+#  way to canonicalize them? some other ideas here https://github.blog/2013-09-17-3d-file-diffs/), I
+#  have decided to use openscad itself for the diffing. Since openscad can import the reference .stl
+#  we can intersect the .stl with the current model. an empty intersection should mean the model is
+#  unchanged. however, openscad will error out on an empty .stl if the test passes (intersection is
+#  empty) and may be difficult to distinguish from the model simply being broken. so instead we
+#  render the current model as an stl to insure it isn't broken, then in a separate invocation of
+#  openscad attempt to render the intersection of the two stls. If this render fails with the
+#  appropriate error messages, we consider this a passing test. if the render succeeds, then the
+#  intersection is non-empty and the regression test has failed.
 
 import os
 import re
