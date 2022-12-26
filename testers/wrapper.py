@@ -96,9 +96,6 @@ def render(name:str, reference:bool=False) -> bool:
         result = subprocess.run(args) #, stderr=subprocess.PIPE)
         return result.returncode == 0
 
-
-
-
 # values are valid for:
 #$ openscad --version
 #OpenSCAD version 2021.01
@@ -124,6 +121,7 @@ def diff(name:str) -> bool:
                 return None
             else:
                 return False
+
 
 def main():
     parser = argparse.ArgumentParser()
