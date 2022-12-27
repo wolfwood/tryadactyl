@@ -49,7 +49,9 @@ tests_path = Path(__file__).resolve().parent
 stls_path = (tests_path / "../things/testers").resolve()
 
 test_filename_pattern = re.compile('(.*)-tester.scad$')
-def collect_test_names(ignore_list:list[str]=[]) -> list[str]:
+def collect_test_names(ignore_list:list[str]) -> list[str]:
+    if ignore_list is None:
+        ignore_list = []
     names = []
 
     files = os.listdir(tests_path)
@@ -65,11 +67,17 @@ def collect_test_names(ignore_list:list[str]=[]) -> list[str]:
 
     return names
 
-def serialize_test_list(tests:list[str]=[]) -> None:
+def serialize_test_list(tests:list[str]) -> None:
+    if tests is None:
+        tests = []
+
     with (tests_path / test_list_filename).open("w") as f:
         f.write(' '.join(tests) + '\n')
 
-def deserialize_test_list(ignore_list:list[str]=[]) -> list[str]:
+def deserialize_test_list(ignore_list:list[str]) -> list[str]:
+    if ignore_list is None:
+        ignore_list = []
+
     with (tests_path / test_list_filename) as l:
         if l.exists():
             with l.open() as f:
