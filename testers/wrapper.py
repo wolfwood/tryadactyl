@@ -117,7 +117,7 @@ def diff(name:str) -> bool:
                 print(name + ": source .stls don't exist")
                 return None
 
-            args = ['openscad', '--render', '-Dtestname="'+name+'"', '-o', '/tmp/foo.stl', 'wrapper.scad']
+            args = ['openscad', '--render', '-Dtestname="'+name+'"', '-o', '/tmp/foo.stl', tests_path / 'wrapper.scad']
             result = subprocess.run(args, encoding='ascii', stderr=subprocess.PIPE)
             if result.returncode == 1:
                 for line in result.stderr.split('\n'):
