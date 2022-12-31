@@ -1,4 +1,6 @@
 *~
 \#*\#
 testers/tests.txt
+testers/.Makefile
+testers/.*.depends
 things/

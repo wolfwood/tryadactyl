@@ -98,10 +98,25 @@ def test_path(name:str) -> Path:
 def stl_path(name:str, reference:bool=False) -> Path:
     return stls_path / (('REFERENCE_' if reference else '') + name + "_tester.stl")
 
-def render(name:str, reference:bool=False) -> bool:
+def render(name:str, reference:bool=False, deps:bool=False, deps_path:Path=None) -> bool:
     with test_path(name) as t:
-        args = ['openscad', '--render', '-q', '-o', stl_path(name, reference), t]
-        result = subprocess.run(args) #, stderr=subprocess.PIPE)
+        input_file = t
+        output_file = stl_path(name, reference)
+
+        if deps:
+            # my makefile is written with relative paths. if we call openscad with absolute paths
+            # then the dependency file will have absolute paths and make won't recognize the
+            # dependency as matching the rule for stl generation, so .stls won't be regenerated
+            # when dependencies change. down side is that the output now depends on Current Working
+            # Directory
+            output_file = Path(os.path.relpath(output_file))
+            input_file = Path(os.path.relpath(input_file))
+
+        args = ['openscad', '--render', '-q', '-o', output_file, input_file]
+        if (not reference) and deps:
+            args += ['-d', deps_path]
+
+        result = subprocess.run(args)
         return result.returncode == 0
 
 # values are valid for:
@@ -138,6 +153,7 @@ def main():
     parser.add_argument('--reference', help='generate reference .stls instead, used to validate future tests', action='store_true')
     parser.add_argument( "testnames", nargs='*', help='list of tests to generate stls for', default=None)
     parser.add_argument('-g', '--generate', help='genenerate test .stl(s)', action='store_true')
+    parser.add_argument('-D', '--deps', nargs='?', help='when generating an .stl, also output a dependency file for use with make', default=None, const=True)
     parser.add_argument('-d', '--diff', help='check test .stl(s) against reference', action='store_true')
     args = parser.parse_args()
 
@@ -154,8 +170,18 @@ def main():
 
     diff_list = []
     if args.generate:
+        # path argument is optional so args.deps looks like a tri-bool {True, None, <file_path>}
+        deps = args.deps is not None
+        deps_path = None
+
         for n in names:
-            if not render(n, args.reference):
+            if deps:
+                if args.deps == True:
+                    deps_path = tests_path / ('.' + n + '.depends')
+                else:
+                    deps_path = Path(args.deps)
+
+            if not render(n, reference=args.reference, deps=deps, deps_path=deps_path):
                 print('error rendering ' + n)
             else:
                 diff_list.append(n)
