@@ -195,7 +195,7 @@ def main():
             if result is None:
                 print('error diffing ' + n)
             else:
-                print(n + ": " + ('success!' if result else "fail :'("))
+                print(n + ": " + ('success' if result else "fail! :'("))
 
 
 if __name__ == "__main__":
