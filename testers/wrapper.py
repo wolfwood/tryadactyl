@@ -48,7 +48,6 @@ test_list_filename = 'tests.txt'
 tests_path = Path(__file__).resolve().parent
 stls_path = (tests_path / "../things/testers").resolve()
 
-test_filename_pattern = re.compile('(.*)-tester.scad$')
 def collect_test_names(ignore_list:list[str]) -> list[str]:
     if ignore_list is None:
         ignore_list = []
@@ -56,6 +55,7 @@ def collect_test_names(ignore_list:list[str]) -> list[str]:
 
     files = os.listdir(tests_path)
 
+    test_filename_pattern = re.compile('(.*)-tester.scad$')
     for f in files:
         m = test_filename_pattern.match(f)
 
@@ -119,12 +119,13 @@ def render(name:str, reference:bool=False, deps:bool=False, deps_path:Path=None)
         result = subprocess.run(args)
         return result.returncode == 0
 
-# values are valid for:
-#$ openscad --version
-#OpenSCAD version 2021.01
-error_pattern = re.compile('^ERROR: The given mesh is not closed! Unable to convert to CGAL_Nef_Polyhedron.$')
-end_pattern = re.compile('^Current top level object is empty.$')
 def diff(name:str) -> bool:
+    # values are valid for:
+    #$ openscad --version
+    #OpenSCAD version 2021.01
+    error_pattern = 'ERROR: The given mesh is not closed! Unable to convert to CGAL_Nef_Polyhedron.'
+    end_pattern = 'Current top level object is empty.'
+
     error_count=0
     with stl_path(name) as t:
         with stl_path(name, True) as r:
@@ -136,9 +137,9 @@ def diff(name:str) -> bool:
             result = subprocess.run(args, encoding='ascii', stderr=subprocess.PIPE)
             if result.returncode == 1:
                 for line in result.stderr.split('\n'):
-                    if error_pattern.match(line):
+                    if line == error_pattern:
                         error_count += 1
-                    elif end_pattern.match(line):
+                    elif line == end_pattern:
                         if error_count == 2:
                             return True
                 return None
