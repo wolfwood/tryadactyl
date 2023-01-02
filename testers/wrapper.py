@@ -44,23 +44,25 @@ import argparse
 from pathlib import Path
 import subprocess
 
-test_list_filename = 'tests.txt'
-tests_path = Path(__file__).resolve().parent
-stls_path = (tests_path / "../things/testers").resolve()
+TEST_LIST_FILENAME = 'tests.txt'
+TESTS_PATH = Path(__file__).resolve().parent
+STLS_PATH = (TESTS_PATH / "../things/testers").resolve()
+
 
 def collect_test_names(ignore_list:list[str]) -> list[str]:
+    """Scan the TESTS_PATH directory and return a list of test names from files matching a pattern."""
     if ignore_list is None:
         ignore_list = []
     names = []
 
-    files = os.listdir(tests_path)
+    files = os.listdir(TESTS_PATH)
 
     test_filename_pattern = re.compile('(.*)-tester.scad$')
-    for f in files:
-        m = test_filename_pattern.match(f)
+    for filename in files:
+        match = test_filename_pattern.match(filename)
 
-        if m:
-            test = m.group(1)
+        if match:
+            test = match.group(1)
 
             if test not in ignore_list:
                 names.append(test)
@@ -68,17 +70,19 @@ def collect_test_names(ignore_list:list[str]) -> list[str]:
     return names
 
 def serialize_test_list(tests:list[str]) -> None:
+    """Save a list of test names to a known filename."""
     if tests is None:
         tests = []
 
-    with (tests_path / test_list_filename).open("w") as f:
+    with (TESTS_PATH / TEST_LIST_FILENAME).open("w") as f:
         f.write(' '.join(tests) + '\n')
 
 def deserialize_test_list(ignore_list:list[str]) -> list[str]:
+    """Read a list of test names from a known filename."""
     if ignore_list is None:
         ignore_list = []
 
-    with (tests_path / test_list_filename) as l:
+    with (TESTS_PATH / TEST_LIST_FILENAME) as l:
         if l.exists():
             with l.open() as f:
                 names = []
@@ -88,27 +92,48 @@ def deserialize_test_list(ignore_list:list[str]) -> list[str]:
                         names.append(test)
 
                 return names
+    return None
 
 def test_path(name:str) -> Path:
-    test = tests_path / (name + "-tester.scad")
+    """Take a test name and return a path for the scad file containing that test."""
+    test = TESTS_PATH / (name + "-tester.scad")
 
     if test.exists():
         return test
+    return None
 
 def stl_path(name:str, reference:bool=False) -> Path:
-    return stls_path / (('REFERENCE_' if reference else '') + name + "_tester.stl")
+    """
+    Take a test name and return the corresponding .stl's file path.
+
+    Parameters:
+        reference: whether to return the reference .stl for the test or the current output
+    """
+    return STLS_PATH / (('REFERENCE_' if reference else '') + name + "_tester.stl")
 
 def render(name:str, reference:bool=False, deps:bool=False, deps_path:Path=None) -> bool:
-    with test_path(name) as t:
-        input_file = t
+    """
+    Render an .stl for a test.
+
+    Parameters:
+        name: the test name
+        reference: whether to generate a reference .stl
+        deps: whether to also generate a dependency file for make
+        deps_path: if deps is true, what name should be used for the dependency file
+
+    Returns:
+        True if the render was successful, otherwise False indicating an error
+    """
+    with test_path(name) as test:
+        input_file = test
         output_file = stl_path(name, reference)
 
         if deps:
             # my makefile is written with relative paths. if we call openscad with absolute paths
             # then the dependency file will have absolute paths and make won't recognize the
             # dependency as matching the rule for stl generation, so .stls won't be regenerated
-            # when dependencies change. down side is that the output now depends on Current Working
-            # Directory
+            # when dependencies change. down side is that the output now depends on the Current
+            # Working Directory
             output_file = Path(os.path.relpath(output_file))
             input_file = Path(os.path.relpath(input_file))
 
@@ -116,10 +141,11 @@ def render(name:str, reference:bool=False, deps:bool=False, deps_path:Path=None)
         if (not reference) and deps:
             args += ['-d', deps_path]
 
-        result = subprocess.run(args)
+        result = subprocess.run(args, check=False)
         return result.returncode == 0
 
 def diff(name:str) -> bool:
+    """Compare the reference and current .stls for a test, return True if they are identical"""
     # values are valid for:
     #$ openscad --version
     #OpenSCAD version 2021.01
@@ -127,14 +153,15 @@ def diff(name:str) -> bool:
     end_pattern = 'Current top level object is empty.'
 
     error_count=0
-    with stl_path(name) as t:
-        with stl_path(name, True) as r:
-            if not t.exists() or not r.exists():
+    with stl_path(name) as test:
+        with stl_path(name, True) as reference:
+            if not test.exists() or not reference.exists():
                 print(name + ": source .stls don't exist")
                 return None
 
-            args = ['openscad', '--render', '-Dtestname="'+name+'"', '-o', '/tmp/foo.stl', tests_path / 'wrapper.scad']
-            result = subprocess.run(args, encoding='ascii', stderr=subprocess.PIPE)
+            args = ['openscad', '--render', '-Dtestname="'+name+'"', '-o', '/tmp/foo.stl',
+                    TESTS_PATH / 'wrapper.scad']
+            result = subprocess.run(args, encoding='ascii', stderr=subprocess.PIPE, check=False)
             if result.returncode == 1:
                 for line in result.stderr.split('\n'):
                     if line == error_pattern:
@@ -143,31 +170,38 @@ def diff(name:str) -> bool:
                         if error_count == 2:
                             return True
                 return None
-            else:
-                return False
+            return False
+    return None
 
-
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument('--clear', help='remove and regenerate list of valid tests', action='store_true')
     parser.add_argument( '-i', '--ignore', nargs='+', help='list of tests to skip')
-    parser.add_argument('--reference', help='generate reference .stls instead, used to validate future tests', action='store_true')
+    parser.add_argument('--reference',
+                        help='generate reference .stls instead, used to validate future tests',
+                        action='store_true')
     parser.add_argument( "testnames", nargs='*', help='list of tests to generate stls for', default=None)
     parser.add_argument('-g', '--generate', help='genenerate test .stl(s)', action='store_true')
-    parser.add_argument('-D', '--deps', nargs='?', help='when generating an .stl, also output a dependency file for use with make', default=None, const=True)
+    parser.add_argument('-D', '--deps', nargs='?',
+                        help='when generating an .stl, also output a dependency file for use with make',
+                        default=None, const=True)
     parser.add_argument('-d', '--diff', help='check test .stl(s) against reference', action='store_true')
     args = parser.parse_args()
 
     ignore_list = args.ignore if args.ignore is not None else []
 
-    names = [x for x in args.testnames if x not in ignore_list] if args.testnames else deserialize_test_list(ignore_list) if not args.clear else None
+    names = None
+    if args.testnames:
+        names = [x for x in args.testnames if x not in ignore_list]
+    elif not args.clear:
+        names = deserialize_test_list(ignore_list)
 
     if names is None:
         names = collect_test_names(ignore_list)
         serialize_test_list(names)
 
-    if not stls_path.exists():
-        stls_path.mkdir(parents=True)
+    if not STLS_PATH.exists():
+        STLS_PATH.mkdir(parents=True)
 
     diff_list = []
     if args.generate:
@@ -175,28 +209,28 @@ def main():
         deps = args.deps is not None
         deps_path = None
 
-        for n in names:
+        for name in names:
             if deps:
-                if args.deps == True:
-                    deps_path = tests_path / ('.' + n + '.depends')
+                if args.deps is True:
+                    deps_path = TESTS_PATH / ('.' + name + '.depends')
                 else:
                     deps_path = Path(args.deps)
 
-            if not render(n, reference=args.reference, deps=deps, deps_path=deps_path):
-                print('error rendering ' + n)
+            if not render(name, reference=args.reference, deps=deps, deps_path=deps_path):
+                print('error rendering ' + name)
             else:
-                diff_list.append(n)
+                diff_list.append(name)
     else:
         diff_list = names
 
     if args.diff:
-        for n in diff_list:
-            result = diff(n)
+        for name in diff_list:
+            result = diff(name)
 
             if result is None:
-                print('error diffing ' + n)
+                print('error diffing ' + name)
             else:
-                print(n + ": " + ('success' if result else "fail! :'("))
+                print(name + ": " + ('success' if result else "fail! :'("))
 
 
 if __name__ == "__main__":
