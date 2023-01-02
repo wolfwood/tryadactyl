@@ -68,6 +68,7 @@ To view the keyboard assembled, run `openscad assembly.scad`. This is how I norm
 
 For printing, the `fingers.scad`, `plate.scad` and `thumb.scad` models can be used to obtain separate parts. trying to print the whole assembly as is would be unlikely to succeed. I like to use the commandline to invoke `openscad` for renders, like the following: `openscad -q --hardwarnings --render -o things/plate.stl plate.scad`.
 
+To validate that changes to the library code have not introduced regressions, run `make test` prior to editing (or after a `git stash`), which will generate reference *.stl*s for later comparison. Run `make test` again after editing to see if the tests still produce identical *.stl*s. New tests should be added when new positioning functions, keycap profiles, or other features are introduced. The tester models should also be useful to those who might like to print a smaller model to consider the feel of a given column shape without wasting time and material printing a full keyboard.
 
 # FAQs
 #### Q
