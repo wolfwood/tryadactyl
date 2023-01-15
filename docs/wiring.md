@@ -6,7 +6,7 @@ This is how I wire up my keyboard so that everything is socketed and reusable as
 
   - [6" Raw, socketed, jumper wire ribbons](https://www.adafruit.com/product/3141) (you can also use the 12" version and remove the individual housings, or use as is)
   - [.1" pitch Small Single Row Wire Housing Pack for DIY Jumper Cables](https://www.adafruit.com/product/3145) (there's only 10 of each size so if you have 6 four row columns on each side, like I do, you might want to supplement with [a big pack of strictly 4 pin housings](https://www.amazon.com/gp/product/B00R5FOZW2/))
-  - [.1" pitch permaproto board](https://www.adafruit.com/product/723). for keyboards with smaller numbers of keys and/or no trackpoint you could [consider a smaller size](https://www.adafruit.com/product/1608)
+  - [.1" pitch permaproto board](https://www.adafruit.com/product/1214).
   - [.1" pitch break-away header pins](https://www.adafruit.com/product/392)
   - Kailh hotswap sockets (MX or Choc, to match your choice of switch) can be found from many online keyboard shops, or you can get MX v2 sockets from Kailh/Kaihua on aliexpress.
 
