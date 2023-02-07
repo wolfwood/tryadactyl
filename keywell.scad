@@ -331,43 +331,69 @@ module sidewall_edge_bounding_box(x=0,y=0,x_aligned=true, header=false,footer=fa
     }
 }
 
-// XXX: overhang needs to be narrowsides aware
-module sidewall_topper(x=0,y=0, header=false,footer=false,leftside=false,rightside=false, bounding_box=false, extra_room=[0,0,0]) {
-  module top(overhang, length) {
-    mirror(y != 0 ? [1,-1,0] : [0,0,0]) translate([-overhang, 0,0]) {
-      difference() {
-	cube([overhang,length,thickness]);
-	translate([overhang,0,0]) rotate([0,-atan(thickness/overhang),0]) translate([0,0,-10]) cube([overhang+10, length,20]);
+/* eventually we'd like to support at least 4 topper styles:
+ *  - one thats just a rectangular prism, flush with the top of the switchmount
+ *  - one thats angled, rather than squared off, connecting the top edge of the switchmount to the
+ *     furthest outside edge of the sidewall cylinder
+ *  - one thats a half cylinder adjacent to the switchmount, linked to the sidewall cylinder with
+ *     a prism, ie a rounded version of the above that automatically moves the wall to be flush
+ *  - one that adds a bezel around the keys, with a configurable bezel width and distance, smoothly
+ *     uniting the bezel bottom to the sidewall cylinder. round top bezel or squared off?
+ */
+module sidewall_topper(x=0,y=0, header=false,footer=false,leftside=false,rightside=false, bounding_box=false, extra_room=[0,0,0], underhang) {
+  module top(overhang, length, underhang) {
+    angled_topper=false;
+    let(overhang = overhang - (underhang ? (outerdia - innerdia)/2 : 0)) {
+      mirror(y != 0 ? [1,-1,0] : [0,0,0]) translate([-overhang, 0, 0]) {
+	difference() {
+	  cube([overhang,length,thickness]);
+
+	  if (angled_topper)
+	    rotate([0,-atan(thickness/overhang),0])
+	      translate([-1, -1, 0]) // clean margins
+	      cube([overhang+10, 2 + length,20]);
+	}
+	translate([0, 0, -wall_width/2]) cube([wall_width,length,wall_width/2]);
       }
-      translate([0, 0, -wall_width/2]) cube([wall_width,length,wall_width/2]);
     }
   }
 
+  // need x_aligned or equivalent to replace sidewall_topper_bounding_box with this
   if (x != 0 && y != 0) {
     position_keywell_corner(x=x,y=y,header=header,footer=footer,leftside=leftside,rightside=rightside,extra_room=extra_room)
       top(wall_width + directional_decoder(wall_extra_room,x,y), epsilon);
   } else if (x != 0) {
-    position_keywell_corner(x=x,y=-1,header=header,footer=footer,leftside=leftside,rightside=rightside,extra_room=extra_room)
-      top(wall_width + directional_decoder(wall_extra_room,x,y), outerdia + optional_sum(header,footer));
+    let (underhang = !is_undef(underhang) ? underhang : (x == 1 && !rightside) || (x == -1 && !leftside))
+      position_keywell_corner(x=x,y=-1,header=header,footer=footer,leftside=leftside,rightside=rightside,extra_room=extra_room)
+      top(wall_width + directional_decoder(wall_extra_room,x,y), outerdia + optional_sum(header,footer), underhang);
   } else {
-    position_keywell_corner(x=1,y=y,header=header,footer=footer,leftside=leftside,rightside=rightside,extra_room=extra_room)
-      top(wall_width + directional_decoder(wall_extra_room,x,y), outerdia + optional_sum(rightside,leftside));
+    let (underhang = !is_undef(underhang) ? underhang : (y == 1 && !header) || (y == -1 && !footer))
+      position_keywell_corner(x=1,y=y,header=header,footer=footer,leftside=leftside,rightside=rightside,extra_room=extra_room)
+      top(wall_width + directional_decoder(wall_extra_room,x,y), outerdia + optional_sum(rightside,leftside), underhang);
   }
 }
 
-module sidewall_topper_bounding_box(x=0,y=0, x_aligned=true, header=false,footer=false,leftside=false,rightside=false, bounding_box=false, extra_room=[0,0,0]) {
-  module top(overhang, length) {
-    mirror(!x_aligned ? [1,-1,0] : [0,0,0])
-    translate([-overhang, 0,0]) {
-      difference() {
-	cube([overhang,length,thickness]);
-	translate([overhang,0,0]) rotate([0,-atan(thickness/overhang),0]) translate([0,0,-10]) cube([overhang+10, length,20]);
-      }
+module sidewall_topper_bounding_box(x=0,y=0, x_aligned=true, header=false,footer=false,leftside=false,rightside=false, bounding_box=false, extra_room=[0,0,0], underhang) {
+  module top(overhang, length, underhang) {
+    angled_topper=false;
+    let(overhang = overhang - (underhang ? (outerdia - innerdia)/2 : 0)) {
+      mirror(!x_aligned ? [1,-1,0] : [0,0,0]) translate([-overhang, 0,0]) {
+        difference() {
+	  cube([overhang,length,thickness]);
 
-      translate([0, 0, -wall_width/2]) cube([wall_width,length,wall_width/2]);
+	  if (angled_topper)
+	    rotate([0,-atan(thickness/overhang),0])
+	      translate([-1,-1,0]) cube([overhang+10, 2 + length,20]);
+	}
+
+	translate([0, 0, -wall_width/2]) cube([wall_width,length,wall_width/2]);
+      }
     }
   }
 
-  position_keywell_corner(x=x,y=y,header=header,footer=footer,leftside=leftside,rightside=rightside,extra_room=extra_room)
-    top(wall_width + directional_decoder(wall_extra_room,x_aligned?x:0,y), epsilon);
+  let (underhang = !is_undef(underhang) ? underhang :
+       x_aligned ? (x == 1 && !rightside) || (x == -1 && !leftside) :
+       (y == 1 && !header) || (y == -1 && !footer))
+    position_keywell_corner(x=x,y=y,header=header,footer=footer,leftside=leftside,rightside=rightside,extra_room=extra_room)
+    top(wall_width + directional_decoder(wall_extra_room,x_aligned?x:0,y), epsilon, underhang);
 }
