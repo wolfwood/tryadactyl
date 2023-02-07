@@ -41,7 +41,7 @@ let(header=false,footer=true,rightside=true,leftside=false, $fn=60) {
 	#sidewall_edge_bounding_box(x=i,y=j,x_aligned=false,header=header,footer=footer,leftside=leftside,rightside=rightside);
 
 	*if (j == 1) {
-	 sidewall_topper(y=i,header=header,footer=footer,leftside=leftside,rightside=rightside);
+	  sidewall_topper(y=i,header=header,footer=footer,leftside=leftside,rightside=rightside);
 	}
       }
       *sidewall_topper(x=i,header=header,footer=footer,leftside=leftside,rightside=rightside);
@@ -69,7 +69,7 @@ let(header=false,footer=true,rightside=true,leftside=false, $fn=60) {
 	#keywell_corner_spheres(x=i, y=j, header=header,footer=footer,leftside=leftside,rightside=rightside);
       }
     }
-   for (i=[-1,1]) {
+    for (i=[-1,1]) {
       #keywell_corner_spheres(x=i, header=header,footer=footer,leftside=leftside,rightside=rightside);
       #keywell_corner_spheres(y=i, header=header,footer=footer,leftside=leftside,rightside=rightside);
     }
@@ -253,8 +253,8 @@ module keywell_corner_spheres(x,y,width=thickness, header=false,footer=false,lef
 	sphere(d=width);
 	if (extra_room == [0,0,0]) {
 	  //translate([0,0,-width/2]) cube([width,width,width]);
-	 translate([0,-width/2,-width/2]) cube([width,width,width]);
-	 translate([-width/2,0,-width/2]) cube([width,width,width]);
+	  translate([0,-width/2,-width/2]) cube([width,width,width]);
+	  translate([-width/2,0,-width/2]) cube([width,width,width]);
 	}
       }
     }
@@ -346,7 +346,6 @@ module sidewall_topper(x=0,y=0, header=false,footer=false,leftside=false,rightsi
   if (x != 0 && y != 0) {
     position_keywell_corner(x=x,y=y,header=header,footer=footer,leftside=leftside,rightside=rightside,extra_room=extra_room)
       top(wall_width + directional_decoder(wall_extra_room,x,y), epsilon);
-
   } else if (x != 0) {
     position_keywell_corner(x=x,y=-1,header=header,footer=footer,leftside=leftside,rightside=rightside,extra_room=extra_room)
       top(wall_width + directional_decoder(wall_extra_room,x,y), outerdia + optional_sum(header,footer));
@@ -367,7 +366,6 @@ module sidewall_topper_bounding_box(x=0,y=0, x_aligned=true, header=false,footer
 
       translate([0, 0, -wall_width/2]) cube([wall_width,length,wall_width/2]);
     }
-
   }
 
   position_keywell_corner(x=x,y=y,header=header,footer=footer,leftside=leftside,rightside=rightside,extra_room=extra_room)
