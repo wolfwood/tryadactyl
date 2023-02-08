@@ -20,9 +20,14 @@ module testwrapper(){
 }
 
 module test(name) {
-  intersection() {
-    invoke_stl(str("REFERENCE_", name));
+  difference() {
+    union() invoke_stl(str("REFERENCE_", name));
+    union() invoke_stl(name);
+  }
+
+  difference() {
     invoke_stl(name);
+    invoke_stl(str("REFERENCE_", name));
   }
 }
 
