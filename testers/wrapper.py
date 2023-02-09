@@ -149,10 +149,12 @@ def diff(name:str) -> bool:
     # values are valid for:
     #$ openscad --version
     #OpenSCAD version 2021.01
-    error_pattern = 'ERROR: The given mesh is not closed! Unable to convert to CGAL_Nef_Polyhedron.'
+    error_pattern = re.compile("^ERROR:")
+    not_closed_error_pattern = 'ERROR: The given mesh is not closed! Unable to convert to CGAL_Nef_Polyhedron.'
     end_pattern = 'Current top level object is empty.'
 
     error_count=0
+    not_closed_count=0
     with stl_path(name) as test:
         with stl_path(name, True) as reference:
             if not test.exists() or not reference.exists():
@@ -164,11 +166,15 @@ def diff(name:str) -> bool:
             result = subprocess.run(args, encoding='ascii', stderr=subprocess.PIPE, check=False)
             if result.returncode == 1:
                 for line in result.stderr.split('\n'):
-                    if line == error_pattern:
+                    if error_pattern.match(line):
                         error_count += 1
+                        if line == not_closed_error_pattern:
+                            not_closed_count += 1
                     elif line == end_pattern:
-                        if error_count == 2:
+                        if error_count == 0:
                             return True
+                        if not_closed_count > 0:
+                            print('\t' + ('both' if error_count > 2 else 'one of') + " the reference and current models are not closed. this means the model is malformed and testing cannot be completed. difference()s with a coincident face, i.e. that don't extend beyond the object being cut, are a common cause.")
                 return None
             return False
     return None
