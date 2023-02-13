@@ -22,12 +22,12 @@ module testwrapper(){
 }
 
 module test(name) {
-  difference() {
+  color("red") difference() {
     union() invoke_stl(str("REFERENCE_", name));
     union() invoke_stl(name);
   }
 
-  difference() {
+  color("green") difference() {
     invoke_stl(name);
     invoke_stl(str("REFERENCE_", name));
   }
