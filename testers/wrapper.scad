@@ -9,6 +9,8 @@ module invoke_stl(name) {
   import(str("../things/testers/", name, "_tester.stl"));
 }
 
+testnamelist="";
+
 module testwrapper(){
   if (!is_undef(testname)) {
     test(testname);
