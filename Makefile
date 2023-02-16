@@ -11,7 +11,7 @@ TESTEXE := ./testers/wrapper.py
 TESTTARGETS = $(addsuffix -diff, $(TESTNAMES))
 TN = $(eval TN := $$(shell cat testers/tests.txt))$(TN)
 TESTSTLS = $(addprefix things/testers/,$(addsuffix _tester.stl,$(TESTNAMES)))
-REFSTL = $(addprefix things/testers/REFERENCE_,$(addsuffix _tester.stl,$(TESTNAMES)))
+REFSTLS = $(addprefix things/testers/REFERENCE_,$(addsuffix _tester.stl,$(TESTNAMES)))
 
 testers/tests.txt:
 	@echo Constructing test list
@@ -41,8 +41,7 @@ things/testers/%_tester.stl: testers/%-tester.scad
 %-diff: things/testers/REFERENCE_%_tester.stl things/testers/%_tester.stl
 	@$(TESTEXE) -d $*
 
-# if I don't make the stls a dependency, then make will delete them after the run D:
-test: testers/tests.txt $(TESTTARGETS)  $(TESTSTLS) $(REFSTLS)
+test: testers/tests.txt $(TESTTARGETS)
 
 clean-test:
 	-rm $(TESTSTLS) testers/.*.depends testers/.Makefile
