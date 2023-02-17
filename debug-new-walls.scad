@@ -1,10 +1,10 @@
 include <settings.scad>;
-use <keycap.scad>;
-use <column-util.scad>;
-use <column-layout.scad>;
-use <trackpoint.scad>;
-use <assembly-util.scad>;
-use <keywell.scad>;
+use <key/cap.scad>;
+use <column/util.scad>;
+use <column/layout.scad>;
+use <assembly/trackpoint.scad>;
+use <assembly/util.scad>;
+use <key/mount.scad>;
 
 
 index_walls = [
@@ -76,7 +76,7 @@ tight_spherical_col = [[row_chord+[-.8,0,0]],
 spherical_z = [4,30,0,0];
 
 
-//layout_placement(row=2, col=2, homerow=2, homecol=0, offsets=[0,-.1,0], params=index_placement_params) keywell(header=true, footer=true, leftside=true);
+//layout_placement(row=2, col=2, homerow=2, homecol=0, offsets=[0,-.1,0], params=index_placement_params) key_mount(header=true, footer=true, leftside=true);
 index_keys= true;
 index_pos = [-(outerdia+4),-4,6];
 index_tent = [0,0,5];
@@ -176,34 +176,34 @@ module mounted_index(keys=true) {
 
       hull () {
       layout_placement(3, 0, params=index_placement_params, displacement=tp_corner_disp, corners=true)
-	keywell_corner_bounding_box(x=-1, y=1,leftside=true, footer=true);
-      layout_placement(2, 1, params=index_placement_params) keywell_side_bounding_box(y=-1, leftside=true,
+	key_mount_corner_bounding_box(x=-1, y=1,leftside=true, footer=true);
+      layout_placement(2, 1, params=index_placement_params) key_mount_side_bounding_box(y=-1, leftside=true,
 										      footer=true);
     }
       hull () {
       layout_placement(3, 0, params=index_placement_params, displacement=tp_corner_disp, corners=true)
-	keywell_corner_bounding_box(x=-1, y=1,leftside=true, footer=true);
-      layout_placement(3, 0, params=index_placement_params) keywell_corner_bounding_box(x=-1, y=-1, rightside=true,
+	key_mount_corner_bounding_box(x=-1, y=1,leftside=true, footer=true);
+      layout_placement(3, 0, params=index_placement_params) key_mount_corner_bounding_box(x=-1, y=-1, rightside=true,
 										      footer=true);
-      layout_placement(2, 1, params=index_placement_params) keywell_bounding_box(y=-1, x=1, leftside=true,
+      layout_placement(2, 1, params=index_placement_params) key_mount_bounding_box(y=-1, x=1, leftside=true,
 											footer=true);
     }
       hull() {
       layout_placement(row=2, col=2, homerow=2, homecol=0, offsets=[0,-.1,0], params=index_placement_params)
-	keywell_bounding_box(x=1,y=-1, header=true, footer=true, leftside=true);
-      layout_placement(2, 1, params=index_placement_params) keywell_bounding_box(x=-1,y=-1, leftside=true,
+	key_mount_bounding_box(x=1,y=-1, header=true, footer=true, leftside=true);
+      layout_placement(2, 1, params=index_placement_params) key_mount_bounding_box(x=-1,y=-1, leftside=true,
 										 footer=true);
       layout_placement(3, 0, params=index_placement_params, displacement=tp_corner_disp, corners=true)
-	keywell_corner_bounding_box(x=-1, y=1,leftside=true, footer=true);
+	key_mount_corner_bounding_box(x=-1, y=1,leftside=true, footer=true);
     }
       hull() {
       layout_placement(row=2, col=2, homerow=2, homecol=0, offsets=[0,-.1,0], params=index_placement_params)
-	keywell_bounding_box(y=-1, header=true, footer=true, leftside=true);
+	key_mount_bounding_box(y=-1, header=true, footer=true, leftside=true);
            layout_placement(3, 0, params=index_placement_params, displacement=tp_corner_disp, corners=true)
-	keywell_corner_bounding_box(x=-1, y=1,leftside=true, footer=true);
+	key_mount_corner_bounding_box(x=-1, y=1,leftside=true, footer=true);
     }
 
-    *layout_placement(row=2, col=2, homerow=2, homecol=0, offsets=[0,-.1,0], params=index_placement_params) keywell(header=true, footer=true, leftside=true);
+    *layout_placement(row=2, col=2, homerow=2, homecol=0, offsets=[0,-.1,0], params=index_placement_params) key_mount(header=true, footer=true, leftside=true);
   }
 
   if (keys) {
@@ -263,24 +263,24 @@ mounted_pinkie(keys=keys);
 join_columns(rows,cols, index_placement_params, middle_placement_params, right=true);
 join_columns(rows,pinkie_cols, middle_placement_params, pinkie_placement_params, left=true);
 
-use <keywell.scad>;
+use <key/mount.scad>;
 module join_columns(rows, cols, params1, params2, left=false, right=false) {
   for (i=[0:rows-1]) {
     hull() {
-      layout_placement(i, 0, params=params1) keywell_side_bounding_box(x=1, rightside=!right,
+      layout_placement(i, 0, params=params1) key_mount_side_bounding_box(x=1, rightside=!right,
 								       header=(i==0), footer=(i==(rows-1)));
-      layout_placement(i, cols-1, params=params2) keywell_side_bounding_box(x=-1, leftside=!left,
+      layout_placement(i, cols-1, params=params2) key_mount_side_bounding_box(x=-1, leftside=!left,
 								       header=(i==0), footer=(i==(rows-1)));
     }
     if (i < rows -1) {
       hull() {
-	layout_placement(i, 0, params=params1) keywell_corner_bounding_box(x=1, y=-1, rightside=!right,
+	layout_placement(i, 0, params=params1) key_mount_corner_bounding_box(x=1, y=-1, rightside=!right,
 									   header=(i==0));
-	layout_placement(i+1, 0, params=params1) keywell_corner_bounding_box(x=1, y=1, rightside=!right,
+	layout_placement(i+1, 0, params=params1) key_mount_corner_bounding_box(x=1, y=1, rightside=!right,
 									     footer=((i+1)==(rows-1)));
-	layout_placement(i, cols-1, params=params2) keywell_corner_bounding_box(x=-1, y=-1, leftside=!left,
+	layout_placement(i, cols-1, params=params2) key_mount_corner_bounding_box(x=-1, y=-1, leftside=!left,
 									   header=(i==0));
-	layout_placement(i+1, cols-1, params=params2) keywell_corner_bounding_box(x=-1, y=1, leftside=!left,
+	layout_placement(i+1, cols-1, params=params2) key_mount_corner_bounding_box(x=-1, y=1, leftside=!left,
 									     footer=((i+1)==(rows-1)));
       }
     }

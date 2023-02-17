@@ -48,6 +48,7 @@ TEST_LIST_FILENAME = 'tests.txt'
 TESTS_PATH = Path(__file__).resolve().parent
 STLS_PATH = (TESTS_PATH / "../things/testers").resolve()
 
+SCAD_EXE = '/home/wolfwood/Downloads/OpenSCAD-2023.01.23.ai13617-x86_64.AppImage' # 'openscad'
 
 def collect_test_names(ignore_list:list[str]) -> list[str]:
     """Scan the TESTS_PATH directory and return a list of test names from files matching a pattern."""
@@ -137,12 +138,24 @@ def render(name:str, reference:bool=False, deps:bool=False, deps_path:Path=None)
             output_file = Path(os.path.relpath(output_file))
             input_file = Path(os.path.relpath(input_file))
 
-        args = ['openscad', '--render', '-q', '-o', output_file, input_file]
+        args = [SCAD_EXE, '--enable=sort-stl', '--render', '-q', '-o', output_file, input_file]
         if (not reference) and deps:
             args += ['-d', deps_path]
 
         result = subprocess.run(args, check=False)
         return result.returncode == 0
+
+def fast_diff(name:str) -> bool:
+    with stl_path(name) as test:
+        with stl_path(name, True) as reference:
+            if not test.exists() or not reference.exists():
+                print(name + ": source .stls don't exist")
+                return None
+
+            args = ['cmp', '-s', reference, test]
+
+            result = subprocess.run(args, encoding='ascii', stderr=subprocess.PIPE, check=False)
+            return result.returncode == 0
 
 def diff(name:str) -> bool:
     """Compare the reference and current .stls for a test, return True if they are identical"""
@@ -161,7 +174,7 @@ def diff(name:str) -> bool:
                 print(name + ": source .stls don't exist")
                 return None
 
-            args = ['openscad', '--render', '-Dtestname="'+name+'"', '-o', '/tmp/foo.stl',
+            args = [SCAD_EXE, '--render', '-Dtestname="'+name+'"', '-o', '/tmp/foo.stl',
                     TESTS_PATH / 'wrapper.scad']
             result = subprocess.run(args, encoding='ascii', stderr=subprocess.PIPE, check=False)
             if result.returncode == 1:
@@ -231,7 +244,7 @@ def main() -> None:
 
     if args.diff:
         for name in diff_list:
-            result = diff(name)
+            result = fast_diff(name)
 
             if result is None:
                 print('error diffing ' + name)

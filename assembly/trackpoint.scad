@@ -1,9 +1,9 @@
 
-include <settings.scad>;
-use <util.scad>;
-use <column-util.scad>;
-use <keywell.scad>;
-use <keycap.scad>;
+include <../settings.scad>;
+use <../util.scad>;
+use <../column/util.scad>;
+use <../key/mount.scad>;
+use <../key/cap.scad>;
 
 
 module install_trackpoint(row,col, row_spacing, col_spacing, profile_rows, homerow,
@@ -27,7 +27,7 @@ module install_trackpoint(row,col, row_spacing, col_spacing, profile_rows, homer
 	above=true;
 	for (i=[0,1]) {
 	  for (j=[0,1]) {
-	    helper(row+i,col+j,d=[0,0,0]) keywell_cavity(above=above,below=true);
+	    helper(row+i,col+j,d=[0,0,0]) key_mount_cavity(above=above,below=true);
 	  }
 	}
       }

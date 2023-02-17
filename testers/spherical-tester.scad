@@ -1,9 +1,9 @@
 include <../settings.scad>;
-use <../keycap.scad>;
-use <../keywell.scad>;
-use <../column-util.scad>;
-use <../column-layout.scad>;
-use <../trackpoint.scad>;
+use <../key/cap.scad>;
+use <../key/mount.scad>;
+use <../column/util.scad>;
+use <../column/layout.scad>;
+use <../assembly/trackpoint.scad>;
 
 module spherical_tester(rows=4, cols=2, keys=false) {
   row_spacing = create_circular_placement([19,35,0]);
@@ -16,7 +16,7 @@ module spherical_tester(rows=4, cols=2, keys=false) {
   placement_params = layout_placement_params(row_spacing=row_spacing, col_spacing=col_spacing, homerow=homerow, profile_rows=profile_rows, tilt=tilt);
 
   if ($preview) {
-    *#rotate(tilt) translate([0,0,optional_vector_index(row_spacing[2],0,0)[1]])
+    #rotate(tilt) translate([0,0,optional_vector_index(row_spacing[2],0,0)[1]])
     scale([col_spacing[2][1]/row_spacing[2][1],1,1])
     sphere($fn=120,r=optional_vector_index(row_spacing[2],0,0)[1]);
     layout_columns(rows=rows, cols=cols, keys=keys, wells=false, params=placement_params);

@@ -4,12 +4,11 @@
  */
 
 
-include <settings.scad>;
-use <keywell.scad>;
-use <keycap.scad>;
-use <column-util.scad>;
-use <trackpoint.scad>;
+include <../settings.scad>;
+use <../key/mount.scad>;
+use <../key/cap.scad>;
 use <util.scad>;
+use <../util.scad>;
 
 module layout_columns(rows=4, cols=1, homerow, homecol, row_spacing,
 		      col_spacing,
@@ -67,7 +66,7 @@ module layout_plate_only(rows=4, cols=1, homerow, homecol, row_spacing,
     }
   }
 
-  // used to join keywells so they form a solid plate
+  // used to join key_mounts so they form a solid plate
   module connect(this, left, down, corner) {
     // params can be ignored, otherwise they should ve a 2d vector of [row,col]
     assert( ( is_undef(this) || is_list(this) ) &&
@@ -80,17 +79,17 @@ module layout_plate_only(rows=4, cols=1, homerow, homecol, row_spacing,
     module hull_corners(this, left, down, corner) {
       hull() {
 	if (!is_undef(this))
-	  placement_helper(this) keywell_bounding_box(y=-1, x=-1, header=$h, footer=$f, leftside=$l, rightside=$r);
+	  placement_helper(this) key_mount_bounding_box(y=-1, x=-1, header=$h, footer=$f, leftside=$l, rightside=$r);
 	if (!is_undef(left))
-	  placement_helper(left) keywell_bounding_box(y=-1, x=1, header=$h, footer=$f, leftside=$l, rightside=$r);
+	  placement_helper(left) key_mount_bounding_box(y=-1, x=1, header=$h, footer=$f, leftside=$l, rightside=$r);
 	if (!is_undef(down))
-	  placement_helper(down) keywell_bounding_box(y=1, x=-1, header=$h, footer=$f, leftside=$l, rightside=$r);
+	  placement_helper(down) key_mount_bounding_box(y=1, x=-1, header=$h, footer=$f, leftside=$l, rightside=$r);
 	if (!is_undef(corner))
-	  placement_helper(corner) keywell_bounding_box(y=1, x=1, header=$h, footer=$f, leftside=$l, rightside=$r);
+	  placement_helper(corner) key_mount_bounding_box(y=1, x=1, header=$h, footer=$f, leftside=$l, rightside=$r);
       }
     }
 
-    //for figuring out how many unique keywells we are joining
+    //for figuring out how many unique key_mounts we are joining
     function count_def(test) = is_undef(test) ? 0 : 1;
 
     num_wells = count_def(this) + count_def(left) + count_def(down) + count_def(corner);
@@ -103,8 +102,8 @@ module layout_plate_only(rows=4, cols=1, homerow, homecol, row_spacing,
       hull_corners(this, left, down, corner);
     } else {
 
-      /* this is a trick to handle joining 2 keywells along a row or column the same as joining the intersection
-       * of 4 keywells. To connect 2 wells in the same column, left is mapped onto 'this' and corner onto down.
+      /* this is a trick to handle joining 2 key_mounts along a row or column the same as joining the intersection
+       * of 4 key_mounts. To connect 2 wells in the same column, left is mapped onto 'this' and corner onto down.
        * To connect 2 wells in the same row, down is mapped onto 'this' and corner onto left.  this reverses the ordering
        * so the reverse boolean is needed to correct this.
        */
@@ -114,7 +113,7 @@ module layout_plate_only(rows=4, cols=1, homerow, homecol, row_spacing,
 
 	/* this is our heuristic for producing concave hulls (which are desireable because they are less likely
 	 *  to protrude from the plate and interfere with keycap travel) by using 2 triangular convex hulls of the
-	 *  corners of keywells, instead of a single convex hull of all 4 corners,
+	 *  corners of key_mounts, instead of a single convex hull of all 4 corners,
 	 *  which will always protrude a bit (and sometimes quite a lot) because it is, after all, convex:
 	 * hulls on the upper right and lower left quadrants of a curved plate should be triangulated so that
 	 *  upper left and lower right corners connect (left and down appear in both hulls). */
@@ -147,7 +146,7 @@ module layout_plate_only(rows=4, cols=1, homerow, homecol, row_spacing,
 
       if (wells) get_homes(params, homerow, homecol, j){// let(homerow=$homerow, homecol=$homecol){
 	// well
-	placement_helper(i,j) keywell(header=$h, footer=$f, leftside=$l, rightside=$r);
+	placement_helper(i,j) key_mount(header=$h, footer=$f, leftside=$l, rightside=$r);
 	if ($preview) placement_helper(i,j) hotswap();
 
 	//connect rows
@@ -224,13 +223,13 @@ module layout_walls_only(rows=4, cols=1, homerow, homecol, row_spacing,
 
       if (topper) {
 	hull() {
-	  placement_helper(i1,j1) keywell_corner_spheres(x=x1, y=y1, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=er_topper);
-	  placement_helper(i2,j2) keywell_corner_spheres(x=x2, y=y2, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=er_topper2);
+	  placement_helper(i1,j1) key_mount_corner_spheres(x=x1, y=y1, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=er_topper);
+	  placement_helper(i2,j2) key_mount_corner_spheres(x=x2, y=y2, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=er_topper2);
 	  if (er_topper != [0,0,0]) {
-	    placement_helper(i1,j1) keywell_corner_spheres(x=x1, y=y1, header=$h, footer=$f, leftside=$l, rightside=$r);
+	    placement_helper(i1,j1) key_mount_corner_spheres(x=x1, y=y1, header=$h, footer=$f, leftside=$l, rightside=$r);
 	  }
 	  if (er_topper2 != [0,0,0] && (ij != ij2 || xy !=xy2)) {
-	    placement_helper(i2,j2) keywell_corner_spheres(x=x2, y=y2, header=$h, footer=$f, leftside=$l, rightside=$r);
+	    placement_helper(i2,j2) key_mount_corner_spheres(x=x2, y=y2, header=$h, footer=$f, leftside=$l, rightside=$r);
 	  }
 	}
 
@@ -241,18 +240,18 @@ module layout_walls_only(rows=4, cols=1, homerow, homecol, row_spacing,
 	  for(k=[0:max(last, last2)-1]) {
 	    hull() {
 
-	      placement_helper(i1,j1) keywell_corner_spheres(x=x1, y=y1, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=extra_room[k > last ?  last : k]);
-	      placement_helper(i1,j1) keywell_corner_spheres(x=x1, y=y1, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=extra_room[k+1 > last ?  last : k+1]);
-	      placement_helper(i2,j2) keywell_corner_spheres(x=x2, y=y2, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=extra_room2[k > last2 ? last2 : k]);
-	      placement_helper(i2,j2) keywell_corner_spheres(x=x2, y=y2, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=extra_room2[k+1 > last2 ? last2 : k+1]);
+	      placement_helper(i1,j1) key_mount_corner_spheres(x=x1, y=y1, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=extra_room[k > last ?  last : k]);
+	      placement_helper(i1,j1) key_mount_corner_spheres(x=x1, y=y1, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=extra_room[k+1 > last ?  last : k+1]);
+	      placement_helper(i2,j2) key_mount_corner_spheres(x=x2, y=y2, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=extra_room2[k > last2 ? last2 : k]);
+	      placement_helper(i2,j2) key_mount_corner_spheres(x=x2, y=y2, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=extra_room2[k+1 > last2 ? last2 : k+1]);
 	    }
 
 	  }
 	}
 
 	if (wall) drop() {
-	    placement_helper(i1,j1) keywell_corner_spheres(x=x1, y=y1, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=er_dropper);
-	    placement_helper(i2,j2) keywell_corner_spheres(x=x2, y=y2, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=er_dropper2);
+	    placement_helper(i1,j1) key_mount_corner_spheres(x=x1, y=y1, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=er_dropper);
+	    placement_helper(i2,j2) key_mount_corner_spheres(x=x2, y=y2, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=er_dropper2);
 	  }
       }
     }
@@ -264,19 +263,19 @@ module layout_walls_only(rows=4, cols=1, homerow, homecol, row_spacing,
     *if (wall) drop() placement_helper(i,j) {
 	//sidewall_edge_bounding_box(x=x, y=y, x_aligned=false, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=extra_room1);
 	//sidewall_edge_bounding_box(x=x, y=y, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=extra_room2);
-	keywell_corner_spheres(x=x, y=y, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=extra_room1);
-	keywell_corner_spheres(x=x, y=y, width=wall_width,  header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=extra_room2);
+	key_mount_corner_spheres(x=x, y=y, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=extra_room1);
+	key_mount_corner_spheres(x=x, y=y, width=wall_width,  header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=extra_room2);
 
       }
 
     *if (topper) hull() placement_helper(i,j) {
 	*sidewall_topper_bounding_box(x=x, y=y, x_aligned=false, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=extra_room1);
 	*sidewall_topper_bounding_box(x=x, y=y, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=extra_room2);
-	keywell_corner_spheres(x=x, y=y, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=extra_room1);
-	keywell_corner_spheres(x=x, y=y, width=wall_width,  header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=extra_room2);
+	key_mount_corner_spheres(x=x, y=y, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=extra_room1);
+	key_mount_corner_spheres(x=x, y=y, width=wall_width,  header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=extra_room2);
       if (extra_room1 != [0,0,0] || extra_room2 != [0,0,0] ) {
-	*keywell_bounding_box(y=y, x=x, header=$h, footer=$f, leftside=$l, rightside=$r);
-	keywell_corner_spheres(x=x, y=y, header=$h, footer=$f, leftside=$l, rightside=$r);
+	*key_mount_bounding_box(y=y, x=x, header=$h, footer=$f, leftside=$l, rightside=$r);
+	key_mount_corner_spheres(x=x, y=y, header=$h, footer=$f, leftside=$l, rightside=$r);
       }
     }
 
@@ -349,18 +348,18 @@ module layout_walls_only(rows=4, cols=1, homerow, homecol, row_spacing,
 		if (topper) {//if (side_extra_room != [0,0,0]) {
 		  placement_helper(i,j) hull() {
 		    //sidewall_topper(x=is_undef($x) ? 0 : $x, y=is_undef($y) ? 0 : $y, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=side_extra_room);
-		    //keywell_bounding_box(y=$y, x=$x, header=$h, footer=$f, leftside=$l, rightside=$r);
+		    //key_mount_bounding_box(y=$y, x=$x, header=$h, footer=$f, leftside=$l, rightside=$r);
 		    if (er[0] != [0,0,0])
-		      keywell_corner_spheres(x=$x, y=$y, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=er[0]);
-		    keywell_corner_spheres(x=$x, y=$y, header=$h, footer=$f, leftside=$l, rightside=$r);
+		      key_mount_corner_spheres(x=$x, y=$y, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=er[0]);
+		    key_mount_corner_spheres(x=$x, y=$y, header=$h, footer=$f, leftside=$l, rightside=$r);
 
 		  }
 
 		  if ( last > 0 ) {
 		    for(k=[0:last-1]) {
 		      placement_helper(i,j) hull() {
-			keywell_corner_spheres(x=$x, y=$y, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=er[k]);
-			keywell_corner_spheres(x=$x, y=$y, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=er[k+1]);
+			key_mount_corner_spheres(x=$x, y=$y, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=er[k]);
+			key_mount_corner_spheres(x=$x, y=$y, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=er[k+1]);
 		      }
 		    }
 		  }
@@ -368,7 +367,7 @@ module layout_walls_only(rows=4, cols=1, homerow, homecol, row_spacing,
 
 		if (wall) drop() placement_helper(i,j)
 			    //sidewall_bounding_box(leftwall=($x == -1), rightwall=($x == 1), bottomwall=($y == -1), topwall=($y == 1), header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=side_extra_room);
-			    keywell_corner_spheres(x=$x, y=$y, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=er[last]);
+			    key_mount_corner_spheres(x=$x, y=$y, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=er[last]);
 
 	      }
 		  //} else {
@@ -386,16 +385,16 @@ module layout_walls_only(rows=4, cols=1, homerow, homecol, row_spacing,
 
 
 		    *if (wall) drop() {
-		      placement_helper(i,j)  keywell_corner_spheres(x=$x, y=-1, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=side_extra_room);
-		      placement_helper(i+1,j) keywell_corner_spheres(x=$x, y=1, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=next_extra_room);
+		      placement_helper(i,j)  key_mount_corner_spheres(x=$x, y=-1, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=side_extra_room);
+		      placement_helper(i+1,j) key_mount_corner_spheres(x=$x, y=1, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=next_extra_room);
 		    }
 
 		    *if(topper) hull() {
-		      placement_helper(i,j) keywell_corner_spheres(x=$x, y=-1, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=side_extra_room);
-		      placement_helper(i+1,j) keywell_corner_spheres(x=$x, y=1, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=next_extra_room);
+		      placement_helper(i,j) key_mount_corner_spheres(x=$x, y=-1, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=side_extra_room);
+		      placement_helper(i+1,j) key_mount_corner_spheres(x=$x, y=1, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=next_extra_room);
 		      if (side_extra_room != [0,0,0]) {
-			placement_helper(i,j) keywell_corner_spheres(x=$x, y=-1, header=$h, footer=$f, leftside=$l, rightside=$r);
-			placement_helper(i+1,j) keywell_corner_spheres(x=$x, y=1, header=$h, footer=$f, leftside=$l, rightside=$r);
+			placement_helper(i,j) key_mount_corner_spheres(x=$x, y=-1, header=$h, footer=$f, leftside=$l, rightside=$r);
+			placement_helper(i+1,j) key_mount_corner_spheres(x=$x, y=1, header=$h, footer=$f, leftside=$l, rightside=$r);
 		      }
 		    }
 		  }
@@ -422,16 +421,16 @@ module layout_walls_only(rows=4, cols=1, homerow, homecol, row_spacing,
 
 			  wall_connector(ij=[i,j], xy=[-1, $y], ij2=[next_i, j+1], xy2=[1, $y], extra_room=side_extra_room, extra_room2=next_extra_room);
 			  *if (wall) drop() {
-			      placement_helper(i,j) keywell_corner_spheres(x=-1, y=$y, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=side_extra_room);
-			    placement_helper(next_i,j+1) keywell_corner_spheres(x=1, y=$y, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=next_extra_room);
+			      placement_helper(i,j) key_mount_corner_spheres(x=-1, y=$y, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=side_extra_room);
+			    placement_helper(next_i,j+1) key_mount_corner_spheres(x=1, y=$y, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=next_extra_room);
 			  }
 
 			  *hull() {
-			    placement_helper(i,j) keywell_corner_spheres(x=-1, y=$y, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=side_extra_room);
-			    placement_helper(next_i,j+1) keywell_corner_spheres(x=1, y=$y, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=next_extra_room);
+			    placement_helper(i,j) key_mount_corner_spheres(x=-1, y=$y, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=side_extra_room);
+			    placement_helper(next_i,j+1) key_mount_corner_spheres(x=1, y=$y, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=next_extra_room);
 			    if (side_extra_room != [0,0,0]) {
-			      placement_helper(i,j) keywell_corner_spheres(x=-1, y=$y, header=$h, footer=$f, leftside=$l, rightside=$r);
-			      placement_helper(next_i,j+1) keywell_corner_spheres(x=1, y=$y, header=$h, footer=$f, leftside=$l, rightside=$r);
+			      placement_helper(i,j) key_mount_corner_spheres(x=-1, y=$y, header=$h, footer=$f, leftside=$l, rightside=$r);
+			      placement_helper(next_i,j+1) key_mount_corner_spheres(x=1, y=$y, header=$h, footer=$f, leftside=$l, rightside=$r);
 			    }
 			  }
 			}
@@ -447,16 +446,16 @@ module layout_walls_only(rows=4, cols=1, homerow, homecol, row_spacing,
 			  next_idx = neighbors[0];
 			  next_extra_room = next_wall[next_idx][1];
 			  drop() {
-			    placement_helper(i,j) keywell_corner_spheres(x=-1, y=1, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=side_extra_room);
-			    placement_helper(next_i+1,j+1) keywell_corner_spheres(x=1, y=-1, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=next_extra_room);
+			    placement_helper(i,j) key_mount_corner_spheres(x=-1, y=1, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=side_extra_room);
+			    placement_helper(next_i+1,j+1) key_mount_corner_spheres(x=1, y=-1, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=next_extra_room);
 			  }
 
 			  hull() {
-			    placement_helper(i,j) keywell_corner_spheres(x=-1, y=1, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=side_extra_room);
-			    placement_helper(next_i+1,j+1) keywell_corner_spheres(x=1, y=-1, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=next_extra_room);
+			    placement_helper(i,j) key_mount_corner_spheres(x=-1, y=1, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=side_extra_room);
+			    placement_helper(next_i+1,j+1) key_mount_corner_spheres(x=1, y=-1, width=wall_width, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=next_extra_room);
 			    if (side_extra_room != [0,0,0]) {
-			      placement_helper(i,j) keywell_corner_spheres(x=-1, y=1, header=$h, footer=$f, leftside=$l, rightside=$r);
-			      placement_helper(next_i+1,j+1) keywell_corner_spheres(x=1, y=-1, header=$h, footer=$f, leftside=$l, rightside=$r);
+			      placement_helper(i,j) key_mount_corner_spheres(x=-1, y=1, header=$h, footer=$f, leftside=$l, rightside=$r);
+			      placement_helper(next_i+1,j+1) key_mount_corner_spheres(x=1, y=-1, header=$h, footer=$f, leftside=$l, rightside=$r);
 			    }
 			  }
 			}
@@ -508,13 +507,13 @@ module layout_walls_only(rows=4, cols=1, homerow, homecol, row_spacing,
       }
     }
 
-    // iterate keywells on perimeter columns
+    // iterate key_mounts on perimeter columns
     for (x=x_walls) {
       j = x == 1 ? 0 : cols -1;
       row_count = optional_index(rows,j);
       for (i=[0:optional_index(row_count,j)-1]) {
 
-	// keywell sidewalls
+	// key_mount sidewalls
 	drop() placement_helper(i,j)
 	  sidewall_bounding_box(leftwall=(x == -1), rightwall=(x == 1), header=$h, footer=$f, leftside=$l, rightside=$r);
 	placement_helper(i,j) sidewall_topper(x=x, header=$h, footer=$f, leftside=$l, rightside=$r);
@@ -534,13 +533,13 @@ module layout_walls_only(rows=4, cols=1, homerow, homecol, row_spacing,
       }
     }
 
-    // iterate keywells on perimeter rows
+    // iterate key_mounts on perimeter rows
     for (y=y_walls) {
       for (j=[0:cols-1]) {
 	row_count = optional_index(rows,j);
 	i = y == 1 ? 0 : row_count -1;
 
-	// keywell sidewalls
+	// key_mount sidewalls
 	drop() placement_helper(i,j)
 	  sidewall_bounding_box(bottomwall=(y == -1), topwall=(y == 1), header=$h, footer=$f, leftside=$l, rightside=$r);
 	placement_helper(i,j) sidewall_topper(y=y, header=$h, footer=$f, leftside=$l, rightside=$r);
@@ -595,7 +594,7 @@ module layout_walls_only(rows=4, cols=1, homerow, homecol, row_spacing,
 	l = side_gets_spacer(leftsides, j != cols-1, perimeter, narrowsides);
 
 	// well
-	placement_helper(i,j) keywell(header=h, footer=f, leftside=l, rightside=r);
+	placement_helper(i,j) key_mount(header=h, footer=f, leftside=l, rightside=r);
 
 	// sidewalls
 	if (leftwall && j == cols-1) {
@@ -685,8 +684,8 @@ module layout_walls_only(rows=4, cols=1, homerow, homecol, row_spacing,
 	//connect rows
 	if (i < rows-1) {
 	  hull() {
-	    placement_helper(i,j) keywell_side_bounding_box(y=-1, header=h, footer=f, leftside=l, rightside=r);
-	    placement_helper(i+1,j) keywell_side_bounding_box(y=1, header=headers, footer=footers, leftside=l, rightside=r);
+	    placement_helper(i,j) key_mount_side_bounding_box(y=-1, header=h, footer=f, leftside=l, rightside=r);
+	    placement_helper(i+1,j) key_mount_side_bounding_box(y=1, header=headers, footer=footers, leftside=l, rightside=r);
 	  }
 
 	  // connecter sidewalls
@@ -716,17 +715,17 @@ module layout_walls_only(rows=4, cols=1, homerow, homecol, row_spacing,
 	//connect cols
 	if (j < cols-1) {
 	  hull() {
-	    placement_helper(i,j) keywell_side_bounding_box(x=-1, header=h, footer=f, leftside=l, rightside=r);
-	    placement_helper(i,j+1) keywell_side_bounding_box(x=1, header=h, footer=f, leftside=leftsides, rightside=rightsides);
+	    placement_helper(i,j) key_mount_side_bounding_box(x=-1, header=h, footer=f, leftside=l, rightside=r);
+	    placement_helper(i,j+1) key_mount_side_bounding_box(x=1, header=h, footer=f, leftside=leftsides, rightside=rightsides);
 	  }
 
 	  //connect connectors
 	  if (i < rows-1) {
 	    hull() {
-	      placement_helper(i,j) keywell_corner_bounding_box(x=-1, y=-1, header=h, footer=f, leftside=l, rightside=r);
-	      placement_helper(i+1,j) keywell_corner_bounding_box(x=-1, y=1,header=headers, footer=footers, leftside=l, rightside=r);
-	      placement_helper(i,j+1) keywell_corner_bounding_box(x=1, y=-1, header=h, footer=f, leftside=leftsides, rightside=rightsides);
-	      placement_helper(i+1,j+1) keywell_corner_bounding_box(x=1, y=1,header=headers, footer=footers, leftside=leftsides, rightside=rightsides);
+	      placement_helper(i,j) key_mount_corner_bounding_box(x=-1, y=-1, header=h, footer=f, leftside=l, rightside=r);
+	      placement_helper(i+1,j) key_mount_corner_bounding_box(x=-1, y=1,header=headers, footer=footers, leftside=l, rightside=r);
+	      placement_helper(i,j+1) key_mount_corner_bounding_box(x=1, y=-1, header=h, footer=f, leftside=leftsides, rightside=rightsides);
+	      placement_helper(i+1,j+1) key_mount_corner_bounding_box(x=1, y=1,header=headers, footer=footers, leftside=leftsides, rightside=rightsides);
 	    }
 	  }
 	}

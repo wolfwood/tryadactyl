@@ -1,9 +1,9 @@
 include <../settings.scad>;
-use <../keywell.scad>;
-use <../keycap.scad>;
-use <../column-util.scad>;
-use <../column-layout.scad>;
-use <../trackpoint.scad>;
+use <../key/mount.scad>;
+use <../key/cap.scad>;
+use <../column/util.scad>;
+use <../column/layout.scad>;
+
 
 module thumbbowl_tester(rows=2, cols=3, keys=false) {
   row_chord_sides = normalize_chord([19,28,0]);

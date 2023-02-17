@@ -1,8 +1,8 @@
 include <../settings.scad>;
-use <../keycap.scad>;
-use <../keywell.scad>;
-use <../column-util.scad>;
-use <../column-layout.scad>;
+use <../key/cap.scad>;
+use <../key/mount.scad>;
+use <../column/util.scad>;
+use <../column/layout.scad>;
 //use <../trackpoint.scad>;
 
 

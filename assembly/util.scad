@@ -1,5 +1,5 @@
-include <settings.scad>;
-use <column-util.scad>;
+include <../settings.scad>;
+use <../column/util.scad>;
 
 
 //keys for param "dictionary"

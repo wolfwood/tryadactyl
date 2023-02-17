@@ -1,9 +1,9 @@
 include <../settings.scad>;
-use <../keycap.scad>;
-use <../keywell.scad>;
-use <../column-util.scad>;
-use <../column-layout.scad>;
-//use <../trackpoint.scad>;
+use <../key/cap.scad>;
+use <../key/mount.scad>;
+use <../column/util.scad>;
+use <../column/layout.scad>;
+
 
 module offset_tester(rows=4, cols=2, keys=false) {
   row_spacing = create_circular_placement([14.5,25,0]);

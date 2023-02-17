@@ -1,9 +1,9 @@
 include <../settings.scad>;
-use <../keycap.scad>;
-use <../keywell.scad>;
-use <../column-util.scad>;
-use <../column-layout.scad>;
-use <../trackpoint.scad>;
+use <../key/cap.scad>;
+use <../key/mount.scad>;
+use <../column/util.scad>;
+use <../column/layout.scad>;
+use <../assembly/trackpoint.scad>;
 
 module flat_tester(rows=4, cols=6,keys=false) {
   row_spacing = create_flat_placement([outerdia+spacer()+.6, outerdia+spacer()+.6, outerdia+spacer()+1.2, outerdia+spacer()+1.2]);

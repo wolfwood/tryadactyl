@@ -1,8 +1,8 @@
 include <../settings.scad>;
-use <../keycap.scad>;
-use <../keywell.scad>;
-use <../column-util.scad>;
-use <../column-layout.scad>;
+use <../key/cap.scad>;
+use <../key/mount.scad>;
+use <../column/util.scad>;
+use <../column/layout.scad>;
 
 module flat_cherry_tester(rows=4, cols=1,keys=false) {
   row_spacing = create_flat_placement([outerdia+spacer()+.6, outerdia+spacer()+.6, outerdia+spacer()+1.2, outerdia+spacer()+1.2]);

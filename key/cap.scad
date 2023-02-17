@@ -3,9 +3,9 @@
  */
 
 
-include <settings.scad>;
+include <../settings.scad>;
 
-include <../KeyV2/includes.scad> // you can ignore this warning if prerendered_keycaps is true
+include <../../KeyV2/includes.scad> // you can ignore this warning if prerendered_keycaps is true
 
 module keycap(row=3, travel_advisory=true, override_profile=false) {
   // KeyV2 will warn for an unsupported profile. good enough?
@@ -30,7 +30,7 @@ module keycap(row=3, travel_advisory=true, override_profile=false) {
 
       show_travel()
 	if (prerendered_keycaps()) {
-	  import(str("key-cache","/",use_profile,"/",row,".stl"));
+	  import(str("prerendered","/",use_profile,"/",row,".stl"));
 	} else {
 	  blank() key_profile(use_profile, effective_row)
 	    if ($preview && fast_keycap_preview()) {

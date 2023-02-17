@@ -1,7 +1,7 @@
 /* utilities shared by columns */
 
-include <settings.scad>;
-use <keycap.scad>;
+include <../settings.scad>;
+use <../key/cap.scad>;
 
 /* utility for making case walls */
 module drop(){

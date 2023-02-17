@@ -24,7 +24,7 @@ _disable_keycap_render = true;
 switch_travel = 4.0;
 
 
-/* MX keywell parameters */
+/* MX key_mount parameters */
 innerdia=13.9;
 outerdia=17;
 thickness=4;
@@ -36,7 +36,7 @@ tab_width = 5;
 epsilon = .001; // smallest meaningful overlap
 
 // XXX profile dependent?
-function spacer() = 1.4; // how close keywells can be
+function spacer() = 1.4; // how close key_mounts can be
 
 
 /* side wall width */
