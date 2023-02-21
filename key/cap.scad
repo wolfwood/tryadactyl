@@ -3,11 +3,11 @@
  */
 
 
-include <../settings.scad>;
+use <../settings.scad>;
 
 include <../../KeyV2/includes.scad> // you can ignore this warning if prerendered_keycaps is true
 
-module keycap(row=3, travel_advisory=true, override_profile=false) {
+module keycap(row=3, travel_advisory=true) {
   // KeyV2 will warn for an unsupported profile. good enough?
   //assert(profile=="cherry"||profile="sa", "unrecognized keycap profile");
 
@@ -23,7 +23,7 @@ module keycap(row=3, travel_advisory=true, override_profile=false) {
       }
     } else {
 
-      use_profile = override_profile == false ? profile : override_profile;
+      use_profile = profile();
 
       effective_row = (row >= 5) ? 5 : ((row < 1) ? 1 : row);
 
@@ -44,7 +44,7 @@ module keycap(row=3, travel_advisory=true, override_profile=false) {
     }
   }
   module show_travel() {
-    how_low = switch_travel;
+    how_low = switch_travel();
     children();
     if (travel_advisory && $preview) {
       color("yellow", 0.25) translate([0,0,-how_low]) linear_extrude(how_low) projection() children();
@@ -74,14 +74,14 @@ module cherry_position_flat(row) {
  *   just become visible, using at least 2 decimal digits
  *  finally, select a top view and then lower the Y to center the origin on the top face
  */
-let(row=1,prof="cherry") {
-  position_flat(row,override_profile=prof) keycap($fast_keycap_preview=true, $prerendered_keycaps=false, row, override_profile=prof);
+let(row=1,$profile="cherry") {
+  position_flat(row) keycap($fast_keycap_preview=true, $prerendered_keycaps=false, row);
 }
 
 
 // wish I had macros right about now ;)
-module position_flat(row, override_profile=false) {
-  use_profile = override_profile == false ? profile : override_profile;
+module position_flat(row) {
+  use_profile = profile();
 
   // strings override global profile row numbers
   if (is_string(row) && row == "SKRH") {
@@ -125,8 +125,8 @@ module position_flat(row, override_profile=false) {
  */
 function effective_row(row,maxrows=4,homerow=2,col=0) =
   let (effective = 3 + (row - (homerow+1)))
-  profile == "dsa" || profile == "g20" ? 1 :
-  profile == "cherry" && effective > 4 ? 4 :
+  profile_is_uniform() ? 1 :
+  profile() == "cherry" && effective > 4 ? 4 :
   effective > 5 ? 5 :
   effective < 1 ? 1 :
   effective;
@@ -137,7 +137,7 @@ function effective_row(row,maxrows=4,homerow=2,col=0) =
  *  just pass the number 3 instead of using this function to make a vector
  */
 function effective_rows(maxrows=4, homerow=2, func=function (r,m,h) effective_row(r,m,h)) =
-  profile == "dsa" || profile == "g20" ? 1 :
+  profile_is_uniform() ? 1 :
   [ for(i=[1:maxrows]) func(i, maxrows, homerow) ];
 
 //echo(effective_rows(4,3, function (r,m,h) effective_row(r,m,h)));

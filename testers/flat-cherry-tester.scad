@@ -1,12 +1,12 @@
-include <../settings.scad>;
+use <../settings.scad>;
 use <../key/cap.scad>;
 use <../key/mount.scad>;
 use <../column/util.scad>;
 use <../column/layout.scad>;
 
 module flat_cherry_tester(rows=4, cols=1,keys=false) {
-  row_spacing = create_flat_placement([outerdia+spacer()+.6, outerdia+spacer()+.6, outerdia+spacer()+1.2, outerdia+spacer()+1.2]);
-  col_spacing=create_flat_placement(outerdia+spacer());
+  row_spacing = create_flat_placement([outerdia()+spacer()+.6, outerdia()+spacer()+.6, outerdia()+spacer()+1.2, outerdia()+spacer()+1.2]);
+  col_spacing=create_flat_placement(outerdia()+spacer());
   homerow=2;
   homecol=0;
   profile_rows=effective_rows(rows,homerow);
@@ -26,8 +26,8 @@ module flat_cherry_tester(rows=4, cols=1,keys=false) {
     translate([0,0,-34-30]) cube([500,500,80],true);
 
     version=3;
-    translate([innerdia/2 + wall_width -.4, -25, -22])
-      rotate([90,0,90]) linear_extrude(.5) text(str(profile, " Flat v",version), size=6);
+    translate([innerdia()/2 + wall_width() -.4, -25, -22])
+      rotate([90,0,90]) linear_extrude(.5) text(str(profile(), " Flat v",version), size=6);
   }
 }
 

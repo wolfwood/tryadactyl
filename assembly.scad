@@ -1,4 +1,4 @@
-include <settings.scad>;
+use <settings.scad>;
 use <key/cap.scad>;
 use <column/util.scad>;
 use <column/layout.scad>;
@@ -33,7 +33,7 @@ tight_spherical_col = [[row_chord+[-1.8,0,0]],
 spherical_z = [4,30,0,0];
 
 index_keys= true;
-index_pos = [-(outerdia+4),-4,6];
+index_pos = [-(outerdia()+4),-4,6];
 index_tent = [0,0,5];
 index_tilt = [0,0,0];
 index_rows= [rows, rows-1, 1];
@@ -65,7 +65,7 @@ middle_rotation = [0,0,0];
 middle_placement_params =
   layout_placement_params(homerow=homerow, homecol=1,
 			  row_spacing=create_circular_placement(tight_cylindrical_row),
-			  col_spacing=create_flat_placement(outerdia+spacer()),
+			  col_spacing=create_flat_placement(outerdia()+spacer()),
 			  profile_rows=profile_rows,
 			  offsets=[ring_offset, middle_offset], tent=tent, tilt=middle_rotation+tilt);
 middle_mountings = [screw_mounting_params(row=0, col=0, height=30, headroom=[[1,3],[2,7]], footroom=[[2,0],[2,2]],
@@ -81,7 +81,7 @@ middle_mountings = [screw_mounting_params(row=0, col=0, height=30, headroom=[[1,
 
 
 pinkie_keys = true;//[[false],[true],[false],[false]];
-pinkie_pos = [outerdia+spacer()+20+2,-23,4];
+pinkie_pos = [outerdia()+spacer()+20+2,-23,4];
 pinkie_tent = [0,0,-2];
 pinkie_tilt = [3,0,0];
 pinkie_placement_params =
@@ -105,7 +105,7 @@ pinkie_mountings = [screw_mounting_params(row=0, col=0, height=10,
 		    ];
 
 thumb_keys= true;
-thumb_pos = index_pos + [-1.5*(outerdia+spacer())+30,-3.5*(outerdia+spacer())-1,-30];
+thumb_pos = index_pos + [-1.5*(outerdia()+spacer())+30,-3.5*(outerdia()+spacer())-1,-30];
 thumb_tilt = [10,-100,25];
 thumb_tent = tent+[0,0,-5];
 thumb_row_chord_sides = [30, 25, 0];
@@ -132,7 +132,7 @@ thumb_mountings = [screw_mounting_params(row=0, col=1, height=6, displacement=[4
 
 /*
   thumb_keys= [false,true,false];
-thumb_pos = index_pos + [-1.75*(outerdia+spacer()),-2.5*(outerdia+spacer())+7,-15 -5];
+thumb_pos = index_pos + [-1.75*(outerdia()+spacer()),-2.5*(outerdia()+spacer())+7,-15 -5];
 thumb_row_chord_sides = [20.5,500,0];
 thumb_row_chord_center = [14.5, 50,0];
 thumb_placement_params =
@@ -153,7 +153,7 @@ thumb_mountings = [screw_mounting_params(row=0, col=1, height=10, displacement=[
 		];
 */
 
-/*thumb_pos = index_pos + [-2*(outerdia+spacer()),-2.5*(outerdia+spacer())+7+1,-15 -5];
+/*thumb_pos = index_pos + [-2*(outerdia()+spacer()),-2.5*(outerdia()+spacer())+7+1,-15 -5];
 thumb_row_chord_sides = [20.5,40,0];
 thumb_row_chord_center = [14.5,32,0];
 thumb_placement_params =
@@ -547,7 +547,7 @@ strut_mounted_finger_plates(keys=true);
 
 *difference() {
   joined_finger_plates(keys=true);
-  translate([0,0,-30-lowest_low]) cube([200,200,lowest_low*2], true);
+  translate([0,0,-30-lowest_low()]) cube([200,200,lowest_low()*2], true);
 }
 
 use <util.scad>;
@@ -583,14 +583,14 @@ module base_plate(z=-48,debug=true) {
       plate(mountings, z=z, debug=debug);
 
     // cutout to acommodate floating palm rest
-    if(!debug) translate([outerdia*2.1,-95,z-.1]) scale([1.,1,1]) wrist_rest_base($fn=120,angle=[0,0,0], back_height=10);
+    if(!debug) translate([outerdia()*2.1,-95,z-.1]) scale([1.,1,1]) wrist_rest_base($fn=120,angle=[0,0,0], back_height=10);
   }
 }
 
 module plate(mountings, z=-31, thickness=4, debug=true, vertical=true) {
   module vertical_mount(){
     if (vertical) {
-      where=[pinkie_pos.x+12.2+2*(outerdia+spacer()),24.8,10];
+      where=[pinkie_pos.x+12.2+2*(outerdia()+spacer()),24.8,10];
 
       // XXX: it would be far preferable not to rotate the children() but handling tent and tilt in bar_magnetize_below()
       //       would add a (circular) dependency to util.scad on column-util.scad

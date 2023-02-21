@@ -1,13 +1,13 @@
 /* utilities shared by columns */
 
-include <../settings.scad>;
+use <../settings.scad>;
 use <../key/cap.scad>;
 
 /* utility for making case walls */
 module drop(){
   hull() {
     children();
-    translate([0,0,-lowest_low]) linear_extrude(height=1) projection() children();
+    translate([0,0,-lowest_low()]) linear_extrude(height=1) projection() children();
  }
 }
 
@@ -54,8 +54,8 @@ row_first_enum = "k";
 
 /* variables are not exported when we `use` this file, so we make a this a function */
 function default_layout_placement_params() =
-  layout_placement_params(row_spacing=create_flat_placement(outerdia+2*spacer()),
-			  col_spacing=create_flat_placement(outerdia+spacer()),
+  layout_placement_params(row_spacing=create_flat_placement(outerdia()+2*spacer()),
+			  col_spacing=create_flat_placement(outerdia()+spacer()),
 			  profile_rows=effective_rows());
 
 /* it would be possible to treat enums as integers and use them as array indexes, but then there is the risk of

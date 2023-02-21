@@ -94,8 +94,8 @@ To validate that changes to the library code have not introduced regressions, ru
     - [ ] add and test DSA profile support
     - [ ] parameterize switch (choc, void, ???)
 	  - [ ] use this to support SKRH and RKJXS nav switches instead of profile row?
-	  - [ ] expand `mxstem()` to incorporate switch type
-	  - [ ] how to generalize `innerdia`, `outerdia` and `thickness`
+	  - [x] expand `mxstem()` to incorporate switch type
+	  - [x] how to generalize `innerdia`, `outerdia` and `thickness`
       - [ ] separate keywell use of `spacer()` from assembly.scad level use
         - [ ] think about automatic decisions about using minimum keywell dimension vs being wide enough to prevent hull from colliding with 1U keycap vs wide keycap support vs being as wide as whatever the keyspacing is to maybe avoid hulling if adjacent key is the same profile and has identical positioning (tent/tilt/offset etc.)
 	- [ ] test traditional modifier key support

@@ -1,4 +1,4 @@
-include <settings.scad>;
+use <settings.scad>;
 use <key/cap.scad>;
 use <column/util.scad>;
 use <column/layout.scad>;
@@ -78,7 +78,7 @@ spherical_z = [4,30,0,0];
 
 //layout_placement(row=2, col=2, homerow=2, homecol=0, offsets=[0,-.1,0], params=index_placement_params) key_mount(header=true, footer=true, leftside=true);
 index_keys= true;
-index_pos = [-(outerdia+4),-4,6];
+index_pos = [-(outerdia()+4),-4,6];
 index_tent = [0,0,5];
 index_tilt = [0,0,0];
 index_rows= [rows, rows-1, 1];
@@ -105,12 +105,12 @@ middle_rotation = [0,0,0];
 middle_placement_params =
   layout_placement_params(homerow=homerow, homecol=1,
 			  row_spacing=create_circular_placement(tight_cylindrical_row),
-			  col_spacing=create_flat_placement(outerdia+spacer()),
+			  col_spacing=create_flat_placement(outerdia()+spacer()),
 			  profile_rows=profile_rows,
 			  offsets=[ring_offset, middle_offset], tent=tent, tilt=middle_rotation+tilt);
 
 pinkie_keys = true;//[[false],[true],[false],[false]];
-pinkie_pos = [outerdia+spacer()+20,-23,4];
+pinkie_pos = [outerdia()+spacer()+20,-23,4];
 pinkie_tent = [0,0,-2];
 pinkie_tilt = [3,0,0];
 pinkie_rows = [1, rows-1, rows];
@@ -126,7 +126,7 @@ pinkie_placement_params =
 
 
 thumb_keys= true;
-thumb_pos = index_pos + [-1.5*(outerdia+spacer())+30,-3.5*(outerdia+spacer())-1,-30];
+thumb_pos = index_pos + [-1.5*(outerdia()+spacer())+30,-3.5*(outerdia()+spacer())-1,-30];
 thumb_tilt = [10,-100,25];
 thumb_tent = tent+[0,0,-5];
 thumb_row_chord_sides = [30, 25, 0];

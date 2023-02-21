@@ -1,4 +1,4 @@
-include <../settings.scad>;
+use <../settings.scad>;
 use <../key/cap.scad>;
 use <../key/mount.scad>;
 use <../column/util.scad>;
@@ -8,7 +8,7 @@ use <../column/layout.scad>;
 
 module cylindrical_tester(rows=4, keys=false) {
   row_spacing = create_circular_placement([15,25,0]);
-  col_spacing=create_flat_placement(outerdia+spacer());
+  col_spacing=create_flat_placement(outerdia()+spacer());
   homerow=2;
   profile_rows=effective_rows(rows,homerow);
 
@@ -31,8 +31,8 @@ module cylindrical_tester(rows=4, keys=false) {
     translate([0,0,-24-40]) cube([500,500,80],true);
 
     version=2;
-    translate([outerdia/2 + spacer()/2 + directional_decoder(wall_extra_room,0,1) + optional_vector_index(wall_width,0,0) -.4, -30, -21])
-      rotate([90,0,90]) linear_extrude(.5) text(str(profile, " Cylinder v",version), size=6);
+    translate([outerdia()/2 + spacer()/2 + directional_decoder(wall_extra_room(),0,1) + optional_vector_index(wall_width(),0,0) -.4, -30, -21])
+      rotate([90,0,90]) linear_extrude(.5) text(str(profile(), " Cylinder v",version), size=6);
   }
 }
 

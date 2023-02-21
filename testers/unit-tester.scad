@@ -1,13 +1,13 @@
 // a 1u key holder, for testing units
 
-include <../settings.scad>;
+use <../settings.scad>;
 use <../key/cap.scad>;
 use <../key/mount.scad>;
 use <../column/util.scad>;
 use <../column/layout.scad>;
 
 module unit_tester() {
-  spacing=create_flat_placement(outerdia+spacer());
+  spacing=create_flat_placement(outerdia()+spacer());
   homerow=0;
   profile_rows=2;
 

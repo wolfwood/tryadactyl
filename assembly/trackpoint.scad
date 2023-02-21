@@ -1,5 +1,5 @@
 
-include <../settings.scad>;
+use <../settings.scad>;
 use <../util.scad>;
 use <../column/util.scad>;
 use <../key/mount.scad>;

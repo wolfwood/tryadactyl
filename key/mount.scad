@@ -4,7 +4,7 @@
  * this is the 'neutral' position, prior to flattening of the keycaps
  */
 
-include <../settings.scad>;
+use <../settings.scad>;
 
 // demo of the coordination of well shapes and bounding boxes
 let(header=false,footer=true,rightside=true,leftside=false, $fn=60) {
@@ -26,13 +26,13 @@ let(header=false,footer=true,rightside=true,leftside=false, $fn=60) {
 
 
   gap=5;
-  translate ([gap+(outerdia+spacer()),gap+(outerdia+spacer()),0]) {
+  translate ([gap+(outerdia()+spacer()),gap+(outerdia()+spacer()),0]) {
     key_mount(header=header,footer=footer,leftside=leftside,rightside=rightside);
 
     #sidewall_bounding_box(rightwall=true, leftwall=true, topwall=true, bottomwall=true, header=header,footer=footer,leftside=leftside,rightside=rightside);
   }
 
-  translate ([-(gap+(outerdia+spacer())),-(gap+(outerdia+spacer())),0]) {
+  translate ([-(gap+(outerdia()+spacer())),-(gap+(outerdia()+spacer())),0]) {
     key_mount(header=header,footer=footer,leftside=leftside,rightside=rightside);
     sidewall_bounding_box(rightwall=true, leftwall=true, topwall=true, bottomwall=true, header=header,footer=footer,leftside=leftside,rightside=rightside);
     for (i=[-1,1]) {
@@ -48,7 +48,7 @@ let(header=false,footer=true,rightside=true,leftside=false, $fn=60) {
     }
   }
 
-  translate ([-(gap+(outerdia+spacer())),(gap+(outerdia+spacer())),0]) {
+  translate ([-(gap+(outerdia()+spacer())),(gap+(outerdia()+spacer())),0]) {
     key_mount(header=header,footer=footer,leftside=leftside,rightside=rightside);
     sidewall_bounding_box(rightwall=true, leftwall=true, topwall=true, bottomwall=true, header=header,footer=footer,leftside=leftside,rightside=rightside);
     for (i=[-1,1]) {
@@ -62,7 +62,7 @@ let(header=false,footer=true,rightside=true,leftside=false, $fn=60) {
     }
   }
 
-  translate ([(gap+(outerdia+spacer())),-(gap+(outerdia+spacer())),0]) {
+  translate ([(gap+(outerdia()+spacer())),-(gap+(outerdia()+spacer())),0]) {
     key_mount(header=header,footer=footer,leftside=leftside,rightside=rightside);
     for (i=[-1,1]) {
       for (j=[-1,1]) {
@@ -79,7 +79,7 @@ let(header=false,footer=true,rightside=true,leftside=false, $fn=60) {
       #key_mount_corner_spheres(y=i, extra_room=[0,5,0], header=header,footer=footer,leftside=leftside,rightside=rightside);
     }
   }
-  *translate ([3*(gap+(outerdia+spacer())),-(gap+(outerdia+spacer())),0]) {
+  *translate ([3*(gap+(outerdia()+spacer())),-(gap+(outerdia()+spacer())),0]) {
     key_mount(header=header,footer=footer,leftside=leftside,rightside=rightside);
     for (i=[-1,1]) {
       #key_mount_corner_spheres(x=i, header=header,footer=footer,leftside=leftside,rightside=rightside);
@@ -98,15 +98,15 @@ let(header=false,footer=true,rightside=true,leftside=false, $fn=60) {
  */
 module key_mount(header=false,footer=false,leftside=false,rightside=false) {
   difference() {
-    translate([0, 0, -mxstem()]) key_mount_slug(header=header,footer=footer,leftside=leftside,rightside=rightside);
+    translate([0, 0, -stem_height()]) key_mount_slug(header=header,footer=footer,leftside=leftside,rightside=rightside);
     key_mount_cavity();
   }
 }
 
 module hotswap() {
-  translate([0, 0, -mxstem()]) {
+  translate([0, 0, -stem_height()]) {
     let(x=10.9, y=4, x2=5.3, y2=6, z=3.1)
-      translate([0, innerdia/2 - 2 - 1, -thickness -3.1/2]) {
+      translate([0, innerdia()/2 - 2 - 1, -thickness() -3.1/2]) {
       color("orange",.2) {
 	cube([10.9,4,3.1], true);
 	translate([-(x/2-x2/2), y/2 - y2/2,0]) cube([x2,y2,z],true);
@@ -126,22 +126,22 @@ module hotswap() {
 module key_mount_cavity(above=false, below=false) {
   margin=.1;
 
-  translate([0, 0, -mxstem()]) union() {
+  translate([0, 0, -stem_height()]) union() {
     if (above) {
       height=25;
-      translate([0,0,height/2]) cube([outerdia,outerdia,height], true);
+      translate([0,0,height/2]) cube([outerdia(),outerdia(),height], true);
     }
 
     // main cavity
-    translate([0, 0, -thickness/2]) cube([innerdia, innerdia, thickness + 2*margin], true);
+    translate([0, 0, -thickness()/2]) cube([innerdia(), innerdia(), thickness() + 2*margin], true);
 
     // cutouts for switch tabs
-    let(depth=tab_depth, width=tab_width, h=thickness - tab_offset){
-      translate([-width/2, innerdia/2 - margin, -thickness - margin]) cube([width, depth + margin, h +margin]);
-      translate([-width/2, -innerdia/2 - depth, -thickness - margin]) cube([width, depth + margin, h +margin]);
+    let(depth=mx_tab_depth(), width=mx_tab_width(), h=thickness() - mx_tab_offset()){
+      translate([-width/2, innerdia()/2 - margin, -thickness() - margin]) cube([width, depth + margin, h +margin]);
+      translate([-width/2, -innerdia()/2 - depth, -thickness() - margin]) cube([width, depth + margin, h +margin]);
 
       if (below) {
-	translate([0,0,-thickness - (thickness - 1)/2]) cube([innerdia, innerdia, thickness - 1], true);
+	translate([0,0,-thickness() - (thickness() - 1)/2]) cube([innerdia(), innerdia(), thickness() - 1], true);
       }
     }
   }
@@ -152,8 +152,8 @@ function optional_diff(a,b) = (a ? spacer()/4 : 0) - (b ? spacer()/4 : 0);
 
 // the outer dimensions of the key_mount, top face sits at originx
 module key_mount_slug(header=false,footer=false,leftside=false,rightside=false) {
-  translate([optional_diff(rightside,leftside), optional_diff(header,footer), -thickness/2])
-    cube([outerdia + optional_sum(leftside, rightside), outerdia + optional_sum(header, footer), thickness],
+  translate([optional_diff(rightside,leftside), optional_diff(header,footer), -thickness()/2])
+    cube([outerdia() + optional_sum(leftside, rightside), outerdia() + optional_sum(header, footer), thickness()],
 	 true);
 }
 
@@ -178,9 +178,9 @@ module position_key_mount_corner(x,y,header=false,footer=false,leftside=false,ri
    *  other corners are populated with mirroring
    */
   mirror([x > 0 ? 1 : 0, 0, 0]) mirror([0, y > 0 ? 1 : 0, 0])
-    translate([-outerdia/2 - ((x > 0 && rightside) || (x < 0 && leftside) ? spacer()/2 : 0),
-	       -outerdia/2 - ((y > 0 && header)    || (y < 0 && footer)   ? spacer()/2 : 0),
-	       -mxstem()-thickness] - (is_undef(extra_room) ? [0,0,0] : extra_room))
+    translate([-outerdia()/2 - ((x > 0 && rightside) || (x < 0 && leftside) ? spacer()/2 : 0),
+	       -outerdia()/2 - ((y > 0 && header)    || (y < 0 && footer)   ? spacer()/2 : 0),
+	       -stem_height()-thickness()] - (is_undef(extra_room) ? [0,0,0] : extra_room))
     children();
 }
 
@@ -204,7 +204,7 @@ module key_mount_corner_bounding_box(x=0,y=0,header=false,footer=false,leftside=
   overlap = show ? .5 : .001;
 
   position_key_mount_corner(x=x,y=y,header=header,footer=footer,leftside=leftside,rightside=rightside)
-    cube([overlap,overlap,thickness]);
+    cube([overlap,overlap,thickness()]);
 }
 
 /* create and position bounding box around a key_mount side,
@@ -213,21 +213,21 @@ module key_mount_corner_bounding_box(x=0,y=0,header=false,footer=false,leftside=
 module key_mount_side_bounding_box(x=0,y=0,header=false,footer=false,leftside=false,rightside=false) {
   assert(((x==1 || x==-1) && y==0) || ((y==1 || y==-1) && x ==0));
 
-  overlap = epsilon;
+  overlap = epsilon();
 
   if (!is_undef(x) && x != 0) {
     position_key_mount_corner(x=x,y=-1,header=header,footer=footer,leftside=leftside,rightside=rightside)
-      cube([overlap, outerdia + optional_sum(header,footer), thickness]);
+      cube([overlap, outerdia() + optional_sum(header,footer), thickness()]);
   } else {
     position_key_mount_corner(x=-1,y=y,header=header,footer=footer,leftside=leftside,rightside=rightside)
-      cube([outerdia + optional_sum(rightside,leftside), overlap, thickness]);
+      cube([outerdia() + optional_sum(rightside,leftside), overlap, thickness()]);
   }
 }
 
-module key_mount_corner_spheres(x,y,width=thickness, header=false,footer=false,leftside=false,rightside=false, extra_room=[0,0,0]) {
+module key_mount_corner_spheres(x,y,width=thickness(), header=false,footer=false,leftside=false,rightside=false, extra_room=[0,0,0]) {
   position_key_mount_corner(x=is_undef(x)?-1:x,y=is_undef(y)?-1:y,header=header,footer=footer,leftside=leftside,rightside=rightside,extra_room=extra_room) translate([0,0,width/2]){
     if (is_undef(x) || x == 0){
-      h = outerdia + optional_sum(rightside,leftside);
+      h = outerdia() + optional_sum(rightside,leftside);
       if (extra_room == [0,0,0]) {
 	rotate([0,90,0]) difference() {
 	  cylinder(d=width, h=h);
@@ -235,10 +235,10 @@ module key_mount_corner_spheres(x,y,width=thickness, header=false,footer=false,l
 	}
       } else {
 	sphere(d=width);
-	translate([outerdia + optional_sum(rightside,leftside), 0 , 0]) sphere(d=width);
+	translate([outerdia() + optional_sum(rightside,leftside), 0 , 0]) sphere(d=width);
       }
     } else if (is_undef(y) || y == 0) {
-      h=outerdia + optional_sum(header,footer);
+      h=outerdia() + optional_sum(header,footer);
       if (extra_room == [0,0,0]) {
 	rotate([-90,0,0]) difference() {
 	  cylinder(d=width, h=h);
@@ -246,7 +246,7 @@ module key_mount_corner_spheres(x,y,width=thickness, header=false,footer=false,l
 	}
       } else {
 	sphere(d=width);
-	translate([0, outerdia + optional_sum(header,footer), 0]) sphere(d=width);
+	translate([0, outerdia() + optional_sum(header,footer), 0]) sphere(d=width);
       }
     } else {
       difference() {
@@ -267,12 +267,12 @@ function directional_decoder(v,x,y) = !is_list(v) ? v :
 
 
 // XXX need to plumb x,y for directional_decoder
-module wall_bbox(length=epsilon,underhang,x_aligned=false) {
+module wall_bbox(length=epsilon(),underhang,x_aligned=false) {
   module bbox_helper (length) {
     if (x_aligned) {
-      translate([0,-wall_width/2,-wall_width/2]) rotate([0,90,0]) cylinder(d=wall_width,h=length);
+      translate([0,-wall_width()/2,-wall_width()/2]) rotate([0,90,0]) cylinder(d=wall_width(),h=length);
     } else {
-      translate([-wall_width/2,0,-wall_width/2]) rotate([-90,0,0]) cylinder(d=wall_width,h=length);
+      translate([-wall_width()/2,0,-wall_width()/2]) rotate([-90,0,0]) cylinder(d=wall_width(),h=length);
     }
   }
 
@@ -280,8 +280,8 @@ module wall_bbox(length=epsilon,underhang,x_aligned=false) {
     /* if the wall is wider than the side of the key_mount, overlap the whole thing, if the wall is narrow,
      * align with the outside, not inside edge
      */
-    underneath = (outerdia-innerdia)/2;
-    displacement = (wall_width >= underneath) ? underneath : wall_width;
+    underneath = (outerdia()-innerdia())/2;
+    displacement = (wall_width() >= underneath) ? underneath : wall_width();
 
     if (x_aligned) {
       translate([0,displacement,0]) bbox_helper(length);
@@ -290,9 +290,9 @@ module wall_bbox(length=epsilon,underhang,x_aligned=false) {
     }
   } else {
     if (x_aligned) {
-      translate([0, -directional_decoder(wall_extra_room.y,0), 0]) bbox_helper(length);
+      translate([0, -directional_decoder(wall_extra_room().y,0), 0]) bbox_helper(length);
     } else {
-      translate([-directional_decoder(wall_extra_room.x,0), 0, 0]) bbox_helper(length);
+      translate([-directional_decoder(wall_extra_room().x,0), 0, 0]) bbox_helper(length);
     }
   }
 }
@@ -301,22 +301,22 @@ module sidewall_bounding_box(leftwall=false,rightwall=false,topwall=false,bottom
 
   if (leftwall) {
     position_key_mount_corner(x=-1,y=-1,header=header,footer=footer,leftside=leftside,rightside=rightside,extra_room=extra_room)
-      wall_bbox(outerdia + optional_sum(header,footer), !leftside);
+      wall_bbox(outerdia() + optional_sum(header,footer), !leftside);
   }
 
   if (rightwall) {
     position_key_mount_corner(x=1,y=-1,header=header,footer=footer,leftside=leftside,rightside=rightside,extra_room=extra_room)
-      wall_bbox(outerdia + optional_sum(header,footer), !rightside);
+      wall_bbox(outerdia() + optional_sum(header,footer), !rightside);
   }
 
   if (topwall) {
     position_key_mount_corner(x=-1,y=1,header=header,footer=footer,leftside=leftside,rightside=rightside,extra_room=extra_room)
-      wall_bbox(outerdia + optional_sum(rightside,leftside), !header, x_aligned=true);
+      wall_bbox(outerdia() + optional_sum(rightside,leftside), !header, x_aligned=true);
   }
 
   if (bottomwall) {
     position_key_mount_corner(x=-1,y=-1,header=header,footer=footer,leftside=leftside,rightside=rightside,extra_room=extra_room)
-      wall_bbox(outerdia + optional_sum(rightside,leftside), !footer, x_aligned=true);
+      wall_bbox(outerdia() + optional_sum(rightside,leftside), !footer, x_aligned=true);
   }
 }
 
@@ -343,17 +343,17 @@ module sidewall_edge_bounding_box(x=0,y=0,x_aligned=true, header=false,footer=fa
 module sidewall_topper(x=0,y=0, header=false,footer=false,leftside=false,rightside=false, bounding_box=false, extra_room=[0,0,0], underhang) {
   module top(overhang, length, underhang) {
     angled_topper=false;
-    let(overhang = overhang - (underhang ? (outerdia - innerdia)/2 : 0)) {
+    let(overhang = overhang - (underhang ? (outerdia() - innerdia())/2 : 0)) {
       mirror(y != 0 ? [1,-1,0] : [0,0,0]) translate([-overhang, 0, 0]) {
 	difference() {
-	  cube([overhang,length,thickness]);
+	  cube([overhang,length,thickness()]);
 
 	  if (angled_topper)
-	    rotate([0,-atan(thickness/overhang),0])
+	    rotate([0,-atan(thickness()/overhang),0])
 	      translate([-1, -1, 0]) // clean margins
 	      cube([overhang+10, 2 + length,20]);
 	}
-	translate([0, 0, -wall_width/2]) cube([wall_width,length,wall_width/2]);
+	translate([0, 0, -wall_width()/2]) cube([wall_width(),length,wall_width()/2]);
       }
     }
   }
@@ -361,32 +361,32 @@ module sidewall_topper(x=0,y=0, header=false,footer=false,leftside=false,rightsi
   // need x_aligned or equivalent to replace sidewall_topper_bounding_box with this
   if (x != 0 && y != 0) {
     position_key_mount_corner(x=x,y=y,header=header,footer=footer,leftside=leftside,rightside=rightside,extra_room=extra_room)
-      top(wall_width + directional_decoder(wall_extra_room,x,y), epsilon);
+      top(wall_width() + directional_decoder(wall_extra_room(),x,y), epsilon());
   } else if (x != 0) {
     let (underhang = !is_undef(underhang) ? underhang : (x == 1 && !rightside) || (x == -1 && !leftside))
       position_key_mount_corner(x=x,y=-1,header=header,footer=footer,leftside=leftside,rightside=rightside,extra_room=extra_room)
-      top(wall_width + directional_decoder(wall_extra_room,x,y), outerdia + optional_sum(header,footer), underhang);
+      top(wall_width() + directional_decoder(wall_extra_room(),x,y), outerdia() + optional_sum(header,footer), underhang);
   } else {
     let (underhang = !is_undef(underhang) ? underhang : (y == 1 && !header) || (y == -1 && !footer))
       position_key_mount_corner(x=1,y=y,header=header,footer=footer,leftside=leftside,rightside=rightside,extra_room=extra_room)
-      top(wall_width + directional_decoder(wall_extra_room,x,y), outerdia + optional_sum(rightside,leftside), underhang);
+      top(wall_width() + directional_decoder(wall_extra_room(),x,y), outerdia() + optional_sum(rightside,leftside), underhang);
   }
 }
 
 module sidewall_topper_bounding_box(x=0,y=0, x_aligned=true, header=false,footer=false,leftside=false,rightside=false, bounding_box=false, extra_room=[0,0,0], underhang) {
   module top(overhang, length, underhang) {
     angled_topper=false;
-    let(overhang = overhang - (underhang ? (outerdia - innerdia)/2 : 0)) {
+    let(overhang = overhang - (underhang ? (outerdia() - innerdia())/2 : 0)) {
       mirror(!x_aligned ? [1,-1,0] : [0,0,0]) translate([-overhang, 0,0]) {
         difference() {
-	  cube([overhang,length,thickness]);
+	  cube([overhang,length,thickness()]);
 
 	  if (angled_topper)
-	    rotate([0,-atan(thickness/overhang),0])
+	    rotate([0,-atan(thickness()/overhang),0])
 	      translate([-1,-1,0]) cube([overhang+10, 2 + length,20]);
 	}
 
-	translate([0, 0, -wall_width/2]) cube([wall_width,length,wall_width/2]);
+	translate([0, 0, -wall_width()/2]) cube([wall_width(),length,wall_width()/2]);
       }
     }
   }
@@ -395,5 +395,5 @@ module sidewall_topper_bounding_box(x=0,y=0, x_aligned=true, header=false,footer
        x_aligned ? (x == 1 && !rightside) || (x == -1 && !leftside) :
        (y == 1 && !header) || (y == -1 && !footer))
     position_key_mount_corner(x=x,y=y,header=header,footer=footer,leftside=leftside,rightside=rightside,extra_room=extra_room)
-    top(wall_width + directional_decoder(wall_extra_room,x_aligned?x:0,y), epsilon, underhang);
+    top(wall_width() + directional_decoder(wall_extra_room(),x_aligned?x:0,y), epsilon(), underhang);
 }

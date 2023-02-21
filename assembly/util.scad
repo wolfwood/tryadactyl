@@ -1,4 +1,4 @@
-include <../settings.scad>;
+use <../settings.scad>;
 use <../column/util.scad>;
 
 
