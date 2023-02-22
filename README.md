@@ -70,6 +70,8 @@ For printing, the `assembly/fingers.scad`, `assembly/plate.scad` and `assembly/t
 
 To validate that changes to the library code have not introduced regressions, run `make test` prior to editing (or after a `git stash`), which will generate reference *.stl*s for later comparison. Run `make test` again after editing to see if the tests still produce identical *.stl*s. New tests should be added when new positioning functions, keycap profiles, or other features are introduced. The tester models should also be useful to those who might like to print a smaller model to consider the feel of a given column shape without wasting time and material printing a full keyboard.
 
+Right now testing is a bit fiddly. Edit `testers/wrapper.py` to point `SCAD_EXE` at a nightly build of openscad, which has the *sort-stl* feature. Even with that, *.stl* files aren't always consistent. The alternative approach also has issues. Blog post incoming :)
+
 # FAQs
 #### Q
   Why not just use a flat keycap profile and save yourself a lot of work?
