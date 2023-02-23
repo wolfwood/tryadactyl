@@ -1,7 +1,7 @@
 /* Crystalhand's holder for a silicone palmrest, now with feet and a magnet
    for secure use on an angled (metal) surface */
 
-use <util.scad>;
+use <../util.scad>;
 
 mount_foot(position=[-40,-20,0])
 mount_foot(position=[-30,28,0])
