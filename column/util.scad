@@ -394,7 +394,7 @@ function optional_normalize(v) = !is_list(v[0]) ? normalize_chord(v) :
 function _optional_index_or_last(v,idx) =
   !is_list(v)   ? v :
   len(v) == 1   ? v[0] :
-  //len(v) <= idx ? v[len(v)-1] :
+  len(v) <= idx ? v[len(v)-1] :
                   v[idx];
 
 function optional_index(v, row, col, leaf = function (l) l) =
