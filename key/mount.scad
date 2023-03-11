@@ -98,7 +98,7 @@ let(header=false,footer=true,rightside=true,leftside=false, $fn=60) {
  */
 module key_mount(header=false,footer=false,leftside=false,rightside=false) {
   difference() {
-    translate([0, 0, -stem_height()]) key_mount_slug(header=header,footer=footer,leftside=leftside,rightside=rightside);
+    key_mount_slug(header=header,footer=footer,leftside=leftside,rightside=rightside);
     key_mount_cavity();
   }
 }
@@ -128,7 +128,7 @@ module key_mount_cavity(above=false, below=false) {
 
   translate([0, 0, -stem_height()]) union() {
     if (above) {
-      height=25;
+      height=5;
       translate([0,0,height/2]) cube([outerdia(),outerdia(),height], true);
     }
 
@@ -160,7 +160,7 @@ function optional_diff(a,b) = (a ? spacer()/4 : 0) - (b ? spacer()/4 : 0);
 
 // the outer dimensions of the key_mount, top face sits at originx
 module key_mount_slug(header=false,footer=false,leftside=false,rightside=false) {
-  translate([optional_diff(rightside,leftside), optional_diff(header,footer), -thickness()/2])
+  translate([optional_diff(rightside,leftside), optional_diff(header,footer), -thickness()/2 - stem_height()])
     cube([outerdia() + optional_sum(leftside, rightside), outerdia() + optional_sum(header, footer), thickness()],
 	 true);
 }
