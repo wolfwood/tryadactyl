@@ -38,7 +38,7 @@ _mx_innerdia = 13.9;
 _mx_outerdia = 17;
 
 _choc_innerdia = _mx_innerdia;
-_choc_outerdia = _mx_outerdia;
+_choc_outerdia = 15.5;
 
 // key plate thickness
 // can be inferred from switch type
@@ -54,8 +54,14 @@ function mx_tab_width() = 5;
 
 _epsilon = .001; // smallest meaningful overlap, used when avoiding coincident faces
 
-// how close key_mounts can be
-function spacer() = 1.4; // how close key_mounts can be
+// the footprint of the keycaps.
+// defines how close key_mounts can be, but mostly used for outer perimeters.
+_mx_min_spacing = 18.4;
+_choc_min_spacing = 18;
+
+// how much room we need for switchpins, hotswaps, etc.
+// used to cut into trackpoint mount supports
+function switch_clearance() = 3;
 
 
 /* side wall width */
@@ -86,6 +92,7 @@ function stem_height() =
   !is_undef(_stem_height) ? _stem_height :
   profile() == "cherry" ? 6.1 :
   profile() == "sa" ? 6.8 :
+  profile() == "lpx" ? 5 :
   assert(false, "unrecognized keycap profile");
 
 
@@ -119,6 +126,12 @@ function outerdia() =
   switch_type() == "mx" && !is_undef(_mx_outerdia) ? _mx_outerdia :
   switch_type() == "choc" && !is_undef(_choc_outerdia) ? _choc_outerdia :
   assert(false, str("please define an outerdia for: ", switch_type()));
+
+function spacer() =
+  !is_undef($spacer) ? $spacer :
+  switch_type() == "mx" ? _mx_min_spacing - outerdia() :
+  switch_type() == "choc" ? _choc_min_spacing - outerdia() :
+  assert(false, str("please define an spacer for: ", switch_type(), " or: ", profile()));
 
 function thickness() =
   !is_undef($thickness) ? $thickness :

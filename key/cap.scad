@@ -27,9 +27,10 @@ module keycap(row=3, travel_advisory=true) {
 
       effective_row = (row >= 5) ? 5 : ((row < 1) ? 1 : row);
 
-
-      show_travel()
-	if (prerendered_keycaps()) {
+      show_travel() {
+	if (use_profile == "lpx") {
+	  translate([-1.605,-29.001,-9.02 + 2.7644]) rotate([48.5,0,90]) import("prerendered/LPX/LPX.stl");
+	}else if (prerendered_keycaps()) {
 	  import(str("prerendered","/",use_profile,"/",row,".stl"));
 	} else {
 	  blank() key_profile(use_profile, effective_row)
@@ -41,8 +42,10 @@ module keycap(row=3, travel_advisory=true) {
 	      key();
 	    }
 	}
+      }
     }
   }
+
   module show_travel() {
     how_low = switch_travel();
     children();
@@ -67,6 +70,12 @@ module cherry_position_flat(row) {
   }
 }
 
+module lpx_position_flat(row) {
+  //assert(row > 0 && row < 5 );
+
+  translate ([0,0,-2.7644]) children();
+}
+
 /* use this to dial in *_position_flat() for each row
  *  first lower the Z height of the switch until the origin sits on its top face
  *  next adjust rotation, using a side view, until the top face of the switch is level. then you may need to go back
@@ -89,6 +98,8 @@ module position_flat(row) {
     translate ([0,0,-5+1]) children();
   } else if (use_profile == "cherry") {
     cherry_position_flat(row) children();
+  } else if (use_profile == "lpx") {
+    lpx_position_flat(row) children();
   } else if (use_profile == "sa") {
     sa_position_flat(row) children();
   } else if (use_profile == "dsa") {
