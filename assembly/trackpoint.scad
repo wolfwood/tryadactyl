@@ -7,7 +7,7 @@ use <../key/cap.scad>;
 
 
 module install_trackpoint(row,col, row_spacing, col_spacing, profile_rows, homerow,
-			  h1=4,h2=4, stem=0,up=0,tilt, displacement=[0,0,0], params=default_layout_placement_params(), square_hole=false, access=true,w1=0,w2=0, use_shield=false, shield=[4,11,12.3], shield_angle=[-65,-5]) {
+			  h1=4,h2=4, stem=0,up=0,tilt, displacement=[0,0,0], params=default_layout_placement_params(), square_hole=false, access=true,w1=0,w2=0, overhead1, overhead2, use_shield=false, shield=[4,11,12.3], shield_angle=[-65,-5]) {
   module helper(row, col, corners=false, d=displacement) {
     layout_placement(row,col, row_spacing, col_spacing, profile_rows=profile_rows, homerow=homerow, tilt=tilt,displacement=d,params=params, corners=corners, flatten=!corners) children();
   }
@@ -21,7 +21,7 @@ module install_trackpoint(row,col, row_spacing, col_spacing, profile_rows, homer
       children();
 
       difference() {
-	helper(row,col,corners=true) trackpoint_mount($fn=60, h1, h2, stem, up, tilt, w1=w1,w2=w2);
+	helper(row,col,corners=true) trackpoint_mount($fn=60, h1, h2, stem, up, tilt, w1=w1,w2=w2, overhead1=overhead1, overhead2=overhead2);
 
 	// remove any material that might interfere with adjacent key switches
 	above=true;
@@ -65,7 +65,7 @@ module trackpoint_cap() {
 
 }
 
-module trackpoint_mount(h1,h2,stem=0,up=0,tilt=[-5,0,0], bottom=false, stemonly=false, w1=0,w2=0){
+module trackpoint_mount(h1,h2,stem=0,up=0,tilt=[-5,0,0], bottom=false, stemonly=false, w1=0,w2=0, overhead1, overhead2){
   width=23+.4;
   depth=9.8;
   flange_z=3;
@@ -105,6 +105,12 @@ module trackpoint_mount(h1,h2,stem=0,up=0,tilt=[-5,0,0], bottom=false, stemonly=
 	  let(x=flange_z,y=depth,z=flange_z) {
 	    translate([width/2+w1,-y/2,-z]) cube([x,y,h1+z]);
 	    mirror([1,0,0]) translate([width/2+w2,-y/2,-z]) cube([x,y,h2+z]);
+	    if(!is_undef(overhead1)) {
+	      translate([width/2+w1-(overhead1 >= 0 ? overhead1:-x),-y/2,-z+h1]) cube([abs(overhead1),y,z]);
+	    }
+	    if(!is_undef(overhead2)) {
+	      mirror([1,0,0]) translate([width/2+w2-(overhead2>= 0 ? overhead2 : -x),-y/2,-z+h2]) cube([abs(overhead2),y,z]);
+	    }
 	  }
 	}
 
