@@ -309,7 +309,18 @@ module layout_walls_only(rows=4, cols=1, homerow, homecol, row_spacing,
 	key_mount_corner_spheres(x=x, y=y, header=$h, footer=$f, leftside=$l, rightside=$r);
       }
     }
+  }
 
+  module old_corner(i,j,x,y, extra_room1=[0,0,0], extra_room2=[0,0,0]) {
+    if (wall) drop() placement_helper(i,j) {
+      sidewall_edge_bounding_box(x=x, y=y, x_aligned=false, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=extra_room1);
+      sidewall_edge_bounding_box(x=x, y=y, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=extra_room2);
+    }
+
+    if (topper) hull() placement_helper(i,j) {
+      sidewall_topper_bounding_box(x=x, y=y, x_aligned=false, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=extra_room1);
+      sidewall_topper_bounding_box(x=x, y=y, header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=extra_room2);
+    }
   }
 
   module corner_helper(side) {
@@ -518,23 +529,23 @@ module layout_walls_only(rows=4, cols=1, homerow, homecol, row_spacing,
     //for (i=[0,row_count-1]) {
 
     if (optional_index(rightwall,0,0) && optional_index(topwall,0,0)) {
-      corner(0,0,x=1,y=1);
+      old_corner(0,0,x=1,y=1);
     }
 
     let (j=0, i=optional_index(rows,j)-1) {
       if (optional_index(rightwall,i,0) && optional_index(bottomwall,0,i)) {
-	corner(i,0,x=1,y=-1);
+	old_corner(i,0,x=1,y=-1);
       }
     }
 
     let (i=0, j=cols-1) {
       if (optional_index(leftwall,i,j) && optional_index(topwall,j,i)) {
-	corner(i,j,x=-1,y=1);
+	old_corner(i,j,x=-1,y=1);
       }
     }
     let (j =cols-1, i = optional_index(rows,j)-1) {
       if (optional_index(leftwall,i,j) && optional_index(bottomwall,j,i)) {
-	corner(i,j,x=-1,y=-1);
+	old_corner(i,j,x=-1,y=-1);
       }
     }
 
