@@ -26,6 +26,9 @@ _disable_keycap_render = true;
 // can be inferred from profile
 //_switch_style= "choc";
 
+// if using mx switches, are they speed switches (lower travel)?
+//_mx_speed = true;
+
 // how far the key switch can depress (only for visual indication, doesn't affect the keyboard)
 // can be inferred from switch type
 //_switch_travel = 4.0;
@@ -108,10 +111,14 @@ function switch_type() =
   profile() == "cherry" || profile() == "sa" || profile() == "dsa" || profile() == "g20" ? "mx" :
   assert(false, str("unknown profile '", profile(), "' cannot deduce switch_type"));
 
+function mx_speed() =
+  !is_undef($mx_speed) ? $mx_speed :
+  !is_undef(_mx_speed) && _mx_speed;
+
 function switch_travel() =
   !is_undef($switch_travel) ? $switch_travel :
   !is_undef(_switch_travel) ? _switch_travel :
-  switch_type() == "mx" ? 4.0 :
+  switch_type() == "mx" ? mx_speed() ? 3.5 : 4.0 :
   switch_type() == "choc" ? 3.0 :
   assert(false, str("unknown switch_type '", switch_type()));
 
