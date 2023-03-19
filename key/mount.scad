@@ -6,6 +6,8 @@
 
 use <../settings.scad>;
 
+fn=60;
+
 // demo of the coordination of well shapes and bounding boxes
 let(header=false,footer=true,rightside=true,leftside=false, $fn=60) {
   key_mount(header=header,footer=footer,leftside=leftside,rightside=rightside);
@@ -238,27 +240,27 @@ module key_mount_corner_spheres(x,y,width=thickness(), header=false,footer=false
       h = outerdia() + optional_sum(rightside,leftside);
       if (extra_room == [0,0,0]) {
 	rotate([0,90,0]) difference() {
-	  cylinder(d=width, h=h);
+	  cylinder($fn=fn,d=width, h=h);
 	  if (extra_room == [0,0,0]) translate([-width/2,0,0]) cube([width, width,h]);
 	}
       } else {
-	sphere(d=width);
-	translate([outerdia() + optional_sum(rightside,leftside), 0 , 0]) sphere(d=width);
+	sphere($fn=fn,d=width);
+	translate([outerdia() + optional_sum(rightside,leftside), 0 , 0]) sphere($fn=fn,d=width);
       }
     } else if (is_undef(y) || y == 0) {
       h=outerdia() + optional_sum(header,footer);
       if (extra_room == [0,0,0]) {
 	rotate([-90,0,0]) difference() {
-	  cylinder(d=width, h=h);
+	  cylinder($fn=fn,d=width, h=h);
 	  if (extra_room == [0,0,0]) translate([0,-width/2,0]) cube([width, width,h]);
 	}
       } else {
-	sphere(d=width);
-	translate([0, outerdia() + optional_sum(header,footer), 0]) sphere(d=width);
+	sphere($fn=fn,d=width);
+	translate([0, outerdia() + optional_sum(header,footer), 0]) sphere($fn=fn,d=width);
       }
     } else {
       difference() {
-	sphere(d=width);
+	sphere($fn=fn,d=width);
 	if (extra_room == [0,0,0]) {
 	  //translate([0,0,-width/2]) cube([width,width,width]);
 	  translate([0,-width/2,-width/2]) cube([width,width,width]);
@@ -278,9 +280,9 @@ function directional_decoder(v,x,y) = !is_list(v) ? v :
 module wall_bbox(length=epsilon(),underhang,x_aligned=false) {
   module bbox_helper (length) {
     if (x_aligned) {
-      translate([0,-wall_width()/2,-wall_width()/2]) rotate([0,90,0]) cylinder(d=wall_width(),h=length);
+      translate([0,-wall_width()/2,-wall_width()/2]) rotate([0,90,0]) cylinder($fn=fn,d=wall_width(),h=length);
     } else {
-      translate([-wall_width()/2,0,-wall_width()/2]) rotate([-90,0,0]) cylinder(d=wall_width(),h=length);
+      translate([-wall_width()/2,0,-wall_width()/2]) rotate([-90,0,0]) cylinder($fn=fn,d=wall_width(),h=length);
     }
   }
 
