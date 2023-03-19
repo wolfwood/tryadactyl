@@ -36,7 +36,7 @@ things/testers/%_tester.stl: testers/%-tester.scad
 
 .PHONY: test image clean-test
 
-.NOTINTERMEDIATE: $(REFSTLS)
+.NOTINTERMEDIATE: $(TESTSTLS) $(REFSTLS)
 
 %-diff: things/testers/REFERENCE_%_tester.stl things/testers/%_tester.stl
 	@$(TESTEXE) -d $*
