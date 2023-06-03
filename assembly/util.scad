@@ -188,3 +188,16 @@ module screw_mounting(row,col,height, displacement,
     }
   }
 }
+
+function tail(v) = assert(is_list(v)) len(v) == 2 ? [v[1]] : [ for (i = [1:len(v)-1]) v[i]];
+
+module apply_screw_mountings(params, idx=0) {
+  assert(is_list(params));
+
+  screw_mounting(mounting_params=params[0], idx=idx, clearance=true)
+    if (len(params) == 1) {
+      children();
+    } else {
+      apply_screw_mountings(tail(params),idx) children();
+    }
+}
