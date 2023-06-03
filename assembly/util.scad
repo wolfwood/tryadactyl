@@ -40,6 +40,24 @@ function screw_mounting_params(row, col, height=20, strut_dia=6.5, screw_dia=3.2
 
 default_screw_mounting_params = screw_mounting_params();
 
+function absolute_screw_mounting_params(placement=[0,0,0],
+					height=match(height_enum,default_screw_mounting_params),
+					strut_dia=match(strut_dia_enum,default_screw_mounting_params),
+					screw_dia=match(screw_dia_enum,default_screw_mounting_params),
+					washer_dia=match(washer_dia_enum,default_screw_mounting_params),
+					headroom=match(headroom_enum, default_screw_mounting_params),
+					footroom=match(footroom_enum, default_screw_mounting_params),
+					spacer=match(spacer_enum, default_screw_mounting_params)
+					) =
+  screw_mounting_params(row=0, col=0,
+			height=height,
+			strut_dia=strut_dia, screw_dia=screw_dia, washer_dia=washer_dia,
+			headroom=headroom, footroom=footroom, spacer=spacer,
+			displacement=placement,
+			layout_params=layout_placement_params(row_spacing=create_flat_placement(0),
+							      col_spacing=create_flat_placement(0), profile_rows=1)
+			);
+
 
 module screw_mounting_blank(params, idx) {
   strut_dia = match(strut_dia_enum, params);
@@ -123,7 +141,7 @@ module screw_mounting(row,col,height, displacement,
       headroom_1 = optional_vector_index(match(headroom_enum,mounting_params), 1)
       ){
 
-    assert(height==6 || height==10 || height==12 || height==15 || height==16 || height==18 || height==20 ||
+    assert(height==0 || height==6 || height==10 || height==12 || height==15 || height==16 || height==18 || height==20 ||
 	   height==21 || height==22 || height==24 || height==25 || height==26 || height==27 || height==28 || height>=30,
 	   "Height must be a combination of 6, 10, 15 and 20 mm struts");
 
@@ -147,7 +165,7 @@ module screw_mounting(row,col,height, displacement,
       if (!blank) {
 	layout_placement(row, col, params=layout_params, row_spacing=row_spacing, col_spacing=col_spacing, profile_rows=profile_rows, homerow=homerow, homecol=homecol, tilt=tilt, offsets=offsets, displacement=displacement,corners=true, flatten=false, stay_upright=true) {
 	  $fn=60;
-	  cylinder(h=height,d=washer_dia);
+	  cylinder(h=height+7,d=washer_dia);
 
 	  let(z=height+spacer_0+spacer_1) {
 	    translate([0,0,-(z+.1)]) cylinder(h=z+2*.1, d=screw_dia);
