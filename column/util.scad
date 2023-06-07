@@ -23,7 +23,7 @@ module drop(){
  * - position is used to do final positioning of groups of columns
  */
 
-function layout_placement_params(row_spacing, col_spacing, profile_rows, homerow=2, homecol=0, tent=[0,0,0], tilt=[0,0,0], position=[0,0,0], offsets=[0,0,0], displacement=[0,0,0], row_first=false) =
+function layout_placement_params(row_spacing, col_spacing, profile_rows, homerow=2, homecol=0, tent=[0,0,0], tilt=[0,0,0], position=[0,0,0], offsets=[0,0,0], displacement=[0,0,0], row_first=false, profile=undef) =
   [[row_spacing_enum, row_spacing],
    [col_spacing_enum, col_spacing],
    [profile_rows_enum, profile_rows],
@@ -34,7 +34,8 @@ function layout_placement_params(row_spacing, col_spacing, profile_rows, homerow
    [displacement_enum, displacement],
    [position_enum, position],
    [tent_enum, tent],
-   [row_first_enum,row_first]
+   [row_first_enum,row_first],
+   [profile_enum,profile]
    ];
 
 /* :/ these variables aren't exported with `use` so params is effectively opaque in intervening functions
@@ -51,6 +52,7 @@ displacement_enum = "h";
 position_enum = "i";
 tent_enum = "j";
 row_first_enum = "k";
+profile_enum = "l";
 
 /* variables are not exported when we `use` this file, so we make a this a function */
 function default_layout_placement_params() =
@@ -133,7 +135,8 @@ module layout_placement(row, col,
       position = match(position_enum, params),
       offsets = optional_vector_index(match_override(offsets_enum, params, offsets), col, row),
       displacement = match(displacement_enum, params) + displacement,
-      row_first = match(row_first_enum,params)) {
+      row_first = match(row_first_enum,params),
+      $profile=optional_index(match_override(profile_enum, params, !is_undef($profile) ? $profile : undef), row, col) ) {
     assert(!is_undef(tilt.x),str(tilt," ",col," ", row," ", match(tilt_enum,params)))
 
     rotate([0,tent.y,0])
