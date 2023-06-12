@@ -32,7 +32,7 @@ I also aim to document an easy approach to handwiring that both simplifies the i
   * pluggable support for new placement styles (spirals anyone?)
   * ability to automatically place things (like trackpoints, screws, and support struts) at the corners between keys so they don't collide with switches and keycaps, even when using complex placements
   * pluggable keycap support (add a new profile with a single function)
-  * pluggable switch support (**TODO**)
+  * pluggable switch support
   * per-key configuration overrides
     * stick a Row 1 key next to a Row 4 key seamlessly by changing keycap profile row
     * Favorite keycaps don't come with an ortho/ergo kit? Use 'traditional' wide modifier keys with you non-row staggered design by setting a position offset.
