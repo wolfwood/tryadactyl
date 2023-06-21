@@ -145,9 +145,9 @@ module key_mount_cavity(above=false, below=false) {
       }
 
     if (switch_type() == "choc" || (mx_and_choc() && switch_type() == "mx"))
-      let(h=thickness() - mx_tab_offset()) {
-	translate([innerdia()/2 - margin, -innerdia()/2, -thickness() - margin]) cube([.2+margin, innerdia(), h +margin]);
-	translate([-innerdia()/2 - .2, -innerdia()/2, -thickness() - margin])    cube([.2+margin, innerdia(), h +margin]);
+      let(h=thickness() - choc_tab_offset()) {
+	translate([innerdia()/2 - margin, -innerdia()/2, -thickness() - margin]) cube([choc_tab_depth()+margin, innerdia(), h +margin]);
+	translate([-innerdia()/2 - .2, -innerdia()/2, -thickness() - margin])    cube([choc_tab_depth()+margin, innerdia(), h +margin]);
       }
 
     if (below) {

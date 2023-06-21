@@ -55,6 +55,9 @@ function mx_tab_offset() = 1.2; // how far from the top the switchholders start
 function mx_tab_depth() = 0.6; // how far tabs stick out
 function mx_tab_width() = 5;
 
+function choc_tab_offset() = 1.2; // how far from the top the switchholders start
+function choc_tab_depth() = 0.2; // how far tabs stick out
+
 function mx_and_choc()=false;
 
 _epsilon = .001; // smallest meaningful overlap, used when avoiding coincident faces
