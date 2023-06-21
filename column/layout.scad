@@ -437,6 +437,7 @@ module layout_walls_only(rows=4, cols=1, homerow, homecol, row_spacing,
 
 		    next_i_valid      = 0 <= next_i   && next_i   < next_row_count;
 		    next_corner_valid = 0 <= next_i+1 && next_i+1 < next_row_count;
+		    next_upper_corner_valid = 0 <= next_i-1 && next_i-1 < next_row_count;
 
 		    if (!is_undef($y) && next_i_valid) {
 		      next_wall = wall_matrix[j+1][next_i];
@@ -451,27 +452,55 @@ module layout_walls_only(rows=4, cols=1, homerow, homecol, row_spacing,
 		      }
 		    }
 
-		    // XXX fixme
-		    *if(next_corner_valid && side == 3){
-		      next_wall = wall_matrix[j+1][next_i+1];
+		    // XXX: consolidate these 4 cases somehow?
+		    if(next_upper_corner_valid && side == 0){
+		      next_wall = wall_matrix[next_j][next_i-1];
 		      if(is_list(next_wall) && [] != next_wall) {
-			neighbors = search(side+1%4,next_wall, 0, 0);
+			neighbors = search((side+1)%4,next_wall, 0, 0);
 			if(0 != len(neighbors)) {
 			  next_idx = neighbors[0];
 			  next_extra_room = next_wall[next_idx][1];
-			  drop() {
-			    placement_helper(i,j) key_mount_corner_spheres(x=-1, y=1, width=wall_width(), header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=side_extra_room);
-			    placement_helper(next_i+1,j+1) key_mount_corner_spheres(x=1, y=-1, width=wall_width(), header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=next_extra_room);
-			  }
 
-			  hull() {
-			    placement_helper(i,j) key_mount_corner_spheres(x=-1, y=1, width=wall_width(), header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=side_extra_room);
-			    placement_helper(next_i+1,j+1) key_mount_corner_spheres(x=1, y=-1, width=wall_width(), header=$h, footer=$f, leftside=$l, rightside=$r, extra_room=next_extra_room);
-			    if (side_extra_room != [0,0,0]) {
-			      placement_helper(i,j) key_mount_corner_spheres(x=-1, y=1, header=$h, footer=$f, leftside=$l, rightside=$r);
-			      placement_helper(next_i+1,j+1) key_mount_corner_spheres(x=1, y=-1, header=$h, footer=$f, leftside=$l, rightside=$r);
-			    }
-			  }
+			  wall_connector(ij=[i,j], xy=[-1, 1], ij2=[next_i-1, next_j], xy2=[1, -1], extra_room=side_extra_room, extra_room2=next_extra_room);
+			}
+		      }
+		    }
+
+		    if(next_upper_corner_valid && side == 3){
+		      next_wall = wall_matrix[next_j][next_i-1];
+		      if(is_list(next_wall) && [] != next_wall) {
+			neighbors = search((side-1)%4,next_wall, 0, 0);
+			if(0 != len(neighbors)) {
+			  next_idx = neighbors[0];
+			  next_extra_room = next_wall[next_idx][1];
+
+			  wall_connector(ij=[i,j], xy=[-1, 1], ij2=[next_i-1, next_j], xy2=[1, -1], extra_room=side_extra_room, extra_room2=next_extra_room);
+			}
+		      }
+		    }
+
+		    if(next_corner_valid && side == 2){
+		      next_wall = wall_matrix[next_j][next_i+1];
+		      if(is_list(next_wall) && [] != next_wall) {
+			neighbors = search((side-1)%4,next_wall, 0, 0);
+			if(0 != len(neighbors)) {
+			  next_idx = neighbors[0];
+			  next_extra_room = next_wall[next_idx][1];
+
+			  wall_connector(ij=[i,j], xy=[-1, -1], ij2=[next_i+1, next_j], xy2=[1, 1], extra_room=side_extra_room, extra_room2=next_extra_room);
+			}
+		      }
+		    }
+
+		    if(next_corner_valid && side == 3){
+		      next_wall = wall_matrix[next_j][next_i+1];
+		      if(is_list(next_wall) && [] != next_wall) {
+			neighbors = search((side+1)%4,next_wall, 0, 0);
+			if(0 != len(neighbors)) {
+			  next_idx = neighbors[0];
+			  next_extra_room = next_wall[next_idx][1];
+
+			  wall_connector(ij=[i,j], xy=[-1, -1], ij2=[next_i+1, next_j], xy2=[1, 1], extra_room=side_extra_room, extra_room2=next_extra_room);
 			}
 		      }
 		    }
