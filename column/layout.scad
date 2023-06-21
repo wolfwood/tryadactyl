@@ -56,10 +56,10 @@ module layout_plate_only(rows=4, cols=1, homerow, homecol, row_spacing,
   module placement_helper(row,col) {
     // lets us pass row, column as 2 scalar parameters, or as a single 2d vector
     let(col = is_undef(col) ? row.y : col, row = is_list(row) ? row.x : row) {
-      $h = side_gets_spacer(optional_index(headers,row,col), row != 0, perimeter, narrowsides);
-      $f = side_gets_spacer(optional_index(footers,row,col), row != optional_index(rows, col)-1, perimeter, narrowsides);
-      $r = side_gets_spacer(optional_index(rightsides,row,col), col != 0, perimeter, narrowsides);
-      $l = side_gets_spacer(optional_index(leftsides,row,col), col != cols-1, perimeter, narrowsides);
+      $h = side_gets_spacer(optional_index(headers,row,col), row != 0, perimeter, narrowsides && optional_index(topwall,row,col));
+      $f = side_gets_spacer(optional_index(footers,row,col), row != optional_index(rows, col)-1, perimeter, narrowsides && optional_index(bottomwall,row,col));
+      $r = side_gets_spacer(optional_index(rightsides,row,col), col != 0, perimeter, narrowsides && optional_index(rightwall,row,col));
+      $l = side_gets_spacer(optional_index(leftsides,row,col), col != cols-1, perimeter, narrowsides && optional_index(leftwall,row,col));
 
       layout_placement(row=row, col=col, row_spacing=row_spacing, col_spacing=col_spacing, profile_rows=profile_rows,
 		       homerow=homerow, homecol=homecol, tilt=tilt, offsets=offsets, displacement=displacement, flatten=flatten, params=params) children();
@@ -228,10 +228,10 @@ module layout_walls_only(rows=4, cols=1, homerow, homecol, row_spacing,
 			 perimeter=true, narrowsides=false, flatten=true, params=default_layout_placement_params(),
 			 wall_matrix, topper=true, wall=true) {
   module placement_helper(row,col) {
-    $h = side_gets_spacer(optional_index(headers,row,col), row != 0, perimeter, narrowsides);
-    $f = side_gets_spacer(optional_index(footers,row,col), row != optional_index(rows,col)-1, perimeter, narrowsides);
-    $r = side_gets_spacer(optional_index(rightsides,row,col), col != 0, perimeter, narrowsides);
-    $l = side_gets_spacer(optional_index(leftsides,row,col), col != cols-1, perimeter, narrowsides);
+    $h = side_gets_spacer(optional_index(headers,row,col), row != 0, perimeter, narrowsides && optional_index(topwall,row,col));
+    $f = side_gets_spacer(optional_index(footers,row,col), row != optional_index(rows,col)-1, perimeter, narrowsides && optional_index(bottomwall,row,col));
+    $r = side_gets_spacer(optional_index(rightsides,row,col), col != 0, perimeter, narrowsides && optional_index(rightwall,row,col));
+    $l = side_gets_spacer(optional_index(leftsides,row,col), col != cols-1, perimeter, narrowsides && optional_index(leftwall,row,col));
 
     layout_placement(row=row, col=col, row_spacing=row_spacing, col_spacing=col_spacing, profile_rows=profile_rows,
 		     homerow=homerow, homecol=homecol, tilt=tilt, offsets=offsets, displacement=displacement, flatten=flatten, params=params) children();
