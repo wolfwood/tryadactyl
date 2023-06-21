@@ -145,7 +145,7 @@ module layout_placement(row, col,
       rotate([0,0,tent.z]) rotate([0,tilt.y,0])
       translate(offsets) rotate([tilt.x,0,0])
       rotate([0,0,tilt.z])
-      // usually we place col first (i.e. closer to the children(), second in right-to-left, top-to-bottom reading order)
+      // usually we place col first (i.e. closer to the children(), second in left-to-right, top-to-bottom reading order)
       //  but this can be overridden
       place_row_and_or_col(row, col, row_spacing, col_spacing, homecol, homerow, corners=corners,
 			   displacement=displacement, row_first=row_first)
