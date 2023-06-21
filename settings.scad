@@ -40,7 +40,7 @@ _disable_keycap_render = true;
 _mx_innerdia = 13.9;
 _mx_outerdia = 17;
 
-_choc_innerdia = _mx_innerdia;
+_choc_innerdia = 13.8;
 _choc_outerdia = 15.5;
 
 // key plate thickness
