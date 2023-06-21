@@ -55,6 +55,8 @@ function mx_tab_offset() = 1.2; // how far from the top the switchholders start
 function mx_tab_depth() = 0.6; // how far tabs stick out
 function mx_tab_width() = 5;
 
+function mx_and_choc()=false;
+
 _epsilon = .001; // smallest meaningful overlap, used when avoiding coincident faces
 
 // the footprint of the keycaps.
@@ -124,7 +126,7 @@ function switch_travel() =
 
 function innerdia() =
   !is_undef($innerdia) ? $innerdia :
-  switch_type() == "mx" && !is_undef(_mx_innerdia) ? _mx_innerdia :
+  switch_type() == "mx" || (mx_and_choc() && switch_type() == "choc") && !is_undef(_mx_innerdia) ? _mx_innerdia :
   switch_type() == "choc" && !is_undef(_choc_innerdia) ? _choc_innerdia :
   assert(false, str("please define an innerdia for: ", switch_type()));
 

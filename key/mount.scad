@@ -138,13 +138,13 @@ module key_mount_cavity(above=false, below=false) {
     translate([0, 0, -thickness()/2]) cube([innerdia(), innerdia(), thickness() + 2*margin], true);
 
     // cutouts for switch tabs
-    if (switch_type() == "mx")
+    if (switch_type() == "mx" || (mx_and_choc() && switch_type() == "choc"))
       let(depth=mx_tab_depth(), width=mx_tab_width(), h=thickness() - mx_tab_offset()){
 	translate([-width/2, innerdia()/2 - margin, -thickness() - margin]) cube([width, depth + margin, h +margin]);
 	translate([-width/2, -innerdia()/2 - depth, -thickness() - margin]) cube([width, depth + margin, h +margin]);
       }
 
-    if (switch_type() == "choc")
+    if (switch_type() == "choc" || (mx_and_choc() && switch_type() == "mx"))
       let(h=thickness() - mx_tab_offset()) {
 	translate([innerdia()/2 - margin, -innerdia()/2, -thickness() - margin]) cube([.2+margin, innerdia(), h +margin]);
 	translate([-innerdia()/2 - .2, -innerdia()/2, -thickness() - margin])    cube([.2+margin, innerdia(), h +margin]);
