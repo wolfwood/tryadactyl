@@ -168,7 +168,7 @@ module magnetize_screwed(position=[0,0,0], cut_height=9) {
 
 *magnetize_screwed() translate([0,0,2])  cube([75,75,4], true);
 
-module bar_magnetize_below(position=[0,0,0], rotation=[0,0,0], spacer=0, walls=2, ceiling=2, washer=0, grow=[0,0,0]) {
+module bar_magnetize_below(position=[0,0,0], rotation=[0,0,0], spacer=0, walls=2, ceiling=2, washer=0, grow=[0,0,0], hex=6.3+.2) {
   bar = [14, 60.5, 5.5+1];
   epsilon=.1;
 
@@ -188,6 +188,12 @@ module bar_magnetize_below(position=[0,0,0], rotation=[0,0,0], spacer=0, walls=2
     if (washer>0) {
       translate(position) rotate(rotation) {
 	rotational_clone() translate([0,45/2,outer.z]) cylinder($fn=60,h=100, d=washer);
+      }
+    }
+
+    if (hex>0) {
+      translate(position) rotate(rotation) {
+	rotational_clone() translate([0,45/2,outer.z]) cylinder($fn=6,h=100, d=hex);
       }
     }
   }
