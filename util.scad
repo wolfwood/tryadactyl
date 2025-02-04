@@ -220,8 +220,8 @@ module bar_magnetize(position=[0,0,0], spacer=2) {
 *bar_magnetize() translate([0,0,2])  cube([50,75,4], true);
 
 module mount_teensy20pp(position=[0,0,0], rotation=[0,0,0], spacer=2, walls=2, diode=false) {
-  slop =.1;
-  bar = [18.2+slop, 51.2+slop, 8+spacer];
+  slop =.18;
+  bar = [17.8+slop, 50.8+slop, 8+spacer];
   epsilon=.1;
 
   outer = bar+[2*walls,2*walls,0];
@@ -270,7 +270,7 @@ module mount_teensy20pp(position=[0,0,0], rotation=[0,0,0], spacer=2, walls=2, d
 
 module mount_trrs(position=[0,0,0], rotation=[0,0,0], spacer=2, walls=2) {
   slop = .1;
-  bar = [6.5+slop, 12.5+slop, 8 + spacer];
+  bar = [6.2+slop, 12.2+slop, 8 + spacer];
   epsilon=.1;
 
   outer = bar + [2*walls,2*walls,0];
