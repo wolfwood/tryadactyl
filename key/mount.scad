@@ -5,6 +5,7 @@
  */
 
 use <../settings.scad>;
+use <../util.scad>;
 
 fn=60;
 
@@ -106,17 +107,37 @@ module key_mount(header=false,footer=false,leftside=false,rightside=false) {
 }
 
 module hotswap() {
-  translate([0, 0, -stem_height()]) {
-    let(x=10.9, y=4, x2=5.3, y2=6, z=3.1)
-      translate([0, innerdia()/2 - 2 - 1, -thickness() -3.1/2]) {
-      color("orange",.2) {
-	cube([10.9,4,3.1], true);
-	translate([-(x/2-x2/2), y/2 - y2/2,0]) cube([x2,y2,z],true);
+  if (switch_type() == "choc" || (mx_and_choc() && switch_type() == "mx")){
+    translate([0, 0, -stem_height()]) color("silver", .2) linear_extrude(.8)
+      offset(r=.65, chamfer=true) square(size = 13.7, center = true);
+
+    translate([0, 0, -stem_height()]) {
+      let(x=10.9, y=4, x2=5.3, y2=6, z=3.1)
+        translate([0, innerdia()/2 - 2 - 1, -thickness() -3.1/2]) {
+        color("orange",.2) {
+          cube([10.9,4,3.1], true);
+          translate([-(x/2-x2/2), y/2 - y2/2,0]) cube([x2,y2,z],true);
+        }
+        let(x3=2.6, y3=2.6, z3 = 1.8) translate([0, 0, z3/2])
+          color("silver", .2) {
+          translate([-(x/2 + x3/2), -.5  - 2.55, 0]) cube([x3, y3, z3],true);
+          translate([(x/2 + x3/2), -.5, 0]) cube([x3, y3, z3],true);
+        }
       }
-      let(x3=(14.5-x)/2, y3=1.8, z3 = 1.95) translate([0, 0, z3/2])
-	color("silver", .2) {
-	translate([-(x/2 + x3/2), -.5  - 2.55, 0]) cube([x3, y3, z3],true);
-	translate([(x/2 + x3/2), -.5, 0]) cube([x3, y3, z3],true);
+    }
+  }else{
+    translate([0, 0, -stem_height()]) {
+      let(x=10.9, y=4, x2=5.3, y2=6, z=3.1)
+        translate([0, innerdia()/2 - 2 - 1, -thickness() -3.1/2]) {
+        color("orange",.2) {
+          cube([10.9,4,3.1], true);
+          translate([-(x/2-x2/2), y/2 - y2/2,0]) cube([x2,y2,z],true);
+        }
+        let(x3=(14.5-x)/2, y3=1.8, z3 = 1.95) translate([0, 0, z3/2])
+          color("silver", .2) {
+          translate([-(x/2 + x3/2), -.5  - 2.55, 0]) cube([x3, y3, z3],true);
+          translate([(x/2 + x3/2), -.5, 0]) cube([x3, y3, z3],true);
+        }
       }
     }
   }
@@ -125,7 +146,7 @@ module hotswap() {
 /* use to cut a key_mount into something. 0.1 mm margins so previews show a proper cavity
  * optionally clears space above and below the well also.
  */
-module key_mount_cavity(above=false, below=false) {
+module key_mount_cavity(above=false, below=false, hotswap_clearance=true) {
   margin=.1;
 
   translate([0, 0, -stem_height()]) union() {
@@ -148,6 +169,14 @@ module key_mount_cavity(above=false, below=false) {
       let(h=thickness() - choc_tab_offset()) {
 	translate([innerdia()/2 - margin, -innerdia()/2, -thickness() - margin]) cube([choc_tab_depth()+margin, innerdia(), h +margin]);
 	translate([-innerdia()/2 - .2, -innerdia()/2, -thickness() - margin])    cube([choc_tab_depth()+margin, innerdia(), h +margin]);
+
+        // make room for choc hot swap sockets
+        let(extra_z=.3) if(hotswap_clearance)
+          translate([0,0,-extra_z])
+          rotational_clone(2) {
+          translate([0,-5.9,-2.2 -3.05]) cylinder($fn=60, h = 3.05+extra_z, d = 3+.4);
+          *translate([-5,-3.8,-2.2 -3.05]) cylinder($fn=60, h = 3.05+extra_z, d = 3+.5); // should have no effect
+        }
       }
 
     if (below) {
