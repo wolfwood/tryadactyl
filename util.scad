@@ -219,9 +219,9 @@ module bar_magnetize(position=[0,0,0], spacer=2) {
 
 *bar_magnetize() translate([0,0,2])  cube([50,75,4], true);
 
-module mount_teensy20pp(position=[0,0,0], rotation=[0,0,0], spacer=2, walls=2, diode=false) {
+module mount_teensy20pp(position=[0,0,0], rotation=[0,0,0], spacer=2, walls=2, diode=false, removal_hole=true, z=8) {
   slop =.18;
-  bar = [17.8+slop, 50.8+slop, 8+spacer];
+  bar = [17.8+slop, 50.8+slop, z+spacer];
   epsilon=.1;
 
   outer = bar+[2*walls,2*walls,0];
@@ -261,16 +261,18 @@ module mount_teensy20pp(position=[0,0,0], rotation=[0,0,0], spacer=2, walls=2, d
       translate([0, bar.y/2, bar.z/2+spacer+7/2]) cube([11, 40, bar.z+7],true);
 
       // for VBUS detect shottky
-      if (diode) translate([0,(pitch/2)+(4*pitch)+(pitch*3/2),spacer]) cube([8,pitch*3,4],true);
+      if (diode || removal_hole)
+        translate([0,(pitch/2)+(4*pitch)+(pitch*3/2),removal_hole ? 0 : spacer])
+          cube([8,pitch*3,4+(removal_hole ? 2*spacer:0)],true);
     }
   }
 }
 
 *mount_teensy20pp() translate([0,0,2])  cube([50,75,4], true);
 
-module mount_trrs(position=[0,0,0], rotation=[0,0,0], spacer=2, walls=2) {
+module mount_trrs(position=[0,0,0], rotation=[0,0,0], spacer=2, walls=2, z=8) {
   slop = .1;
-  bar = [6.2+slop, 12.2+slop, 8 + spacer];
+  bar = [6.2+slop, 12.2+slop, z + spacer];
   epsilon=.1;
 
   outer = bar + [2*walls,2*walls,0];
