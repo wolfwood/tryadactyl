@@ -77,8 +77,8 @@ function get_homerow(params, homerow, col) = optional_index(match_override(homer
 
 // for the rare case we don't want any translation, we only want to be oriented at the same angle
 module rotation_only(row, col, tilt, tent, params=default_layout_placement_params()) {
-  let(tent = match_override(tent_enum, params, tent),
-      tilt = optional_vector_index(match_override(tilt_enum, params, tilt), col, row)){
+  let(tent = optional_vector_index(match_override(tent_enum, params, tent), row, col),
+      tilt = optional_vector_index(match_override(tilt_enum, params, tilt), row, col)){
     rotate([0,tent.y,0])
       rotate([tent.x,0,0])
       rotate([0,0,tent.z])
@@ -91,8 +91,8 @@ module rotation_only(row, col, tilt, tent, params=default_layout_placement_param
 
 // this cancels out the rotations, giving the effect of translation only
 module reverse_rotation(row, col, tilt, tent, params=default_layout_placement_params()) {
-  let(tent = match_override(tent_enum, params, tent),
-      tilt = optional_vector_index(match_override(tilt_enum, params, tilt), col, row)){
+  let(tent = optional_vector_index(match_override(tent_enum, params, tent), row, col),
+      tilt = optional_vector_index(match_override(tilt_enum, params, tilt), row, col)){
     rotate([0,0,-tilt.z])
       rotate([-tilt.x,0,0])
       rotate([0,-tilt.y,0])
@@ -130,11 +130,11 @@ module layout_placement(row, col,
       profile_rows = match_override(profile_rows_enum, params, profile_rows),
       homerow = optional_index(match_override(homerow_enum, params, homerow), col),
       homecol = match_override(homecol_enum, params, homecol),
-      tent = match_override(tent_enum, params, tent),
-      tilt = optional_vector_index(match_override(tilt_enum, params, tilt), col, row),
-      position = match(position_enum, params),
-      offsets = optional_vector_index(match_override(offsets_enum, params, offsets), col, row),
-      displacement = match(displacement_enum, params) + displacement,
+      tent = optional_vector_index(match_override(tent_enum, params, tent), row, col),
+      tilt = optional_vector_index(match_override(tilt_enum, params, tilt), row, col),
+      position = optional_vector_index(match(position_enum, params), row, col),
+      offsets = optional_vector_index(match_override(offsets_enum, params, offsets), row, col),
+      displacement = optional_vector_index(match(displacement_enum, params), row, col) + optional_vector_index(displacement, row, col),
       row_first = match(row_first_enum,params),
       $profile=optional_index(match_override(profile_enum, params, !is_undef($profile) ? $profile : undef), row, col) ) {
     assert(!is_undef(tilt.x),str(tilt," ",col," ", row," ", match(tilt_enum,params)))
@@ -384,67 +384,37 @@ function optional_normalize(v) = !is_list(v[0]) ? normalize_chord(v) :
 				     [ for(e=v) optional_normalize(e) ];
 
 
-/* used for flexible column parameters without a lot of boilerplate, allows us to pass:
- *  - a scalar (if we want all keys treated the same)
- *  - an array (for treating each key in a column (row) differently, but all columns (rows) identically)
- *  - a 2d array (to be able to configure each key individually
- */
-//function optional_index(v, row, col) = !is_list(v) ? v : !is_list(v[0]) ? v[row] :
-  //  len(v[col]) == 1 ? v[col][0] : v[col][row];
-//function optional_vector_index(v, row, col) = !is_list(v[0]) ? v : !is_list(v[0][0]) ? v[row] :
-//  len(v[col]) == 1 ? v[col][0] : v[col][row];
+/* optional_index() is used for flexible per-key parameter specification without always requiring values
+   for every key, it allows us to pass:
+ *  - a scalar: e.g. 2 (if we want all keys treated the same)
+ *  - an array: e.g. [1,2,3] (for treating each element in a row differently, but all columns identically)
+ *  - a 2d array: e.g. [[1,2,3],[4,5,6],[7,8,9]] (to be able to configure each key individually)
 
+ *    to treat each column differently, but every row in that column identically,
+        wrap each element in []: e.g. [[1],[2],[3]]
+
+ *    more generally, you can omit duplicate rows or columns at the end of an array, the last value
+        specified will be substituted rather than triggering an out of bounds error
+
+ * for everything but column placement arguments and homerow, 1d arrays are row indexed, 2d arrays are
+     column major (switching the order row and col are passed in the caller means col index 1d arrays,
+     and row major 2d arrays. the assumption in these cases is that only 1d arrays are likely).
+*/
 function _optional_index_or_last(v,idx) =
   !is_list(v)   ? v :
   len(v) == 1   ? v[0] :
   len(v) <= idx ? v[len(v)-1] :
                   v[idx];
 
+// assumes a data element (leaf) is scalar, by default
 function optional_index(v, row, col, leaf = function (l) l) =
   !is_list(leaf(v))    ? v :
   !is_list(leaf(v[0])) ? _optional_index_or_last(v, row) :
                          _optional_index_or_last(_optional_index_or_last(v, col), row);
-  //len(v) == 1          ? v[0] :
-  //len(v) <= row        ? v[len(v)-1] :
-  //                       v[row] :
-  //len(v[col]) == 1     ? v[col][0] :
-  //len(v) == 1          ? len(v[0]) == 1 ? v[0][0]  : v[0][row] :
-  //len(v[col]) <= row   ? v[col][len(v[col])-1] :
-  //                       v[col][row];
 
+// assumes a data element is a list of scalars, by overriding leaf
 function optional_vector_index(v, row, col) = optional_index(v, row, col, leaf = function(l) l[0]);
 
-// column major vs row major data
-// (eg, if expanding values from a scalar, which dimension are we most likely to customize)
-/* Column-major (the basic unit of a columnar stagger is the columns, so this is the default)
- *  col_spacing
- *  offset
- *  tilt
- *  # rows and possibly homerow (ergodox/dactyl/DM all have columns with fewer rows)
- */
-/* Row-major
- *  row_spacing
- *  profile_rows (rarely a scalar, usually a vector already)
- */
-/* Both
- *  walls - if I want to tune them its probably for a specific key
- *  headers/footers and sides? maybe row or column respectively but probably a key specific workaround
- *  wider modifier keys - this is column major, but also usually varies with row (ergodox has a 1u key in the last row)
- *  vertical keys and horizontal spacebars - maybe just a combo of offset and varying # rows per column?
- */
-/* so how to handle?
- *  first dimension is always the same:
- *     - clumsy for data oriented differently, needs to know how many replicas to create
- *  by convention:
- *     - straightforward unless you guess wrong
- *     - might need two copies of helper functions (and to remember which to use)
- *  wrapper with metadata saying column or row major:
- *     - might need to use a constructor even if I just want a scalar (adds complexity)
- *     - gives a place to stash other metadata
- */
-/* right now, I only see 2 row-first data types which are both strongly row associated,
- *  so sticking to convention for now
- */
 
 //utils for accumulating multiple columns (rows) worth of the above structures
 function range_sum(v, start, stop, other, sum=0) =
