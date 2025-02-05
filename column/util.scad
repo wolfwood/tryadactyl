@@ -250,12 +250,12 @@ function create_flat_placement(v) = ["flat", [], v];
 /* circular style - rows in XZ plane, columns in YZ */
 // XXX doesn't use ranged_sum(), so individually tuned key spacing won't properly reflect neighbor's positions
 module place_circular_row(row, col, row_spacing, homerow, corners=false, reverse=false, args=[], displacement=[0,0,0]){
+  count = homerow-row;
+
   temp_chord = optional_vector_index(row_spacing, row, col);
-  chord = normalize_chord([temp_chord[0]+displacement.y,temp_chord[1],0]);
+  chord = normalize_chord([temp_chord[0]+(count<0?-1:1)*displacement.y,temp_chord[1],0]);
 
   z_correct = args[0];
-
-  count = homerow-row;
 
   if (corners) {
     translate([0,0,reverse?0:chord[1]]) rotate([(reverse?-1:1)*((2*count-1)*chord[2]/2),0,0]) translate([0,0,reverse?0:-chord[1]])
@@ -265,7 +265,9 @@ module place_circular_row(row, col, row_spacing, homerow, corners=false, reverse
 	children();
       }
   } else {
-    translate([0,0,reverse?0:chord[1]]) rotate([(reverse?-1:1)*((homerow-row)*chord[2]),0,0]) translate([0,0,reverse?0:-chord[1]])
+    disp_chord = normalize_chord([displacement.y,temp_chord[1],0]);
+
+    translate([0,0,reverse?0:chord[1]]) rotate([count == 0 ? disp_chord[2] : (reverse?-1:1)*((homerow-row)*chord[2]),0,0]) translate([0,0,reverse?0:-chord[1]])
        if (is_num(z_correct) && z_correct == 0) {
 	children();
       } else {
@@ -275,12 +277,12 @@ module place_circular_row(row, col, row_spacing, homerow, corners=false, reverse
 }
 
 module place_circular_col(row, col, col_spacing, homecol, homerow, corners=false, reverse=false, args=[], displacement=[0,0,0]){
+  count = homecol-col;
+
   temp_chord = optional_vector_index(col_spacing, col, row);
-  chord = normalize_chord([temp_chord[0]+displacement.x,temp_chord[1],0]);
+  chord = normalize_chord([temp_chord[0]+(count<0?-1:1)*displacement.x,temp_chord[1],0]);
 
   z_correct = args[0];
-
-  count = homecol-col;
 
   if (corners) {
     translate([0,0,reverse?0:chord[1]]) rotate([0,(reverse?-1:1)*-((2*count-1)*chord[2]/2),0]) translate([0,0,reverse?0:-chord[1]])
@@ -290,7 +292,9 @@ module place_circular_col(row, col, col_spacing, homecol, homerow, corners=false
 	children();
     //}
   } else {
-    translate([0,0,reverse?0:chord[1]]) rotate([0,(reverse?-1:1)*-((homecol-col)*chord[2]),0]) translate([0,0,reverse?0:-chord[1]])
+    disp_chord = normalize_chord([displacement.x,temp_chord[1],0]);
+
+    translate([0,0,reverse?0:chord[1]]) rotate([0, count == 0 ? disp_chord[2] : (reverse?-1:1)*-((homecol-col)*chord[2]),0]) translate([0,0,reverse?0:-chord[1]])
       if (is_num(z_correct) && z_correct == 0) {
 	children();
       } else {
