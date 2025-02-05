@@ -27,16 +27,20 @@ module layout_columns(rows=4, cols=1, homerow, homecol, row_spacing,
 		    leftwall=leftwall, rightwall=rightwall, topwall=topwall, bottomwall=bottomwall,
 		    perimeter=perimeter, narrowsides=narrowsides, flatten=flatten,
 		    reverse_triangles=reverse_triangles, punch_holes=punch_holes,
-		    params=params);
-
-  if (wells) {
-    layout_walls_only(rows=rows, cols=cols, homerow=homerow, homecol=homecol, row_spacing=row_spacing,
-		      col_spacing=col_spacing,
-		      profile_rows=profile_rows, offsets=offsets, tilt=tilt, displacement=displacement, keys=keys, wells=wells,
-		      headers=headers, footers=footers, leftsides=leftsides, rightsides=rightsides,
-		      leftwall=leftwall, rightwall=rightwall, topwall=topwall, bottomwall=bottomwall,
-		      perimeter=perimeter, narrowsides=narrowsides, flatten=flatten, params=params,
-		      wall_matrix=wall_matrix);
+		    params=params){
+    if (wells) {
+      layout_walls_only(rows=rows, cols=cols, homerow=homerow, homecol=homecol, row_spacing=row_spacing,
+                        col_spacing=col_spacing,
+                        profile_rows=profile_rows, offsets=offsets, tilt=tilt, displacement=displacement, keys=keys, wells=wells,
+                        headers=headers, footers=footers, leftsides=leftsides, rightsides=rightsides,
+                        leftwall=leftwall, rightwall=rightwall, topwall=topwall, bottomwall=bottomwall,
+                        perimeter=perimeter, narrowsides=narrowsides, flatten=flatten, params=params,
+                        wall_matrix=wall_matrix){
+        children();
+      }
+    } else {
+      children();
+    }
   }
 }
 
@@ -138,56 +142,59 @@ module layout_plate_only(rows=4, cols=1, homerow, homecol, row_spacing,
   }
 
   difference() {
-    for (j=[0:cols-1]) {
-      row_count = optional_index(rows,j);
-      for (i=[0:row_count-1]) {
-	if (!punch_holes && optional_index(keys, j, i)) {
-	  placement_helper(i,j) keycap($effective_row);
-	}
+    union() {
+      for (j=[0:cols-1]) {
+        row_count = optional_index(rows,j);
+        for (i=[0:row_count-1]) {
+          if (!punch_holes && optional_index(keys, j, i)) {
+            placement_helper(i,j) keycap($effective_row);
+          }
 
-	if (wells) get_homes(params, homerow, homecol, j){// let(homerow=$homerow, homecol=$homecol){
-	    // well
-	    if (!punch_holes) {
-	      placement_helper(i,j) key_mount(header=$h, footer=$f, leftside=$l, rightside=$r);
-	    } else {
-	      placement_helper(i,j) key_mount_slug(header=$h, footer=$f, leftside=$l, rightside=$r);
-	    }
-	    if ($preview && !punch_holes) placement_helper(i,j) hotswap();
+          if (wells) get_homes(params, homerow, homecol, j){// let(homerow=$homerow, homecol=$homecol){
+              // well
+              if (!punch_holes) {
+                placement_helper(i,j) key_mount(header=$h, footer=$f, leftside=$l, rightside=$r);
+              } else {
+                placement_helper(i,j) key_mount_slug(header=$h, footer=$f, leftside=$l, rightside=$r);
+              }
+              if ($preview && !punch_holes) placement_helper(i,j) hotswap();
 
-	    //connect rows
-	    if (i < row_count-1) {
-	      connect([i,j], down=[i+1,j]);
-	    }
+              //connect rows
+              if (i < row_count-1) {
+                connect([i,j], down=[i+1,j]);
+              }
 
-	    // XXX get row offset working, also handle corner connect when next column is longer than this one
-	    //                               (maybe connect bottom to side as well?)
+              // XXX get row offset working, also handle corner connect when next column is longer than this one
+              //                               (maybe connect bottom to side as well?)
 
-	    //connect cols
-	    if (j < cols-1) { // not the last column
-	      let(next_homerow=get_homerow(params, homerow, j+1),
-		  next_row_count=optional_index(rows, j+1),
-		  row_offset=(next_homerow - $homerow),
-		  next_i=i+row_offset,
-		  next_j=j+1) {
+              //connect cols
+              if (j < cols-1) { // not the last column
+                let(next_homerow=get_homerow(params, homerow, j+1),
+                    next_row_count=optional_index(rows, j+1),
+                    row_offset=(next_homerow - $homerow),
+                    next_i=i+row_offset,
+                    next_j=j+1) {
 
-		next_i_valid      = 0 <= next_i   && next_i   < next_row_count;
-		next_corner_valid = 0 <= next_i+1 && next_i+1 < next_row_count;
+                  next_i_valid      = 0 <= next_i   && next_i   < next_row_count;
+                  next_corner_valid = 0 <= next_i+1 && next_i+1 < next_row_count;
 
-		if (next_i_valid) {
-		  connect([i,j], left=[next_i, next_j]);
-		}
+                  if (next_i_valid) {
+                    connect([i,j], left=[next_i, next_j]);
+                  }
 
-		//connect connectors
-		if (bool2int(i < row_count-1) + bool2int(next_i_valid) + bool2int(next_corner_valid) >= 2) {
-		  connect([i,j],
-			  down   = (i < row_count-1)   ? [i+1,j]           : undef,
-			  left   = (next_i_valid)      ? [next_i,next_j]   : undef,
-			  corner = (next_corner_valid) ? [next_i+1,next_j] : undef);
-		}
-	      }
-	    }
-	  }
+                  //connect connectors
+                  if (bool2int(i < row_count-1) + bool2int(next_i_valid) + bool2int(next_corner_valid) >= 2) {
+                    connect([i,j],
+                            down   = (i < row_count-1)   ? [i+1,j]           : undef,
+                            left   = (next_i_valid)      ? [next_i,next_j]   : undef,
+                            corner = (next_corner_valid) ? [next_i+1,next_j] : undef);
+                  }
+                }
+              }
+            }
+        }
       }
+      children();
     }
     if (punch_holes) {
       for (j=[0:cols-1]) {
@@ -602,6 +609,8 @@ module layout_walls_only(rows=4, cols=1, homerow, homecol, row_spacing,
       }
     }
   }
+
+  children();
 }
 
 /*module layout_columns_only(rows=4, cols=1, homerow=2, row_spacing=create_flat_placement(outerdia()+2*spacer()),
