@@ -168,8 +168,12 @@ module magnetize_screwed(position=[0,0,0], cut_height=9) {
 
 *magnetize_screwed() translate([0,0,2])  cube([75,75,4], true);
 
-module bar_magnetize_below(position=[0,0,0], rotation=[0,0,0], spacer=0, walls=2, ceiling=2, washer=0, grow=[0,0,0], hex=6.3+.2) {
-  bar = [14, 60.5, 5.5+1];
+module bar_magnetize_below(position=[0,0,0], rotation=[0,0,0], spacer=0, walls=2, ceiling=2, washer=0, grow=[0,0,0], hex=6.3+.2,mini=false) {
+  _bar = mini ? [13.5, 40, 5] : [13.5, 60, 5];
+  _gap = 1;
+  bar = [for (i = _bar) i + (mini ? .4 : .5)] + [0,0,_gap];
+  separation = mini ? 20.5 : 45;
+  //bar = [14, 60.5, 5.5+1];
   epsilon=.1;
 
   outer = bar+[2*walls,2*walls,ceiling+spacer];
@@ -183,23 +187,23 @@ module bar_magnetize_below(position=[0,0,0], rotation=[0,0,0], spacer=0, walls=2
     }
     translate(position) rotate(rotation) {
       translate([0,0,(bar.z/2 + spacer - epsilon)]) cube(bar+[0,0,epsilon*2], true);
-      rotational_clone() translate([0,45/2,0]) cylinder($fn=60,h=2*(outer.z+epsilon), d=3.6, center=true);
+      rotational_clone() translate([0,separation/2,0]) cylinder($fn=60,h=2*(outer.z+epsilon), d=3.6, center=true);
     }
     if (washer>0) {
       translate(position) rotate(rotation) {
-	rotational_clone() translate([0,45/2,outer.z]) cylinder($fn=60,h=100, d=washer);
+	rotational_clone() translate([0,separation/2,outer.z]) cylinder($fn=60,h=100, d=washer);
       }
     }
 
     if (hex>0) {
       translate(position) rotate(rotation) {
-	rotational_clone() translate([0,45/2,outer.z]) cylinder($fn=6,h=100, d=hex);
+	rotational_clone() translate([0,separation/2,outer.z]) cylinder($fn=6,h=100, d=hex);
       }
     }
   }
 }
 
-*bar_magnetize_below() translate([0,0,2])  cube([50,75,4], true);
+bar_magnetize_below(mini=true) translate([0,0,2])  cube([30,60,4], true);
 
 module bar_magnetize(position=[0,0,0], spacer=2) {
   bar = [14, 60.5, 5.5];
