@@ -168,13 +168,13 @@ module magnetize_screwed(position=[0,0,0], cut_height=9) {
 
 *magnetize_screwed() translate([0,0,2])  cube([75,75,4], true);
 
-module round_magnetize_below(position=[0,0,0], spacer=0, walls=2, ceiling=2, washer=0, grow=0, hex=6.3+.2, mini=true,chamfer=0) {
+module round_magnetize_below(position=[0,0,0], spacer=0, walls=2, ceiling=2, washer=0, grow=0, hex=6.3+.2, mini=true,chamfer=0, gap) {
   epsilon=0.1;
   $fa = 1;
   $fs = 0.1;
 
   _cutout = mini ? [16,5] : [25,6];
-  _gap = 1;
+  _gap = is_undef(gap) ? 1 : gap;
 
   cutout = [for (i = _cutout) i + (mini ? .4 : .5)] + [0,_gap];
 
@@ -206,9 +206,9 @@ module round_magnetize_below(position=[0,0,0], spacer=0, walls=2, ceiling=2, was
   }
 }
 
-module bar_magnetize_below(position=[0,0,0], rotation=[0,0,0], spacer=0, walls=2, ceiling=2, washer=0, grow=[0,0,0], hex=6.3+.2,mini=false) {
+module bar_magnetize_below(position=[0,0,0], rotation=[0,0,0], spacer=0, walls=2, ceiling=2, washer=0, grow=[0,0,0], hex=6.3+.2,mini=false, gap) {
   _bar = mini ? [13.5, 40, 5] : [13.5, 60, 5];
-  _gap = 1;
+  _gap = is_undef(gap) ? 1 : gap ;
   bar = [for (i = _bar) i + (mini ? .4 : .5)] + [0,0,_gap];
   separation = mini ? 20.5 : 45;
   //bar = [14, 60.5, 5.5+1];
