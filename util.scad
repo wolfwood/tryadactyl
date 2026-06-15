@@ -168,6 +168,44 @@ module magnetize_screwed(position=[0,0,0], cut_height=9) {
 
 *magnetize_screwed() translate([0,0,2])  cube([75,75,4], true);
 
+module round_magnetize_below(position=[0,0,0], spacer=0, walls=2, ceiling=2, washer=0, grow=0, hex=6.3+.2, mini=true,chamfer=0) {
+  epsilon=0.1;
+  $fa = 1;
+  $fs = 0.1;
+
+  _cutout = mini ? [16,5] : [25,6];
+  _gap = 1;
+
+  cutout = [for (i = _cutout) i + (mini ? .4 : .5)] + [0,_gap];
+
+  outer = cutout+[2*walls,ceiling+spacer];
+
+    difference() {
+    union(){
+      children();
+        translate(position) cylinder(h=outer.y+grow,d=outer.x);
+    }
+
+    translate(position+[0,0,-epsilon]) cylinder(h=cutout.y+epsilon,d=cutout.x);
+    translate(position) cylinder(h=40, d=3.8, center=true);
+
+    if(is_num(chamfer) && chamfer>0)
+      translate(position)
+      rotate_extrude()
+      polygon([[outer.x/2+epsilon,outer.y+grow+epsilon],
+               [outer.x/2+epsilon,outer.y+grow-chamfer],
+               [outer.x/2-chamfer,outer.y+grow+epsilon]]);
+
+    if (washer>0) {
+      translate(position+[0,0,outer.y]) cylinder(h=100, d=washer);
+    }
+
+    if (hex>0) {
+      translate(position+[0,0,outer.y]) cylinder($fn=6, h=100, d=hex);
+    }
+  }
+}
+
 module bar_magnetize_below(position=[0,0,0], rotation=[0,0,0], spacer=0, walls=2, ceiling=2, washer=0, grow=[0,0,0], hex=6.3+.2,mini=false) {
   _bar = mini ? [13.5, 40, 5] : [13.5, 60, 5];
   _gap = 1;
