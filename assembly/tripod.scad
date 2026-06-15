@@ -22,7 +22,7 @@ module smallrig_mount(rot=[0,90,0],pos=[0,0,0],noop=false, frame=true){
 
     if (!noop)
     translate(pos) rotate(rot){
-      cylinder(d=d+2*slop,h=h*2,center=true);
+      cylinder(d=d+slop,h=h*2,center=true);
       sep=15.1;
       d2=3;
       h2=2.6+slop*2;
