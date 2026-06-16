@@ -173,7 +173,7 @@ module round_magnetize_below(position=[0,0,0], spacer=0, walls=2, ceiling=2, was
   $fa = 1;
   $fs = 0.1;
 
-  _cutout = mini ? [16,5] : [25,6];
+  _cutout = mini ? [16,5] : [31.1,5];
   _gap = is_undef(gap) ? 1 : gap;
 
   cutout = [for (i = _cutout) i + (mini ? .4 : .5)] + [0,_gap];
