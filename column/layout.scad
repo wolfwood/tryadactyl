@@ -18,6 +18,7 @@ module layout_columns(rows=4, cols=1, homerow, homecol, row_spacing,
 		      leftwall=false, rightwall=false, topwall=false, bottomwall=false,
 		      perimeter=true, narrowsides=false, flatten=true,
 		      reverse_triangles=false, punch_holes=false,
+                      connect_cols=true,
 		      params=default_layout_placement_params(),
 		      wall_matrix) {
   layout_plate_only(rows=rows, cols=cols, homerow=homerow, homecol=homecol,row_spacing=row_spacing,
@@ -27,6 +28,7 @@ module layout_columns(rows=4, cols=1, homerow, homecol, row_spacing,
 		    leftwall=leftwall, rightwall=rightwall, topwall=topwall, bottomwall=bottomwall,
 		    perimeter=perimeter, narrowsides=narrowsides, flatten=flatten,
 		    reverse_triangles=reverse_triangles, punch_holes=punch_holes,
+                    connect_cols=connect_cols,
 		    params=params){
     if (wells) {
       layout_walls_only(rows=rows, cols=cols, homerow=homerow, homecol=homecol, row_spacing=row_spacing,
@@ -55,6 +57,7 @@ module layout_plate_only(rows=4, cols=1, homerow, homecol, row_spacing,
 			 leftwall=false, rightwall=false, topwall=false, bottomwall=false,
 			 perimeter=true, narrowsides=false, flatten=true,
 			 reverse_triangles=false, punch_holes=false,
+                         connect_cols=true,
 			 params=default_layout_placement_params()) {
 
   module placement_helper(row,col) {
@@ -168,7 +171,7 @@ module layout_plate_only(rows=4, cols=1, homerow, homecol, row_spacing,
               //                               (maybe connect bottom to side as well?)
 
               //connect cols
-              if (j < cols-1) { // not the last column
+              if (connect_cols && j < cols-1) { // not the last column
                 let(next_homerow=get_homerow(params, homerow, j+1),
                     next_row_count=optional_index(rows, j+1),
                     row_offset=(next_homerow - $homerow),
