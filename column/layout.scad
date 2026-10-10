@@ -13,7 +13,7 @@ use <../util.scad>;
 module layout_columns(rows=4, cols=1, homerow, homecol, row_spacing,
 		      col_spacing,
 
-		      profile_rows, offsets, tilt, displacement=[0,0,0], keys=false, wells=true,
+             profile_rows, offsets, tilt, displacement=[0,0,0], keys=false, wells=true,slugs=false,
 		      headers=false, footers=false, leftsides=false, rightsides=false,
 		      leftwall=false, rightwall=false, topwall=false, bottomwall=false,
 		      perimeter=true, narrowsides=false, flatten=true,
@@ -23,7 +23,7 @@ module layout_columns(rows=4, cols=1, homerow, homecol, row_spacing,
 		      wall_matrix) {
   layout_plate_only(rows=rows, cols=cols, homerow=homerow, homecol=homecol,row_spacing=row_spacing,
 		    col_spacing=col_spacing,
-		    profile_rows=profile_rows, offsets=offsets, tilt=tilt, displacement=displacement, keys=keys, wells=wells,
+		    profile_rows=profile_rows, offsets=offsets, tilt=tilt, displacement=displacement, keys=keys, wells=wells,slugs=slugs,
 		    headers=headers, footers=footers, leftsides=leftsides, rightsides=rightsides,
 		    leftwall=leftwall, rightwall=rightwall, topwall=topwall, bottomwall=bottomwall,
 		    perimeter=perimeter, narrowsides=narrowsides, flatten=flatten,
@@ -52,7 +52,7 @@ function side_gets_spacer(spacer, has_neighbor, perimeter, force_underhang) =
 
 module layout_plate_only(rows=4, cols=1, homerow, homecol, row_spacing,
 			 col_spacing,
-			 profile_rows, offsets, tilt, displacement=[0,0,0], keys=false, wells=true,
+            profile_rows, offsets, tilt, displacement=[0,0,0], keys=false, wells=true,slugs=false,
 			 headers=false, footers=false, leftsides=false, rightsides=false,
 			 leftwall=false, rightwall=false, topwall=false, bottomwall=false,
 			 perimeter=true, narrowsides=false, flatten=true,
@@ -155,7 +155,7 @@ module layout_plate_only(rows=4, cols=1, homerow, homecol, row_spacing,
 
           if (wells) get_homes(params, homerow, homecol, j){// let(homerow=$homerow, homecol=$homecol){
               // well
-              if (!punch_holes) {
+              if (!punch_holes && !slugs) {
                 placement_helper(i,j) key_mount(header=$h, footer=$f, leftside=$l, rightside=$r);
               } else {
                 placement_helper(i,j) key_mount_slug(header=$h, footer=$f, leftside=$l, rightside=$r);
@@ -203,7 +203,7 @@ module layout_plate_only(rows=4, cols=1, homerow, homecol, row_spacing,
       for (j=[0:cols-1]) {
 	row_count = optional_index(rows,j);
 	for (i=[0:row_count-1]) {
-	  if (wells) get_homes(params, homerow, homecol, j){
+	  get_homes(params, homerow, homecol, j){
 	      // well
 	      placement_helper(i,j) key_mount_cavity(above=true,below=true);
 	    }
